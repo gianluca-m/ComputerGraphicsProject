@@ -1,85 +1,106 @@
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<!DOCTYPE html
+  PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Computer Graphics - Project Proposal</title>
+  <title>Computer Graphics - Project Proposal</title>
 
-    <link href="resources/bootstrap.min.css" rel="stylesheet">
-    <link href="resources/offcanvas.css" rel="stylesheet">
-    <link href="resources/custom2014.css" rel="stylesheet">
-    <link href="resources/twentytwenty.css" rel="stylesheet" type="text/css" />
+  <link href="resources/bootstrap.min.css" rel="stylesheet">
+  <link href="resources/offcanvas.css" rel="stylesheet">
+  <link href="resources/custom2014.css" rel="stylesheet">
+  <link href="resources/twentytwenty.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
 
-<div class="container headerBar">
-		<h1>Project Proposal - gimoro & enzlere</h1>
-</div>
+  <div class="container headerBar">
+    <h1>Project Proposal - gimoro & enzlere</h1>
+  </div>
 
-<div class="container contentWrapper">
-<div class="pageContent">
+  <div class="container contentWrapper">
+    <div class="pageContent">
 
-	<!-- ================================================================= -->
+      <!-- ================================================================= -->
 
-	<h2>Proposal</h2>
+      <h2>Proposal</h2>
 
-  <img style="width: 90%; display: block; margin-left: auto; margin-right: auto; " src="images/space.jpg" alt="Space">
-	<br>
-  <p> For our Image, we want to show the beauty of space with an Astronaut that the world has never seen before.
-    There will be some objects floating around in space that do not belong there.
-  </p>
-  <br>
-  <img style="width: 75%; display: block; margin-left: auto; margin-right: auto; " src="images/asteroids.jpg" alt="Asteroids">
-  <br>
-  <p> As things like Asteroids are typically floating around in Space, we plan to add something like this to our image. 
-    And this is a perfect entry point to develop some procedurally generated objects.</p>
-  <br>
-  
-    <img style="width: 75%; display: block; margin-left: auto; margin-right: auto; " src="images/shark.jpg" alt="Reef Shark">
-    <br>
-    <p> Of course the image would not be complete without an actual Astronaut.
+      <img style="width: 90%; display: block; margin-left: auto; margin-right: auto; " src="images/space.jpg"
+        alt="Space">
+      <br>
+      <p> For our Image, we want to show the beauty of space with an Astronaut that the world has never seen before.
+        There will be some objects floating around in space that do not belong there.
+      </p>
+      <br>
+      <img style="width: 75%; display: block; margin-left: auto; margin-right: auto; " src="images/asteroids.jpg"
+        alt="Asteroids">
+      <br>
+      <p> As things like Asteroids are typically floating around in Space, we plan to add something like this to our
+        image.
+        And this is a perfect entry point to develop some procedurally generated objects.</p>
+      <br>
+
+      <img style="width: 75%; display: block; margin-left: auto; margin-right: auto; " src="images/shark.jpg"
+        alt="Reef Shark">
+      <br>
+      <p> Of course the image would not be complete without an actual Astronaut.
         To fit the theme of the course, we wanted to put a reef shark into the scene.</p>
-    
-
-    <!--By Albert kok - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=6699558 -->
-    <!-- ================================================================= -->
-
-    <h2>Features</h2>
-
-    <h3>Eric Enzler</h3>
-    <!-- This is not final, I was just fumbling around -->
-    <ul>
-      <li>[15] Disney BSDF</li>
-      <li>[15] Homogeneous Participating Media</li>
-      <li>[15] Advanced Camera model</li>
-      <li>[5] Procedural Volumes</li>
-      <li>[5] Simple Extra Emitters</li>
-      <li>[5] Motion Blur for arbitrary Objects</li>
-    </ul>
-    
-    <h3>Gianluca Moro</h3>
-    <ul>
-      <li>One</li>
-      <li>Two</li>
-      <li>Three</li>
-    </ul>
-</div>
-</div>
 
 
-<!-- Bootstrap core JavaScript -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="resources/bootstrap.min.js"></script>
-<script src="resources/jquery.event.move.js"></script>
-<script src="resources/jquery.twentytwenty.js"></script>
+      <p>Ideas:
+      <ul>
+        <li>Space Nebula -> Participating Media</li>
+        <li>Adding random cloud somewhere in space -> Participating Media</li>
+      </ul>
+      </p>
+
+      <!--By Albert kok - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=6699558 -->
+      <!-- ================================================================= -->
+
+      <h2>Features</h2>
+
+      <h3>Eric Enzler</h3>
+      <!-- This is not final, I was just fumbling around -->
+      <ul>
+        <li>[15] Disney BSDF</li>
+        <li>[15] Homogeneous Participating Media</li>
+        <li>[15] Advanced Camera model</li>
+        <li>[5] Procedural Volumes</li>
+        <li>[5] Simple Extra Emitters</li>
+        <li>[5] Motion Blur for arbitrary Objects</li>
+        <!--git das nöd 10 pünkt??-->
+      </ul>
+
+      <h3>Gianluca Moro</h3>
+      <!--Some ideas:-->
+      <ul>
+        <li>[15] Progressive Photon Mapping</li>
+        <li>[15] Environment Map Emitter</li>
+        <li>[10] Mip-Mapping for Textures</li>
+        <li>[10] Emissive Participating Media</li>
+        <li>[5] Probabilistic Progressive Photon Mapping</li>
+        <!--Progressive Photon Mapping extends Probabilistic Progressive Photon Mapping-->
+        <li>[5] Images as Textures</li>
+        <!--Mip-Mapping for Textures depends on Images as Textures-->
+      </ul>
+    </div>
+  </div>
 
 
-<script>
-$(window).load(function(){$(".twentytwenty-container").twentytwenty({default_offset_pct: 0.5});});
-</script>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script src="resources/bootstrap.min.js"></script>
+  <script src="resources/jquery.event.move.js"></script>
+  <script src="resources/jquery.twentytwenty.js"></script>
+
+
+  <script>
+    $(window).load(function () { $(".twentytwenty-container").twentytwenty({ default_offset_pct: 0.5 }); });
+  </script>
 
 </body>
+
 </html>
