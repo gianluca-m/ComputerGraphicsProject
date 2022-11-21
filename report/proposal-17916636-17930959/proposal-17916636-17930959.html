@@ -24,76 +24,98 @@
   <div class="container contentWrapper">
     <div class="pageContent">
 
-      <!-- ================================================================= -->
+      <div #proposal>
+        <h2>Proposal</h2>
 
-      <h2>Proposal</h2>
+        <div>
+          <img style="width: 80%; display: block; margin: auto;" src="images/space.jpg" alt="Space">
+          <p style="text-align: center;">Source: <a href="https://pixabay.com/images/id-1388003/">pixabay</a></p>
+        </div>
 
-      <img style="width: 90%; display: block; margin-left: auto; margin-right: auto; " src="images/space.jpg"
-        alt="Space">
-      <br>
-      <p> For our Image, we want to show the beauty of space with an Astronaut that the world has never seen before.
-        There will be some objects floating around in space that do not belong there.
-      </p>
-      <br>
-      <img style="width: 75%; display: block; margin-left: auto; margin-right: auto; " src="images/asteroids.jpg"
-        alt="Asteroids">
-      <br>
-      <p> As things like Asteroids are typically floating around in Space, we plan to add something like this to our
-        image.
-        And this is a perfect entry point to develop some procedurally generated objects. <br>
-        We also plan to add planets in the background for which we can use the bump map texture and mip-mapping since they will be far away from the camera.
-      </p>
+        <p> For our Image, we want to show the beauty of space with an astronaut and/or space ship that the world has
+          never seen before.
+          To fit the theme of the project "Out of Place", we want to put something completely random into our scene:
+          For example a pirate ship, or a cool looking animal as an astronaut.
+        </p>
 
-      
-      <br>
-      <p> Of course the image would not be complete without an actual Astronaut.
-        To fit the theme of the course, we wanted to put something completely random into our scene: For example a pirate ship
-         or some cool looking animal.</p>
-      <p>Additional Ideas:
-      <ul>
-        <li>Space Nebula</li>
-        <li>Clouds around the planet earth surface</li>
-        <li>Stars in background</li>
-      </ul>
-      </p>
+        <div>
+          <img style="width: 80%; display: block; margin: auto;" src="images/asteroids.jpg" alt="Asteroids">
+          <p style="text-align: center;">Source: <a href="https://pixabay.com/images/id-1422642/">pixabay</a></p>
+        </div>
 
-      <!--By Albert kok - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=6699558 -->
-      <!-- ================================================================= -->
+        <p> As things like asteroids are typically floating around in space, we plan to add something like this to our
+          image. And this is a perfect entry point to develop some procedurally generated objects.
+        </p>
+        <p>
+          We also want to add planets and moons in the background for which we can use the bump map texture and
+          mip-mapping since they will be far away from the camera.
+        </p>
+        <p>To utilize the Participating Media feature, we plan on adding clouds around the planet earth surface.
+          Another idea could be to have floating clouds somewhere in the scene, where the space ship is "floating in".
+          Or, maybe one of the planets could just be a sphere of smoke.
+        </p>
 
-      <h2>Features</h2>
+        <p>Additional Ideas:
+        <ul>
+          <li>Space Nebula</li>
+          <li>Stars in background</li>
+        </ul>
+        </p>
 
-      <h3>Eric Enzler</h3>
-      <p>I will be in Military Service from 21. November until 09. December, but as already discussed with the TAs, 
-        we are able to submit later until 17. January 2023. Therefore, we will not participate in the Rendering Competition.
-      </p>
-      <ul>
-        <li>[15] Disney BSDF</li>
-        <li>[15] Advanced Camera model</li>
-        <li>[15] Environment Map Emitter</li>
-        <li>[5] Procedural Volumes</li>
-        <li>[5] Simple Extra Emitters</li>
-        <li>[5] Motion Blur for cameras</li>
-      </ul>
+        <p>If we see that trying to add all the features into a single final scene is not possible,
+          because it will overload the scene and look bad, we will just render certain features in seperate scenes to
+          validate them.
+        </p>
+      </div>
 
-      <h3>Gianluca Moro</h3>
-      <!--Some ideas:-->
-      <ul>
-        <li>[30] Heterogeneous Participating Media</li>
-        <li>[15] Moderate Denoising 1: NL-means using Pixel Variance Estimates</li>
-        <li>[5] Mip-Mapping for Textures</li>   <!--only count 5 points instead of 10 because of 60 points limit-->
+      <br> <br>
+
+      <div #features>
+        <h2>Features</h2>
+
+        <h3>Eric Enzler</h3>
+        <p><em>I will be in Military Service from 21. November until 09. December, but as already discussed with the
+            TAs,
+            we are able to submit later until 17. January 2023. Therefore, we will not participate in the Rendering
+            Competition.</em>
+        </p>
+        <ul>
+          <li>[15 Points] <b>Disney BSDF</b></li>
+          <li>[15 Points] <b>Advanced Camera model</b></li>
+          <li>[15 Points] <b>Environment Map Emitter</b></li>
+          <li>[5 Points] <b>Procedural Volumes</b></li>
+          <li>[5 Points] <b>Simple Extra Emitters</b></li>
+          <li>[5 Points] <b>Motion Blur for cameras</b></li>
+        </ul>
+
+        <h3>Gianluca Moro</h3>
+        <!--Some ideas:-->
+        <ul>
+          <li>[30 Points] <b>Heterogeneous Participating Media</b></li>
+          <li>[15 Points] <b>Moderate Denoising 1: NL-means using Pixel Variance Estimates</b></li>
+          <li>[5 Points] <b>Mip-Mapping for Textures</b></li>
+          <!--only count 5 points instead of 10 because of 60 points limit-->
           <ul>
-            <li>Note: To stay in the 60 point limit, I will only count 5 points instead of 10.</li>
+            <li>Note: To stay in the 60 points limit, I will only count 5 points instead of 10.</li>
           </ul>
-        <li>[5] Bump Mapping or Normal Mapping</li>
-        <li>[5] Images as Textures</li>
-      </ul>
+          <li>[5 Points] <b>Bump Mapping or Normal Mapping</b></li>
+          <li>[5 Points] <b>Images as Textures</b></li>
+        </ul>
+      </div>
 
-      <h2>Evaluation</h2>
-      <p>To evaluate the implementation of our features, we plan to compare our generated images with images
-        generated by <a href="https://github.com/mitsuba-renderer/mitsuba">Mitsuba</a> and/or <a href="https://github.com/mmp/pbrt-v3/">PBRT</a>. <br>
-        The Disney BSDF can be compared to existing example images as seen in the <a href="https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf">Disney Paper</a>. <br>
-        The extra emitters can be tested using existing scenes from the programming assignments. 
-      </p>
+      <br> <br>
+
+      <div #evaluation>
+        <h2>Evaluation</h2>
+        <p>To evaluate the implementation of our features, we will compare images generated using our renderer to images
+          rendered using <a href="https://github.com/mitsuba-renderer/mitsuba">Mitsuba</a> and/or <a
+            href="https://github.com/mmp/pbrt-v3/">PBRT</a>. <br>
+          The Disney BSDF can be compared to existing example images as seen in the <a
+            href="https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf">Disney
+            Paper</a>.
+        </p>
+      </div>
+
     </div>
   </div>
 
