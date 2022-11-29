@@ -82,17 +82,20 @@ public:
         its.geoFrame = Frame(normal);
         its.shFrame = its.geoFrame;
 
-        its.uv = sphericalCoordinates(normal);
-
-        /**
+        /** 
          * Because nori uses (acos(z), atan2(y, x)) as spherical coordinates
          * (usually it would be (0.5 + atan2(x, z)/2pi,  0.5 + asin(y)/pi) as seen in https://en.wikipedia.org/wiki/UV_mapping),
          * we need to scale as follows
          *      uv.x = uv.x / (2 * pi) + 0.5
          *      uv.y = uv.y / pi
          * */     
-        its.uv.x() = its.uv.x() / (2.0f * M_PI) + 0.5f;
-        its.uv.y() = its.uv.y() / M_PI;
+        //its.uv = sphericalCoordinates(normal);
+        //its.uv.x() = its.uv.x() / (2.0f * M_PI) + 0.5f;
+        //its.uv.y() = its.uv.y() / M_PI;
+
+        // Not using nori sphericalCoordinates because those are wrong
+        its.uv.x() = 0.5f + std::atan2(normal.y(), normal.x()) / (2.0f * M_PI);
+        its.uv.y() = 0.5f + std::asin(normal.z()) / M_PI;
     }
 
     virtual void sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const override {
