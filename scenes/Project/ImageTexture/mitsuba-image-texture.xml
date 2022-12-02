@@ -56,12 +56,19 @@
 	<shape type="obj">
 		<string name="filename" value="plane.obj"/>
 
-		<bsdf type="diffuse"/>
+		<bsdf type="diffuse">
+            <texture type="bitmap" name="reflectance">
+                <string name="filename" value="wet-pebbles.png"/>
+				<transform name="to_uv">
+					<scale value="5"/>
+				</transform>
+            </texture>
+        </bsdf>
 
 		<transform name="to_world">
-			<scale value="100,1,100"/>
+			<scale value="50,50,50"/>
             <rotate x="1" angle="90"/>
-            <translate value="0,0,-1"/>
+            <translate value="-1,-1,-4"/>
 		</transform>
 
 	</shape>
@@ -69,6 +76,11 @@
     <!-- Illuminate using a point light -->
     <emitter type="point">
 		<point name="position" value="3,7,10"/>
-		<rgb name="intensity" value="2000"/>
+		<rgb name="intensity" value="500"/>
+	</emitter>
+
+	<emitter type="point">
+		<point name="position" value="-10,-10,20"/>
+		<rgb name="intensity" value="400"/>
 	</emitter>
 </scene>

@@ -48,18 +48,27 @@
 				<vector name="shift" value="0.5 0"/>
             </texture>
         </bsdf>
+
+		<transform name="toWorld">
+            <rotate axis="1,0,0" angle="90"/>
+		</transform>
 	</mesh>
 
 	<!-- Ground plane -->
 	<mesh type="obj">
 		<string name="filename" value="plane.obj"/>
 
-		<bsdf type="diffuse"/>
+		<bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+                <string name="filename" value="wet-pebbles.png"/>
+				<vector name="scale" value="5, 5"/>
+            </texture>
+        </bsdf>
 
 		<transform name="toWorld">
-			<scale value="100,1,100"/>
+			<scale value="50 50 50"/>
 			<rotate axis="1,0,0" angle="90"/>
-			<translate value="0,0,-1"/>
+			<translate value="-1,-1,-4"/>
 		</transform>
 
 	</mesh>
@@ -67,7 +76,12 @@
 	<!-- Illuminate using a point light -->
 	<emitter type="point">
 		<point name="position" value="3,7,10"/>
-		<color name="power" value="2000,2000,2000"/>
+		<color name="power" value="5000,5000,5000"/>
+	</emitter>
+
+	<emitter type="point">
+		<point name="position" value="-10,-10,20"/>
+		<color name="power" value="4000,4000,4000"/>
 	</emitter>
 
 </scene>
