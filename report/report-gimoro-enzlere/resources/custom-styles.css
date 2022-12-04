@@ -1,0 +1,13 @@
+dt {
+    float: left;
+    clear: left;
+    width: 10em;
+    text-align: right;
+    font-weight: bold;
+    color: black;
+}
+
+dd {
+    padding-left: 12em;
+    margin-bottom: 0.5em;
+}
