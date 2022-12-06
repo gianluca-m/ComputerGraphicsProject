@@ -1,11 +1,14 @@
+import argparse
 import mitsuba as mi
 
 
-mi.set_variant('scalar_rgb')
+parser = argparse.ArgumentParser()
+parser.add_argument('input', type=str, help="Path to the exr file to conver to png")
+args = parser.parse_args()
 
-# TODO: file name as command line argument 
-file = 'NormalMapping/normal-mapping-sphere'
+file = '.'.join(args.input.split('.')[:-1])
 print(f"Converting '{file}.exr' to png")
-img_exr = mi.Bitmap(file + '.exr')
 
+mi.set_variant('scalar_rgb')
+img_exr = mi.Bitmap(file + '.exr')
 mi.util.write_bitmap(file + '.png', img_exr)
