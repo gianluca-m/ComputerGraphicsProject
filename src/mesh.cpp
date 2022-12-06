@@ -162,11 +162,10 @@ void Mesh::setHitInformation(uint32_t index, const Ray3f &ray, Intersection & it
         // Compute tangent and bitangent (https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/)
         Vector3f deltaPos1 = p1 - p0;
         Vector3f deltaPos2 = p2 - p0;
-        Vector3f deltaUV1 = m_UV.col(idx1) - m_UV.col(idx0);
-        Vector3f deltaUV2 = m_UV.col(idx2) - m_UV.col(idx0);
+        Vector2f deltaUV1 = m_UV.col(idx1) - m_UV.col(idx0);
+        Vector2f deltaUV2 = m_UV.col(idx2) - m_UV.col(idx0);
 
         float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV2.x() * deltaUV1.y());
-
         Vector3f tangent = ((deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r).normalized();
         Vector3f bitangent = ((deltaPos2 * deltaUV1.x() - deltaPos1 * deltaUV2.x()) * r).normalized();
 

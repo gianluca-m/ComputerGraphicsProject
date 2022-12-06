@@ -98,10 +98,7 @@ public:
         its.uv.y() = 0.5f + std::asin(normal.z()) / M_PI;
 
         if (its.mesh->getBSDF()->hasNormalMap()) {
-            Vector3f tangent = its.geoFrame.s;
-            Vector3f bitangent = tangent.cross(its.geoFrame.n);
-
-            its.mesh->getBSDF()->getNormalMap()->applyNormal(its.uv, tangent, bitangent, its);
+            its.mesh->getBSDF()->getNormalMap()->applyNormal(its.uv, -its.geoFrame.s, -its.geoFrame.t, its);
         }
     }
 
