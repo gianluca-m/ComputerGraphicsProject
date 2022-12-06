@@ -28,7 +28,7 @@ public:
 
     virtual std::string toString() const override;
 
-    virtual T eval(const Point2f &uv) override {
+    virtual T eval(const Point2f &uv) const override {
         // Map uv coordinates to unit grid centered at (0,0)
         auto mappedX = (uv.x() / m_scale.x()) - m_delta.x();
         auto mappedY = (uv.y() / m_scale.y()) - m_delta.y();

@@ -48,6 +48,11 @@ public:
                         throw NoriException("There is already an albedo defined!");
                     m_albedo = static_cast<Texture<Color3f> *>(obj);
                 }
+                else if (obj->getIdName() == "normal") {
+                    if (m_normal_map)
+                        throw NoriException("There is already a normal map defined!");
+                    m_normal_map = static_cast<Texture<Vector3f> *>(obj);
+                }
                 else {
                     throw NoriException("The name of this texture does not match any field!");
                 }
@@ -123,13 +128,23 @@ public:
         return true;
     }
 
+    bool hasNormalMap() const override {
+        return m_normal_map != nullptr;
+    }
+
+    Texture<Vector3f> *getNormalMap() const override {
+        return m_normal_map;
+    }
+
     /// Return a human-readable summary
     virtual std::string toString() const override {
         return tfm::format(
             "Diffuse[\n"
-            "  albedo = %s\n"
+            "  albedo = %s,\n"
+            "  normal = %s\n"
             "]",
-            m_albedo ? indent(m_albedo->toString()) : std::string("null")
+            m_albedo ? indent(m_albedo->toString()) : std::string("null"),
+            m_normal_map ? indent(m_normal_map->toString()) : std::string("null")
         );
     }
 
@@ -137,6 +152,7 @@ public:
 
 private:
     Texture<Color3f> * m_albedo;
+    Texture<Vector3f> *m_normal_map = nullptr;
 };
 
 NORI_REGISTER_CLASS(Diffuse, "diffuse");

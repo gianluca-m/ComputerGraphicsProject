@@ -96,6 +96,13 @@ public:
         // Not using nori sphericalCoordinates because those are wrong
         its.uv.x() = 0.5f + std::atan2(normal.y(), normal.x()) / (2.0f * M_PI);
         its.uv.y() = 0.5f + std::asin(normal.z()) / M_PI;
+
+        if (its.mesh->getBSDF()->hasNormalMap()) {
+            Vector3f tangent = its.geoFrame.s;
+            Vector3f bitangent = tangent.cross(its.geoFrame.n);
+
+            its.mesh->getBSDF()->getNormalMap()->applyNormal(its.uv, tangent, bitangent, its);
+        }
     }
 
     virtual void sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const override {
