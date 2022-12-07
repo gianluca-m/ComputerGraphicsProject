@@ -36,12 +36,9 @@ public:
         if (m_image == NULL) {
             tfm::printfln("Error: Loading image texture '%s' failed\n\t%s", m_filename, stbi_failure_reason());
         }
-        else {
-            tfm::printfln("Loading image texture successful. #channels = %i, width = %i, height = %i", m_channels, m_width, m_height);
-        }
     }
 
-    std::string toString() const {
+    std::string toString() const override {
         return tfm::format(
             "ImageTexture[\n"
                 "  filename = \"%s\",\n"
@@ -52,7 +49,7 @@ public:
             m_filename, m_scale.toString(), m_shift.toString(), m_linear_rgb);
     }
 
-    Color3f eval(const Point2f &uv) {
+    Color3f eval(const Point2f &uv) const override {
         // Map uv to texture coordinates
         auto mappedX = uv.x() * m_width;
         auto mappedY = (1.0f - uv.y()) * m_height;

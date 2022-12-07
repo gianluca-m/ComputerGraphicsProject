@@ -68,8 +68,7 @@
             which is already imported in <code>ext/nanogui</code>. This allows us to load png and jpg images into 8-bit
             integer arrays. <br>
             To sample a the texture, the <code>eval()</code> method takes the uv coordinates of the desired point as
-            input. We then convert
-            the uv coordinates to image coordinates as follows:
+            input. We then convert the uv coordinates to image coordinates as follows:
             $$
             \begin{align}
             x &= u \cdot width \\
@@ -86,8 +85,8 @@
             B &= image[index+2] / 255 \\
             \end{align}
             $$
-            where $num\_channels$ is the number of channels in the image: 4 for RGBA images (png), and 3 for RGB images
-            (jpg). The final color is also converted to linear RGB using the <code>nori::Color3f::toLinearRGB()</code>
+            where $num\_channels$ is the number of channels in the image: 4 for RGBA images, and 3 for RGB images.
+            The final color is also converted to linear RGB using the <code>nori::Color3f::toLinearRGB()</code>
             method.<br> <br>
 
             I also added a <code>scale</code> property, which allows to shrink (scale &gt; 1), and repeat the texture to
@@ -115,7 +114,102 @@
               href="https://3dtextures.me/2020/05/11/ground-wet-pebbles-001/">3dtextures.me</a>.
           </p>
         </div>
+
+        <br>
+
+        <div #normalMapping>
+          <h2>2. Normal Mapping [5 points]</h2>
+          <dl>
+            <dt>Modified Files</dt>
+            <dd><code>src/normal_map.cpp</code> <br>
+              <code>src/mesh.cpp</code> <br>
+              <code>src/sphere.cpp</code> <br>
+              <code>include/nori/texture.h</code> <br>
+              <code>include/nori/bsdf.h</code>
+            </dd>
+
+            <dt>External libraries</dt>
+            <dd><a href="https://github.com/nothings/stb">stb_image</a></dd>
+
+            <dt>Theory</dt>
+            <dd><a href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/">
+                OpenGL Tutorial 13: Normal Mapping</a>
+            </dd>
+          </dl>
+
+          <p>Normal mapping can be used to fake the lighting of bumps and dents of meshes without adding more polygons.
+          </p>
+
+          <h3>Implementation</h3>
+          <p>The normal map is an RGB image where each texel encodes the normal at that point: $normal = \left( 2 \cdot
+            color_{RGB} \right) - 1$. <br>
+            Loading the image and mapping the $uv$ coordinate to image coordinates is done the same way as for the Image
+            Textures.
+            The only difference is that now the <code>eval()</code> method returns the normal vector instead of the
+            color. <br>
+            To apply the normal mapping, we do the following for each detected intersection:
+          <ul>
+            <li>Compute tangent and bitangent at intersection point. We want the tangent vector to be in the same
+              direction as the texture coordinates. For this, I followed the steps explained in the <a
+                href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/">
+                OpenGL Normal Mapping</a> tutorial:
+              $$
+              \begin{align}
+              deltaPos1 &= vertex_1 - vertex_0 \\
+              deltaPos2 &= vertex_2 - vertex_1 \\
+              deltaUV1 &= uv_1 - uv_0 \\
+              deltaUV2 &= uv_2 - uv_0 \\
+              r &= \frac{1}{deltaUV1_x \cdot deltaUV2_y - detlaUV1_y \cdot deltaUV2_x} \\
+              tangent &= r \cdot (deltaPos1 \cdot deltaUV2_y - deltaPos2 \cdot deltaUV1_y) \\
+              bitangent &= r \cdot (deltaPos2 \cdot deltaUV1_x - deltaPos1 \cdot deltaUV2_x)
+              \end{align}
+              $$
+              where $detlaPos1, deltaPos2$ are polygon edges, and $deltaUV1, deltaUV2$ the edges in the uv space.
+            </li>
+            <li>Calculate the new normal at the intersection point using the normal map and the $uv$ coordinates:
+              $new\_normal = \left( 2 \cdot color_{RGB} \right) - 1$
+            </li>
+            <li>Use the tangent, bitangent and the mesh normal to compute a tangent space coordinate frame,
+              and then use this frame to convert the new normal to world coordinates.
+            </li>
+            <li>Set the converted normal as the mesh shading frame normal.</li>
+          </ul>
+          </p>
+
+          <h3>Validation</h3>
+          <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
+            sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object. <br>
+            The images are almost identical, only the brightness is again slightly different because nori and mitsuba use
+            somewhat different values for the same light intensity. <br>
+            The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
+            when comparing to only having the texture applied without normal mapping.
+          </p>
+
+          <!--TODO (gimoro): fix lighting-->
+          <div class="twentytwenty-container">
+            <img src="images/features/normal-mapping/mitsuba-normal-mapping-sphere.png" alt="mitsuba3"
+              class="img-responsive">
+            <img src="images/features/normal-mapping/normal-mapping-sphere.png" alt="Mine" class="img-responsive">
+            <img src="images/features/normal-mapping/no-normal-mapping-sphere.png" alt="Texture only"
+              class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/normal-mapping/mitsuba-normal-mapping-wall.png" alt="mitsuba3"
+              class="img-responsive">
+            <img src="images/features/normal-mapping/normal-mapping-wall.png" alt="Mine" class="img-responsive">
+            <img src="images/features/normal-mapping/no-normal-mapping-wall.png" alt="Texture only"
+              class="img-responsive">
+          </div>
+
+          <p>The texture and normal maps are from <a
+              href="https://3dtextures.me/2022/05/21/stylized-stone-floor-005/">3dtextures.me</a>
+          </p>
+        </div>
       </div>
+
+      <!--TODO (gimoro): mention that I am doing "Normal Mapping" + "Textured Area Emitters" instead of "Mip-Mapping"-->
 
       <br> <br>
 

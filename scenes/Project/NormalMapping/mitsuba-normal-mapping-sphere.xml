@@ -1,0 +1,59 @@
+<scene version="3.0.0">
+	<!-- Use a direct illumination integrator -->
+	<integrator type="direct" />
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<sensor type="perspective">
+		<transform name="to_world">
+			<scale x="-1" />
+			<lookat target="0,0,3" origin="10,10,10" up="0,0,1"/>
+		</transform>
+
+		<!-- Field of view: 30 degrees -->
+		<float name="fov" value="40"/>
+
+		<!-- Independent sample generator, user-selected samples per pixel -->
+		<sampler type="independent">
+			<integer name="sample_count" value="32"/>
+		</sampler>
+
+		<!-- EXR image at HD resolution -->
+		<film type="hdrfilm">
+			<!-- 768 x 768 pixels -->
+			<integer name="width" value="720"/>
+			<integer name="height" value="720"/>
+		</film>
+	</sensor>
+
+	<!-- Load a sphere shape -->
+
+	<shape type="sphere">
+		<point name="center" value="0 0 3" />
+		<float name="radius" value="5" />
+
+		<bsdf type="normalmap">
+			<texture name="normalmap" type="bitmap">
+				<boolean name="raw" value="true"/>
+				<string name="filename" value="Stone_Floor_normal.png"/>
+				<transform name="to_uv">
+					<scale value="3"/>
+				</transform>
+			</texture>
+			<bsdf type="diffuse">
+				<texture type="bitmap" name="reflectance">
+					<string name="filename" value="Stone_Floor_basecolor.png"/>
+					<transform name="to_uv">
+						<scale value="3"/>
+					</transform>
+				</texture>
+			</bsdf>
+		</bsdf>
+	</shape>
+
+	<!-- Illuminate using a point light -->
+	<emitter type="point">
+		<point name="position" value="5,5,12"/>
+		<rgb name="intensity" value="400"/>
+	</emitter>
+
+</scene>

@@ -20,6 +20,7 @@
 #define __NORI_TEXTURE_H
 
 #include <nori/object.h>
+#include <nori/shape.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -38,7 +39,10 @@ public:
      * */
     virtual EClassType getClassType() const override { return ETexture; }
 
-    virtual T eval(const Point2f & uv) = 0;
+    virtual T eval(const Point2f & uv) const = 0;
+
+    /// @brief Applies the normal mapping (if normal map defined)
+    virtual void applyNormal(const Point2f &uv, const Vector3f &tangent, const Vector3f &bitangent, Intersection &its) {}
 };
 
 NORI_NAMESPACE_END

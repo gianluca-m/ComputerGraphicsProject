@@ -85,6 +85,7 @@ add_executable(nori
   src/path_mats.cpp
   src/path_mis.cpp
   src/image_texture.cpp
+  src/normal_map.cpp
 )
 
 # The following lines build the warping test application
