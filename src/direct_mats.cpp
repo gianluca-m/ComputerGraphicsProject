@@ -25,13 +25,15 @@ public:
         Intersection wiIts;
         if (scene->rayIntersect(wi, wiIts) && wiIts.mesh->isEmitter()) {
             EmitterQueryRecord emitterRecord{its.p, wiIts.p, wiIts.shFrame.n};
+            emitterRecord.uv = wiIts.uv;
             Li = wiIts.mesh->getEmitter()->eval(emitterRecord);
         }
 
         Color3f Le{0.0f};
         if (its.mesh->isEmitter()) {
-            EmitterQueryRecord emitterRec{ray.o, its.p, its.shFrame.n};
-            Le = its.mesh->getEmitter()->eval(emitterRec);   // add Le
+            EmitterQueryRecord emitterRecord{ray.o, its.p, its.shFrame.n};
+            emitterRecord.uv = its.uv;
+            Le = its.mesh->getEmitter()->eval(emitterRecord);   // add Le
         }
 
         return Le + Li * fr;

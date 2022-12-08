@@ -107,7 +107,13 @@ public:
         sRec.p = m_position + m_radius * q;
         sRec.n = q;
         sRec.pdf = std::pow(1.f/m_radius,2) * Warp::squareToUniformSpherePdf(Vector3f(0.0f,0.0f,1.0f));
+
+        sRec.uv = Point2f{
+            0.5f + std::atan2(sRec.n.y(), sRec.n.x()) / (2.0f * M_PI),
+            0.5f + std::asin(sRec.n.z()) / M_PI
+        };
     }
+
     virtual float pdfSurface(const ShapeQueryRecord & sRec) const override {
         return std::pow(1.f/m_radius,2) * Warp::squareToUniformSpherePdf(Vector3f(0.0f,0.0f,1.0f));
     }

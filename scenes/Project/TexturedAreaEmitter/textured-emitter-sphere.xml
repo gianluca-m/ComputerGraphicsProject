@@ -1,0 +1,48 @@
+<scene>
+	<!-- Independent sample generator, user-selected samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="64"/>
+	</sampler>
+
+	<integrator type="path_mis" />
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="0,0,3" origin="10,10,10" up="0,0,1"/>
+		</transform>
+
+		<!-- Field of view: 40 degrees -->
+		<float name="fov" value="40"/>
+
+		<!-- 512 x 512 pixels -->
+		<integer name="width" value="720"/>
+		<integer name="height" value="720"/>
+	</camera>
+
+	<!-- Load a sphere shape -->
+	<mesh type="sphere">
+		<point name="center" value="0,0,3"/>
+		<float name="radius" value="3"/>
+
+		<emitter type="area">
+			<texture type="image_texture" name="radiance">
+                <string name="filename" value="rainbow.png"/>
+				<vector name="shift" value="0.5 0"/>
+            </texture>
+		</emitter>
+	</mesh>
+
+	<!-- Ground plane -->
+	<mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+
+		<transform name="toWorld">
+			<scale value="50 50 50"/>
+			<rotate axis="1,0,0" angle="90"/>
+			<translate value="0,0,-1"/>
+		</transform>
+
+	</mesh>
+
+</scene>

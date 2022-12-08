@@ -27,11 +27,12 @@ public:
             // Contribution from material sampling
             if (xo.mesh->isEmitter()) {
                 EmitterQueryRecord emitterRecord{recursiveRay.o, xo.p, xo.shFrame.n};
+                emitterRecord.uv = xo.uv;
                 Li += t * xo.mesh->getEmitter()->eval(emitterRecord);       // Li += t * Le(x0)
             }
 
             // Russian Roulette
-            successProbability = std::min(t.x(), 0.99f);
+            successProbability = std::min(t.maxCoeff(), 0.99f);
             if (sampler->next1D() > successProbability || successProbability == 0.0f) {
                 break;
             }

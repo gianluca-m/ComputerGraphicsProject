@@ -56,7 +56,15 @@ void Mesh::sampleSurface(ShapeQueryRecord & sRec, const Point2f & sample) const 
         sRec.n = n;
     }
     sRec.pdf = m_pdf.getNormalization();
+
+    // Compute texture coordinate
+    uint32_t idx0 = m_F(0, idT), idx1 = m_F(1, idT), idx2 = m_F(2, idT);
+    if (m_UV.size() > 0)
+        sRec.uv = bc.x() * m_UV.col(idx0) +
+                  bc.y() * m_UV.col(idx1) +
+                  bc.z() * m_UV.col(idx2);
 }
+
 float Mesh::pdfSurface(const ShapeQueryRecord & sRec) const {
     return m_pdf.getNormalization();
 }

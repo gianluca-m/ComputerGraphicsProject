@@ -41,6 +41,8 @@ struct EmitterQueryRecord {
     float pdf;
     /// Shadow ray
     Ray3f shadowRay;
+    /// UV associated with the point
+    Point2f uv;
 
     /// Create an unitialized query record
     EmitterQueryRecord() { }
