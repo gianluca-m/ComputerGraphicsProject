@@ -121,7 +121,8 @@
           <h2>2. Normal Mapping [5 points]</h2>
           <dl>
             <dt>Modified Files</dt>
-            <dd><code>src/normal_map.cpp</code> <br>
+            <dd>
+              <code>src/normal_map.cpp</code> <br>
               <code>src/mesh.cpp</code> <br>
               <code>src/sphere.cpp</code> <br>
               <code>include/nori/texture.h</code> <br>
@@ -180,8 +181,8 @@
           <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
               href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
             sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object. <br>
-            The images are almost identical, only the brightness is again slightly different because nori and mitsuba use
-            somewhat different values for the same light intensity. <br>
+            The images are almost identical, only the brightness is again slightly different because nori and mitsuba
+            use somewhat different values for the same light intensity. <br>
             The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
             when comparing to only having the texture applied without normal mapping.
           </p>
@@ -207,9 +208,60 @@
               href="https://3dtextures.me/2022/05/21/stylized-stone-floor-005/">3dtextures.me</a>
           </p>
         </div>
-      </div>
 
-      <!--TODO (gimoro): mention that I am doing "Normal Mapping" + "Textured Area Emitters" instead of "Mip-Mapping"-->
+        <br>
+
+        <div id="texturedAreaEmitters">
+          <h2>3. Textured Area Emitters [5 points]</h2>
+          <dl>
+            <dt>Modified Files</dt>
+            <dd>
+              <code>src/arealight.cpp</code> <br>
+              <code>src/mesh.cpp</code> <br>
+              <code>src/sphere.cpp</code> <br>
+              <code>src/path_mis, path_mats, photonmapper, direct_mis, direct_mats, direct_ems.cpp</code> <br>
+              <code>include/nori/emitter.h</code> <br>
+              <code>include/nori/shape.h</code>
+            </dd>
+          </dl>
+
+          <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of "Mip-Mapping"
+            to stay in the 60 points limit.</i>
+
+          <h3>Implementation</h3>
+          <p>For this feature, I modified the arealight to also accept a texture as the radiance. Now when sampling the
+            emitter, it will use the uv coordinates to look up the color in the texture and return that
+            value as the radiance. The lookup is the same as for Image Textures, described above. <br>
+            To be able to lookup the texture, I added a <code>Point2f uv</code> property to the
+            <code>EmitterQueryRecord</code> and to the <code>ShapeQueryRecord</code>. The <code>uv</code> property of
+            the <code>EmitterQueryRecord</code> is updated in the <code>Integrator::Li</code> methods of the different
+            integrators. This uv value is updated when we ray intersection point is an emitter. <br>
+            The <code>uv</code> property of the <code>ShapeQueryRecord</code> is updated in the
+            <code>Shape::sampleSurface</code> method in <code>mesh.cpp</code> and <code>sphere.cpp</code>.
+            This uv value is updated when we sample a point on the emitter surface.
+          </p>
+
+          <h3>Validation</h3>
+          <p>To validate the implementation, we created identical scenes and redered them in nori and <a
+              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain either an
+            analytical sphere or a mesh, and a ground plane. The sphere resp. mesh is the only emitter in the scene. The
+            <code>path_mis</code> integrator with 64 samples per pixel was used to render the scene. <br>
+            The images look very similar: The mean error between the images is only 0.003 for both scenes, calculated
+            using the <a href="https://github.com/tom94/tev">tev</a> tool.
+          </p>
+          <div class="twentytwenty-container">
+            <img src="images/features/textured-emitters/mitsuba-textured-emitter-sphere.png" alt="mitsuba3"
+              class="img-responsive">
+            <img src="images/features/textured-emitters/textured-emitter-sphere.png" alt="Mine" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/textured-emitters/mitsuba-textured-emitter-mesh.png" alt="mitsuba3"
+              class="img-responsive">
+            <img src="images/features/textured-emitters/textured-emitter-mesh.png" alt="Mine" class="img-responsive">
+          </div>
+        </div>
+      </div>
 
       <br> <br>
 
