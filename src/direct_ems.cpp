@@ -20,6 +20,7 @@ public:
 
         for (auto light : scene->getLights()) {
             EmitterQueryRecord emitterRecord{its.p};
+            emitterRecord.uv = its.uv;
             auto LeDivPdf = light->sample(emitterRecord, sampler->next2D());       // Le / pdf_em
 
             if (scene->rayIntersect(emitterRecord.shadowRay)) continue;
@@ -37,8 +38,9 @@ public:
         }
 
         if (its.mesh->isEmitter()) {
-            EmitterQueryRecord emitterRec{ray.o, its.p, its.shFrame.n};
-            Lo += its.mesh->getEmitter()->eval(emitterRec);   // add Le
+            EmitterQueryRecord emitterRecord{ray.o, its.p, its.shFrame.n};
+            emitterRecord.uv = its.uv;
+            Lo += its.mesh->getEmitter()->eval(emitterRecord);   // add Le
         }
 
         return Lo;

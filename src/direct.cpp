@@ -21,6 +21,7 @@ public:
 
         for (auto light : scene->getLights()) {
             EmitterQueryRecord emitterRecord{its.p};
+            emitterRecord.uv = its.uv;
             Color3f incidentRadiance = light->sample(emitterRecord, sample);
 
             if (scene->rayIntersect(emitterRecord.shadowRay)) {

@@ -80,6 +80,8 @@ struct ShapeQueryRecord {
     Normal3f n;
     /// Probability of the sample
     float pdf;
+    /// UV associated with the sampled point
+    Point2f uv;
 
     /// Empty constructor
     ShapeQueryRecord() {}

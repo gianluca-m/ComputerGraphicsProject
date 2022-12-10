@@ -19,13 +19,18 @@
 #include <nori/emitter.h>
 #include <nori/warp.h>
 #include <nori/shape.h>
+#include <nori/texture.h>
 
 NORI_NAMESPACE_BEGIN
 
 class AreaEmitter : public Emitter {
 public:
-    AreaEmitter(const PropertyList &props) {
-        m_radiance = props.getColor("radiance");
+    AreaEmitter(const PropertyList &propList) {
+        if (propList.has("radiance")) {
+            PropertyList l;
+            l.setColor("value", propList.getColor("radiance"));
+            m_radiance = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+        }
     }
 
     virtual std::string toString() const override {
@@ -33,14 +38,14 @@ public:
                 "AreaLight[\n"
                 "  radiance = %s,\n"
                 "]",
-                m_radiance.toString());
+                m_radiance->toString());
     }
 
-    virtual Color3f eval(const EmitterQueryRecord & lRec) const override {
+    virtual Color3f eval(const EmitterQueryRecord &lRec) const override {
         if(!m_shape)
             throw NoriException("There is no shape attached to this Area light!");
 
-        return lRec.n.dot(lRec.wi) < 0 ? m_radiance : Color3f{0.0f};
+        return lRec.n.dot(lRec.wi) < 0 ? m_radiance->eval(lRec.uv) : Color3f{0.0f};
     }
 
     virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const override {
@@ -52,6 +57,7 @@ public:
 
         lRec.p = shapeRecord.p;
         lRec.n = shapeRecord.n;
+        lRec.uv = shapeRecord.uv;
         
         auto shadowRayDir = (lRec.p - lRec.ref);
         lRec.wi = shadowRayDir.normalized();
@@ -60,9 +66,7 @@ public:
         auto p = pdf(lRec);
         lRec.pdf = p;
 
-        if (p <= 0) return Color3f{0.0f};
-
-        return eval(lRec) / p;
+        return p <= 0 ? Color3f{0.0f} : eval(lRec) / p;
     }
 
     virtual float pdf(const EmitterQueryRecord &lRec) const override {
@@ -80,7 +84,6 @@ public:
         return (lRec.ref - lRec.p).squaredNorm() / cosTheta * pdfSurface;  // p_omega = d^2 / cos(theta) * p_A
     }
 
-
     virtual Color3f samplePhoton(Ray3f &ray, const Point2f &sample1, const Point2f &sample2) const override {
         ShapeQueryRecord shapeRecord;
         m_shape->sampleSurface(shapeRecord, sample1);
@@ -88,17 +91,29 @@ public:
         auto direction = Frame(shapeRecord.n).toWorld(Warp::squareToCosineHemisphere(sample2));
         ray = Ray3f{shapeRecord.p, direction};
 
-        if (shapeRecord.pdf <= 0) {
-            return Color3f{0.0f};
-        }
+        if (shapeRecord.pdf <= 0) return Color3f{0.0f};
 
         EmitterQueryRecord emitterRecord{shapeRecord.p + direction, shapeRecord.p, shapeRecord.n};
         return M_PI / shapeRecord.pdf * eval(emitterRecord);     // pi * area * Le = pi * 1/pdf * Le
     }
 
+    void addChild(NoriObject *obj) override {
+        switch (obj->getClassType()) {
+            case ETexture:
+                if (m_radiance) 
+                    throw NoriException("AreaEmitter: There is already a texture defined!");
+                m_radiance = static_cast<Texture<Color3f> *>(obj);
+                break;
+            
+            default:
+                throw NoriException("AreaEmitter::addChild(<%s>) is not supported!",
+                                    classTypeName(obj->getClassType()));
+        }
+    }
+
 
 protected:
-    Color3f m_radiance;
+    Texture<Color3f> *m_radiance = nullptr;
 };
 
 NORI_REGISTER_CLASS(AreaEmitter, "area")

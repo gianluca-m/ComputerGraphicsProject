@@ -21,8 +21,9 @@ public:
         // Le
         Color3f Le{0.0f};
         if (its.mesh->isEmitter()) {
-            EmitterQueryRecord emitterRec{ray.o, its.p, its.shFrame.n};
-            Le = its.mesh->getEmitter()->eval(emitterRec);
+            EmitterQueryRecord emitterRecord{ray.o, its.p, its.shFrame.n};
+            emitterRecord.uv = its.uv;
+            Le = its.mesh->getEmitter()->eval(emitterRecord);
         }
 
 
@@ -30,6 +31,7 @@ public:
         Color3f Lem{0.0f};
         for (auto light : scene->getLights()) {
             EmitterQueryRecord emitterRecord{its.p};
+            emitterRecord.uv = its.uv;
             auto LeDivPdf = light->sample(emitterRecord, sampler->next2D());       // Le / pdf_em
 
             if (scene->rayIntersect(emitterRecord.shadowRay)) continue;
@@ -62,6 +64,7 @@ public:
         Intersection wiIts;
         if (scene->rayIntersect(wi, wiIts) && wiIts.mesh->isEmitter()) {
             EmitterQueryRecord emitterRecord{its.p, wiIts.p, wiIts.shFrame.n};
+            emitterRecord.uv = wiIts.uv;
             Li = wiIts.mesh->getEmitter()->eval(emitterRecord);
             pdfEm = wiIts.mesh->getEmitter()->pdf(emitterRecord);
         }

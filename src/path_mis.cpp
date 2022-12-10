@@ -15,6 +15,8 @@ public:
         Color3f Li{0.0f};
         Color3f t{1.0f};
 
+        float n = (float) scene->getLights().size();
+
         Ray3f recursiveRay = ray;
         Intersection xo;
         float successProbability;
@@ -30,11 +32,12 @@ public:
             // Contribution from material sampling
             if (xo.mesh->isEmitter()) {
                 EmitterQueryRecord emitterRecord{recursiveRay.o, xo.p, xo.shFrame.n};
+                emitterRecord.uv = xo.uv;
                 Li += t * wMat * xo.mesh->getEmitter()->eval(emitterRecord);        // Li += t * w_mat * Le(x0)
             }
 
             // Russian Roulette
-            successProbability = std::min(t.x(), 0.99f);
+            successProbability = std::min(t.maxCoeff(), 0.99f);
             if (sampler->next1D() > successProbability || successProbability == 0.0f) {
                 break;
             }
@@ -44,7 +47,8 @@ public:
             // Contribution from emitter sampling
             auto randomEmitter = scene->getRandomEmitter(sampler->next1D());
             EmitterQueryRecord emitterRecord{xo.p};
-            Color3f LeDivPdf = randomEmitter->sample(emitterRecord, sampler->next2D()) * (float) scene->getLights().size();
+            // No need to set emitterRecord.uv here specifically, because it will be set in Emitter::sample()
+            Color3f LeDivPdf = randomEmitter->sample(emitterRecord, sampler->next2D()) * n;
             if (!scene->rayIntersect(emitterRecord.shadowRay)) {
                 auto wi = xo.shFrame.toLocal(-recursiveRay.d);
                 auto wo = xo.shFrame.toLocal(emitterRecord.wi);
@@ -59,7 +63,7 @@ public:
                 auto pdfSum = pdfEm + pdfMat;
                 wEm = (pdfSum > 0) ? pdfEm / pdfSum : 0.0f;
 
-                Li += wEm * t * (xo.mesh->getBSDF()->eval(bsdfRecord) * LeDivPdf * cosTheta);
+                Li += wEm * t * xo.mesh->getBSDF()->eval(bsdfRecord) * LeDivPdf * cosTheta;
             }
 
             BSDFQueryRecord bsdfRecord{xo.shFrame.toLocal(-recursiveRay.d)};
@@ -76,13 +80,17 @@ public:
                 Intersection its;
                 if (!scene->rayIntersect(recursiveRay, its)) break;
 
+                auto pdfEm = 0.0f;
+
                 if (its.mesh->isEmitter()) {
                     EmitterQueryRecord eRecord{xo.p, its.p, its.shFrame.n};
-                    auto pdfEm = its.mesh->getEmitter()->pdf(eRecord);
-                    auto pdfMat = xo.mesh->getBSDF()->pdf(bsdfRecord);
-                    auto pdfSum = pdfEm + pdfMat;
-                    wMat = (pdfSum > 0) ? pdfMat / pdfSum : 0.0f;
+                    eRecord.uv = its.uv;
+                    pdfEm = its.mesh->getEmitter()->pdf(eRecord);
                 }
+
+                auto pdfMat = xo.mesh->getBSDF()->pdf(bsdfRecord);
+                auto pdfSum = pdfEm + pdfMat;
+                wMat = (pdfSum > 0) ? pdfMat / pdfSum : 0.0f;
             }
         }
 
