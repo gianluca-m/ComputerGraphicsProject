@@ -99,6 +99,8 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block)
 }
 
 void RenderThread::renderScene(const std::string & filename) {
+    // TODO (gimoro): Make this a CLI argument (?)
+    bool computeVariance = false;
 
     filesystem::path path(filename);
 
@@ -125,11 +127,13 @@ void RenderThread::renderScene(const std::string & filename) {
         size_t lastdot = outputName.find_last_of(".");
         if (lastdot != std::string::npos)
             outputName.erase(lastdot, std::string::npos);
+
+        std::string varianceOutputName = outputName + "_variance.exr";
         outputName += ".exr";
 
         /* Do the following in parallel and asynchronously */
         m_render_status = 1;
-        m_render_thread = std::thread([this,outputName] {
+        m_render_thread = std::thread([this, outputName, computeVariance, varianceOutputName] {
             const Camera *camera = m_scene->getCamera();
             Vector2i outputSize = camera->getOutputSize();
 
@@ -146,12 +150,19 @@ void RenderThread::renderScene(const std::string & filename) {
             tbb::concurrent_vector< std::unique_ptr<Sampler> > samplers;
             samplers.resize(numBlocks);
 
+            // Variance estimation using "Bessel's correction"
+            ImageBlock varianceBlock{camera->getOutputSize(), camera->getReconstructionFilter()};
+            Bitmap sumBitmap{camera->getOutputSize()};
+            Bitmap sumSquaredBitmap{camera->getOutputSize()};
+
             for (uint32_t k = 0; k < numSamples ; ++k) {
                 m_progress = k/float(numSamples);
                 if(m_render_status == 2)
                     break;
 
                 tbb::blocked_range<int> range(0, numBlocks);
+
+                if (computeVariance) varianceBlock.clear();
 
                 auto map = [&](const tbb::blocked_range<int> &range) {
                     // Allocate memory for a small image block to be rendered by the current thread
@@ -174,7 +185,9 @@ void RenderThread::renderScene(const std::string & filename) {
                         renderBlock(m_scene, samplers.at(blockId).get(), block);
 
                         // The image block has been processed. Now add it to the "big" block that represents the entire image
-                        m_block.put(block);
+                        m_block.put(block);        
+
+                        if (computeVariance) varianceBlock.put(block);
                     }
                 };
 
@@ -183,6 +196,25 @@ void RenderThread::renderScene(const std::string & filename) {
 
                 /// Default: parallel rendering
                 tbb::parallel_for(range, map);
+
+                if (computeVariance) {
+                    // Variance estimation (update sum and sumSquared)
+                    varianceBlock.lock();
+                    Bitmap bitmap{*varianceBlock.toBitmap()};
+                    varianceBlock.unlock();
+
+                    auto rows = bitmap.rows();
+                    auto columns = bitmap.cols();
+                    Color3f currentPixel;
+                    for (int y = 0; y < rows; y++) {
+                        for (int x = 0; x < columns; x++) {
+                            currentPixel = bitmap(y, x);
+                            sumBitmap(y, x) += currentPixel;
+                            sumSquaredBitmap(y, x) += pow(currentPixel, 2);
+                        }
+                    }
+                }
+                
 
                 blockGenerator.reset();
             }
@@ -197,6 +229,26 @@ void RenderThread::renderScene(const std::string & filename) {
 
             /* Save using the OpenEXR format */
             bitmap->save(outputName);
+
+            if (computeVariance) {
+                // Variance estimation
+                Bitmap varianceBitmap{camera->getOutputSize()};
+                auto rows = varianceBitmap.rows();
+                auto columns = varianceBitmap.cols();
+                float numSamplesSquared = powf(numSamples, 2);
+                float samplesFactor = numSamples * (numSamples - 1);
+                Color3f currentPixel;
+                for (int y = 0; y < rows; y++) {
+                    for (int x = 0; x < columns; x++) {
+                        // var[p] = (sample variance) * 1/n = ((ss/n - (s/n)^2) * (n/(n-1))) * 1/n = (ss - s^2/n) / ((n-1) * n)
+                        varianceBitmap(y, x) = (sumSquaredBitmap(y, x) - (pow(sumBitmap(y, x), 2) / numSamples)) / samplesFactor;
+                    }
+                }
+                
+                // Save variance bitmap
+                varianceBitmap.save(varianceOutputName);
+            }
+            
 
             delete m_scene;
             m_scene = nullptr;
