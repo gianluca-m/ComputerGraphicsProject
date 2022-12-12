@@ -295,7 +295,40 @@
 
         <div id="featuresEric">
           <h1>Features: Eric Enzler</h1>
-          <!--TODO: Add-->
+          <div id="directional">
+            <h2>1. Directional Light [5 points]</h2>
+
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/directionallight.cpp</code> <br>
+              </dd>
+            </dl>
+
+            <h3>Implementation</h3>
+            <p>For this special light source, I used the implementation of the book. Unfortunately, I could not make use of the bounding box of the scene.
+              In the implementation, I am currently using a hardcoded value for the radius. This overestimates the power of the light a bit but still gives good results.
+            </p>
+
+            <h3>Validation</h3>
+            <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain two meshes and a ground plane. The direction of the light source and the color
+                  of the light are the same. The two images show no differences with this direction of the light. In other cases, our implementation resultet in a slightly brighter picture because
+                  of the overestimation described above.
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/directionallight/directional1_mine.png" alt="Mine"
+                class="img-responsive">
+              <img src="images/features/directionallight/directional1_ref.png" alt="Mitsuba"
+                class="img-responsive">
+            </div>
+            <br>
+            <p> Our implementation offers the ability to color the directional light, giving us some additional options to work with. The direction of the light is different than in the picture above!
+          </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/directionallight/directional_colored.png" alt="Colored light">
+          </div>
+        </div>
         </div>
 
         <br> <br>
