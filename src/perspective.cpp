@@ -47,6 +47,9 @@ public:
         m_nearClip = propList.getFloat("nearClip", 1e-4f);
         m_farClip = propList.getFloat("farClip", 1e4f);
 
+        m_focalLength = propList.getFloat("focalLength", 1.f);
+        m_lensRadius = propList.getFloat("lensRadius", 0.f);
+
         m_rfilter = NULL;
     }
 
@@ -102,7 +105,21 @@ public:
         float invZ = 1.0f / d.z();
 
         ray.o = m_cameraToWorld * Point3f(0, 0, 0);
-        ray.d = m_cameraToWorld * d;
+        ray.d = m_cameraToWorld * d; 
+
+        /* Depth of Field PBRT 6.2.3*/
+        if(m_lensRadius > 0 ){
+
+            Point2f pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
+            float ft = m_focalLength / d.z();
+            Point3f pFocus = ft * d;
+
+            auto o = Point3f(pLens.x(), pLens.y(), 0);
+            d = (pFocus-o).normalized();
+            ray.o = m_cameraToWorld * o;
+            ray.d = m_cameraToWorld * d;
+        }
+        
         ray.mint = m_nearClip * invZ;
         ray.maxt = m_farClip * invZ;
         ray.update();
@@ -149,6 +166,8 @@ private:
     float m_fov;
     float m_nearClip;
     float m_farClip;
+    float m_focalLength;
+    float m_lensRadius; //=f-value
 };
 
 NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
