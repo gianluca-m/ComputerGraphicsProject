@@ -235,7 +235,7 @@
             To be able to lookup the texture, I added a <code>Point2f uv</code> property to the
             <code>EmitterQueryRecord</code> and to the <code>ShapeQueryRecord</code>. The <code>uv</code> property of
             the <code>EmitterQueryRecord</code> is updated in the <code>Integrator::Li</code> methods of the different
-            integrators. This uv value is updated when we ray intersection point is an emitter. <br>
+            integrators. This uv value is updated when the ray intersection point is an emitter. <br>
             The <code>uv</code> property of the <code>ShapeQueryRecord</code> is updated in the
             <code>Shape::sampleSurface</code> method in <code>mesh.cpp</code> and <code>sphere.cpp</code>.
             This uv value is updated when we sample a point on the emitter surface.
@@ -265,19 +265,82 @@
 
       <br> <br>
 
-      <div id="featuresEric">
-        <h1>Features: Eric Enzler</h1>
-        <!--TODO: Add-->
+      <div id="denoising">
+        <h2>4. NL-means using Pixel Variance Estimates [15 points]</h2>
+        <dl>
+          <dt>Modified Files</dt>
+          <dd>
+            <code>src/render.cpp</code> <br>
+            <code>src/denoise/denoise.py</code>
+          </dd>
+
+          <dt>External Libraries</dt>
+          <dd>
+            <a href="https://github.com/opencv/opencv-python">opencv-python</a> <br>
+            <a href="https://numpy.org/">numpy</a>
+          </dd>
+
+          <dt>Theory</dt>
+          <dd>
+            <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">
+              CG Lecture Slides 25.11.2022, Image-Based Denoising & Denoising with Deep Learning
+            </a>
+          </dd>
+        </dl>
+
+        <h3>Implementation</h3>
+        <p>
+          To perform NL means denoising, we need the pixel variance. To estimate the non-uniform pixel variance,
+          I used the following formula:
+          $$
+          \begin{align}
+          var[p] &= (\text{sample variance}) \cdot \frac{1}{n} \\
+          &= \left( \left( \frac{\sum_{i=1}^n x_i^2}{n} - \left( \frac{\sum_{i=1}^n x_i}{n} \right)^2 \right)
+          \cdot \frac{n}{n-1} \right) \cdot \frac{1}{n}
+          \end{align}
+          $$
+          To estimate the variance, I updated the <code>RenderThread::renderScene</code> in <code>render.cpp</code>.
+          Now when rendering a scene, it will also output a <code>image_variance.exr</code> file, containing the
+          estimated variances. <br>
+          I implemented the fast NL-means denoising algorithm given in the 
+          <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">lecture slides</a> in python, 
+          using opencv and numpy. The algorithm is well explained in the lecture slides. For the $d^2$ function, 
+          I used the non-uniform variance variant. <br>
+          OpenCV is used to read and write the image files, and to apply the boxfilter convolution. 
+          Numpy is used to perform efficient array operations.
+        </p>
+
+        <h3>Validation</h3>
+        <p>
+          To validate the denoising, I rendered the cbox scene using the <code>path_mis</code> integrator,
+          with 256 samples per pixel, which produced quite a noisy image. I also rendered the same scene
+          with 8192 samples per pixel as a baseline to compare the denoised image to. <br>
+          Rendering and denoising the 256 spp image (with $r=10, f=3, k=0.45$) took in total about 2.2 minutes,
+          while the 8192 spp took about 51 minutes to render. So, we have a speedup of around 23. <br>
+          The denoised image looks very similar to the high spp version. 
+        </p>
+        <div class="twentytwenty-container">
+          <img src="images/features/denoise/cbox_path_mis-256.png" alt="256 spp render" class="img-responsive">
+          <img src="images/features/denoise/cbox_path_mis-256_denoised.png" alt="256 spp denoised"
+            class="img-responsive">
+          <img src="images/features/denoise/cbox_path_mis-8192.png" alt="8192 spp render" class="img-responsive">
+        </div>
       </div>
-
-      <br> <br>
-
-      <div id="finalImage">
-        <h1>Final Image</h1>
-        <i>TODO: Add</i>
-      </div>
-
     </div>
+
+    <div id="featuresEric">
+      <h1>Features: Eric Enzler</h1>
+      <!--TODO: Add-->
+    </div>
+
+    <br> <br>
+
+    <div id="finalImage">
+      <h1>Final Image</h1>
+      <i>TODO: Add</i>
+    </div>
+
+  </div>
   </div>
 
 

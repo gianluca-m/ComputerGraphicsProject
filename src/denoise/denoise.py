@@ -64,7 +64,7 @@ def main():
 
     print(f"Denoising '{data_file}'")
     start = time.time()
-    denoised = nl_means_denoise(data, data_variance, r=20, f=9)
+    denoised = nl_means_denoise(data, data_variance)
     execution_time = time.time() - start
     print(f"Finished denoising in {round(execution_time)} seconds ({round(execution_time / 60, 2)} minutes)")
 
