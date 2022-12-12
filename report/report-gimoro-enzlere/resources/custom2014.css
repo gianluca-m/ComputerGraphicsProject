@@ -833,14 +833,6 @@ h3.newsarchive{
 	}
 }
 
-@media (min-width: 768px){
-	.container {
-		width: 748px;
-	}
-}
-@media (min-width:992px){
-	.container{width:948px}
-}
-@media (min-width:1200px){
-	.container{width:1148px}
+.container {
+	width: 90%;
 }
