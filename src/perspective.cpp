@@ -47,9 +47,16 @@ public:
         m_nearClip = propList.getFloat("nearClip", 1e-4f);
         m_farClip = propList.getFloat("farClip", 1e4f);
 
-        m_focalLength = propList.getFloat("focalLength", 1.f);
+        m_focalLength = propList.getFloat("focalLength", 0.f);
         m_lensRadius = propList.getFloat("lensRadius", 0.f);
 
+        m_motionblur = propList.getString("motionblur", "");
+
+        if(m_motionblur != ""){
+            m_finalMotion = propList.getTransform("motion", Transform());
+        }
+
+            
         m_rfilter = NULL;
     }
 
@@ -92,7 +99,8 @@ public:
 
     Color3f sampleRay(Ray3f &ray,
             const Point2f &samplePosition,
-            const Point2f &apertureSample) const {
+            const Point2f &apertureSample,
+            float contribution) const {
         /* Compute the corresponding position on the 
            near plane (in local camera space) */
         Point3f nearP = m_sampleToCamera * Point3f(
@@ -108,18 +116,30 @@ public:
         ray.d = m_cameraToWorld * d; 
 
         /* Depth of Field PBRT 6.2.3*/
-        if(m_lensRadius > 0 ){
-
+        if(m_lensRadius > 0 ) {
             Point2f pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
             float ft = m_focalLength / d.z();
             Point3f pFocus = ft * d;
 
-            auto o = Point3f(pLens.x(), pLens.y(), 0);
-            d = (pFocus-o).normalized();
-            ray.o = m_cameraToWorld * o;
+            ray.o = Point3f(pLens.x(), pLens.y(), 0);
+            ray.d = (pFocus-ray.o).normalized();
+
+            ray.o = m_cameraToWorld * ray.o;
             ray.d = m_cameraToWorld * d;
+            
         }
-        
+
+        if(m_motionblur != ""){
+            Eigen::Matrix4f editable;
+
+            if(m_motionblur == "linear"){
+            }
+            Transform trans(m_cameraToWorld.getMatrix() * (1.0f - contribution) + m_finalMotion.getMatrix() * contribution);
+            //Keep the origin fixed!
+            //Such that the scene stays
+            ray.d = trans * d;
+        }
+
         ray.mint = m_nearClip * invZ;
         ray.maxt = m_farClip * invZ;
         ray.update();
@@ -168,6 +188,8 @@ private:
     float m_farClip;
     float m_focalLength;
     float m_lensRadius; //=f-value
+    std::string m_motionblur;
+    Transform m_finalMotion;
 };
 
 NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
