@@ -13,15 +13,7 @@ public:
         m_worldCenter = Point3f(0,0,0);
         /* Radius of 300 is an overapproximation as mentioned in the book. An exact measure would not be worth the cost/outcome*/
         m_worldRadius = 300;
-    }
-
-    /* This function is not working as it should*/
-    virtual void Preprocess(const Scene *scene) {
-        auto bbox = scene->getBoundingBox();
-        m_worldCenter = bbox.getCenter();
-        m_worldRadius = (bbox.max - m_worldCenter).norm();
-    }
-   
+    }   
 
     virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const {
         lRec.wi = -m_direction;

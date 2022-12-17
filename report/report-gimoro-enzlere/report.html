@@ -42,7 +42,7 @@
     <hr class="solid">
     <a href="#featuresEric">Features Eric Enzler</a>
     <ul>
-      <li>TODO (enzlere): Add</li>
+      <li><a href="#directional">Directional Light</a></li>
     </ul>
     <hr class="solid">
     <a href="#finalImage">Final Image</a>
@@ -303,6 +303,11 @@
               <dd>
                 <code>src/directionallight.cpp</code> <br>
               </dd>
+
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Distant_Lights">PBR Book, 12.4 Distant Lights</a> <br>
+              </dd>
             </dl>
 
             <h3>Implementation</h3>
@@ -323,10 +328,15 @@
                 class="img-responsive">
             </div>
             <br>
-            <p> Our implementation offers the ability to color the directional light, giving us some additional options to work with. The direction of the light is different than in the picture above!
+            <p> In the scene below, our implementation results in a brighter image than the one from mitsuba.
           </p>
-            <div class="twentytwenty-container">
-              <img src="images/features/directionallight/directional_colored.png" alt="Colored light">
+          <div class="twentytwenty-container">
+            <img src="images/features/directionallight/directional2_mine.png" alt="Mine"
+              class="img-responsive">
+              <img src="images/features/directionallight/directional2_ref.png" alt="Mitsuba"
+              class="img-responsive">
+              <img src="images/features/directionallight/directional_colored.png" alt="Colored"
+              class="img-responsive">
           </div>
         </div>
         </div>
