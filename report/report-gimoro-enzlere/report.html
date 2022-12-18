@@ -28,321 +28,403 @@
 
 <body>
 
-  <div class="container headerBar">
-    <h1>Project Report - gimoro & enzlere</h1>
+  <div class="sidenav">
+    <a href="#">Home</a> <br>
+    <hr class="solid">
+    <a href="#motivation">Motivational Image</a> <br>
+    <hr class="solid">
+    <a href="#featuresGianluca">Features Gianluca Moro</a>
+    <ul>
+      <li><a href="#imageTextures">Image Textures</a></li>
+      <li><a href="#normalMapping">Normal Mapping</a></li>
+      <li><a href="#texturedAreaEmitters">Textured Area Emitters</a></li>
+      <li><a href="#denoising">NL-means Denoising</a></li>
+    </ul>
+    <hr class="solid">
+    <a href="#featuresEric">Features Eric Enzler</a>
+    <ul>
+      <li><a href="#directional">Directional Light</a></li>
+    </ul>
+    <hr class="solid">
+    <a href="#finalImage">Final Image</a>
+
+    <p class="copyright"><i>Copyright &copy; 2022, <br> Gianluca Moro & Eric Enzler</i></p>
   </div>
 
-  <div class="container contentWrapper">
-    <div class="pageContent">
+  <div class="main">
+    <div class="container headerBar">
+      <h1>Project Report - Gianluca Moro & Eric Enzler</h1>
+    </div>
 
-      <!--TODO: fix headers-->
+    <div class="container contentWrapper">
+      <div class="pageContent">
 
-      <div id="motivation">
-        <h1>Motivation Image</h1>
-        <i>TODO: Add</i>
-      </div>
+        <!--TODO: fix headers-->
 
-      <br> <br>
-
-      <div id="featuresGianluca">
-        <h1>Features: Gianluca Moro</h1>
-
-        <div id="imageTextures">
-          <h2>1. Image Textures [5 points]</h2>
-          <dl>
-            <dt>Modified Files</dt>
-            <dd><code>src/image_texture.cpp</code></dd>
-
-            <dt>External libraries</dt>
-            <dd><a href="https://github.com/nothings/stb">stb_image</a></dd>
-
-            <dt>Theory</dt>
-            <dd><a href="https://www.pbr-book.org/3ed-2018/Texture/Image_Texture">PBR Book, 10.4 Image Texture</a> <br>
-              <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=804475">CG Lecture Slides 27.09.2022,
-                Polygonal Meshes & Texture Mapping</a>
-            </dd>
-          </dl>
-
-          <h3>Implementation</h3>
-          <p>To load the texture images, I am using the <a href="https://github.com/nothings/stb">stb_image</a> library,
-            which is already imported in <code>ext/nanogui</code>. This allows us to load png and jpg images into 8-bit
-            integer arrays. <br>
-            To sample a the texture, the <code>eval()</code> method takes the uv coordinates of the desired point as
-            input. We then convert the uv coordinates to image coordinates as follows:
-            $$
-            \begin{align}
-            x &= u \cdot width \\
-            y &= (1 - v) \cdot height
-            \end{align}
-            $$
-            Note the $(1 - v)$ because otherwise, the texture would be flipped upside down. <br>
-            We can then get the RGB values from the image data array as follows:
-            $$
-            \begin{align}
-            index &= (x + y \cdot width) \cdot num\_channels \\
-            R &= image[index] / 255 \\
-            G &= image[index+1] / 255 \\
-            B &= image[index+2] / 255 \\
-            \end{align}
-            $$
-            where $num\_channels$ is the number of channels in the image: 4 for RGBA images, and 3 for RGB images.
-            The final color is also converted to linear RGB using the <code>nori::Color3f::toLinearRGB()</code>
-            method.<br> <br>
-
-            I also added a <code>scale</code> property, which allows to shrink (scale &gt; 1), and repeat the texture to
-            fit the surface, or make it bigger (scale &lt; 1). <br>
-            Furthermore, I added a <code>shift</code> property, which allows to translate the texture. This is for
-            example useful to rotate the texture on a sphere.
-          </p>
-
-          <h3>Validation</h3>
-          <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
-              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The images are almost identical,
-            only the brightness is slightly different because nori and mitsuba use somewhat different values for the
-            same light intensity. However, the textures are applied the identically.
-          </p>
-          <div class="twentytwenty-container">
-            <img src="images/features/image-textures/mitsuba-image-texture.png" alt="mitsuba3" class="img-responsive">
-            <img src="images/features/image-textures/image-texture.png" alt="Mine" class="img-responsive">
-            <img src="images/features/image-textures/no-image-texture.png" alt="no textures" class="img-responsive">
-          </div>
-          <p>
-            The duck model and texture are from <a
-              href="https://free3d.com/3d-model/bird-v1--282209.html">free3d.com</a>,
-            the earth texture from <a href="https://www.solarsystemscope.com/textures/">solarsystemscope.com</a>,
-            and the ground texture from <a
-              href="https://3dtextures.me/2020/05/11/ground-wet-pebbles-001/">3dtextures.me</a>.
-          </p>
+        <div id="motivation">
+          <h1>Motivational Image</h1>
+          <i>TODO: Add</i>
         </div>
 
-        <br>
+        <br> <br>
 
-        <div id="normalMapping">
-          <h2>2. Normal Mapping [5 points]</h2>
-          <dl>
-            <dt>Modified Files</dt>
-            <dd>
-              <code>src/normal_map.cpp</code> <br>
-              <code>src/mesh.cpp</code> <br>
-              <code>src/sphere.cpp</code> <br>
-              <code>include/nori/texture.h</code> <br>
-              <code>include/nori/bsdf.h</code>
-            </dd>
+        <div id="featuresGianluca">
+          <h1>Features: Gianluca Moro</h1>
 
-            <dt>External libraries</dt>
-            <dd><a href="https://github.com/nothings/stb">stb_image</a></dd>
+          <div id="imageTextures">
+            <h2>1. Image Textures [5 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd><code>src/image_texture.cpp</code></dd>
 
-            <dt>Theory</dt>
-            <dd><a href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/">
-                OpenGL Tutorial 13: Normal Mapping</a>
-            </dd>
-          </dl>
+              <dt>External libraries</dt>
+              <dd><a href="https://github.com/nothings/stb">stb_image</a></dd>
 
-          <p>Normal mapping can be used to fake the lighting of bumps and dents of meshes without adding more polygons.
-          </p>
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Texture/Image_Texture">PBR Book, 10.4 Image Texture</a> <br>
+                <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=804475">CG Lecture Slides 27.09.2022,
+                  Polygonal Meshes & Texture Mapping</a>
+              </dd>
+            </dl>
 
-          <h3>Implementation</h3>
-          <p>The normal map is an RGB image where each texel encodes the normal at that point: $normal = \left( 2 \cdot
-            color_{RGB} \right) - 1$. <br>
-            Loading the image and mapping the $uv$ coordinate to image coordinates is done the same way as for the Image
-            Textures.
-            The only difference is that now the <code>eval()</code> method returns the normal vector instead of the
-            color. <br>
-            To apply the normal mapping, we do the following for each detected intersection:
-          <ul>
-            <li>Compute tangent and bitangent at intersection point. We want the tangent vector to be in the same
-              direction as the texture coordinates. For this, I followed the steps explained in the <a
-                href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/">
-                OpenGL Normal Mapping</a> tutorial:
+            <h3>Implementation</h3>
+            <p>To load the texture images, I am using the <a href="https://github.com/nothings/stb">stb_image</a>
+              library, which is already imported in <code>ext/nanogui</code>. This allows us to load png and jpg images
+              into 8-bit integer arrays. <br>
+              To sample a the texture, the <code>eval()</code> method takes the uv coordinates of the desired point as
+              input. We then convert the uv coordinates to image coordinates as follows:
               $$
               \begin{align}
-              deltaPos1 &= vertex_1 - vertex_0 \\
-              deltaPos2 &= vertex_2 - vertex_1 \\
-              deltaUV1 &= uv_1 - uv_0 \\
-              deltaUV2 &= uv_2 - uv_0 \\
-              r &= \frac{1}{deltaUV1_x \cdot deltaUV2_y - detlaUV1_y \cdot deltaUV2_x} \\
-              tangent &= r \cdot (deltaPos1 \cdot deltaUV2_y - deltaPos2 \cdot deltaUV1_y) \\
-              bitangent &= r \cdot (deltaPos2 \cdot deltaUV1_x - deltaPos1 \cdot deltaUV2_x)
+              x &= u \cdot width \\
+              y &= (1 - v) \cdot height
               \end{align}
               $$
-              where $detlaPos1, deltaPos2$ are polygon edges, and $deltaUV1, deltaUV2$ the edges in the uv space.
-            </li>
-            <li>Calculate the new normal at the intersection point using the normal map and the $uv$ coordinates:
-              $new\_normal = \left( 2 \cdot color_{RGB} \right) - 1$
-            </li>
-            <li>Use the tangent, bitangent and the mesh normal to compute a tangent space coordinate frame,
-              and then use this frame to convert the new normal to world coordinates.
-            </li>
-            <li>Set the converted normal as the mesh shading frame normal.</li>
-          </ul>
-          </p>
+              Note the $(1 - v)$ because otherwise, the texture would be flipped upside down. <br>
+              We can then get the RGB values from the image data array as follows:
+              $$
+              \begin{align}
+              index &= (x + y \cdot width) \cdot num\_channels \\
+              R &= image[index] / 255 \\
+              G &= image[index+1] / 255 \\
+              B &= image[index+2] / 255 \\
+              \end{align}
+              $$
+              where $num\_channels$ is the number of channels in the image: 4 for RGBA images, and 3 for RGB images.
+              The final color is also converted to linear RGB using the <code>nori::Color3f::toLinearRGB()</code>
+              method.<br> <br>
 
-          <h3>Validation</h3>
-          <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
-              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
-            sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object. <br>
-            The images are almost identical, only the brightness is again slightly different because nori and mitsuba
-            use somewhat different values for the same light intensity. <br>
-            The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
-            when comparing to only having the texture applied without normal mapping.
-          </p>
+              I also added a <code>scale</code> property, which allows to shrink (scale &gt; 1), and repeat the texture
+              to fit the surface, or make it bigger (scale &lt; 1). <br>
+              Furthermore, I added a <code>shift</code> property, which allows to translate the texture. This is for
+              example useful to rotate the texture on a sphere.
+            </p>
 
-          <!--TODO (gimoro): fix lighting-->
-          <div class="twentytwenty-container">
-            <img src="images/features/normal-mapping/mitsuba-normal-mapping-sphere.png" alt="mitsuba3"
-              class="img-responsive">
-            <img src="images/features/normal-mapping/normal-mapping-sphere.png" alt="Mine" class="img-responsive">
-            <img src="images/features/normal-mapping/no-normal-mapping-sphere.png" alt="Texture only"
-              class="img-responsive">
+            <h3>Validation</h3>
+            <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The images are almost identical,
+              only the brightness is slightly different because nori and mitsuba use somewhat different values for the
+              same light intensity. However, the textures are applied the identically.
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/image-textures/mitsuba-image-texture.png" alt="mitsuba3" class="img-responsive">
+              <img src="images/features/image-textures/image-texture.png" alt="Mine" class="img-responsive">
+              <img src="images/features/image-textures/no-image-texture.png" alt="no textures" class="img-responsive">
+            </div>
+            <p>
+              The duck model and texture are from <a
+                href="https://free3d.com/3d-model/bird-v1--282209.html">free3d.com</a>,
+              the earth texture from <a href="https://www.solarsystemscope.com/textures/">solarsystemscope.com</a>,
+              and the ground texture from <a
+                href="https://3dtextures.me/2020/05/11/ground-wet-pebbles-001/">3dtextures.me</a>.
+            </p>
           </div>
+
           <br>
-          <div class="twentytwenty-container">
-            <img src="images/features/normal-mapping/mitsuba-normal-mapping-wall.png" alt="mitsuba3"
-              class="img-responsive">
-            <img src="images/features/normal-mapping/normal-mapping-wall.png" alt="Mine" class="img-responsive">
-            <img src="images/features/normal-mapping/no-normal-mapping-wall.png" alt="Texture only"
-              class="img-responsive">
+
+          <div id="normalMapping">
+            <h2>2. Normal Mapping [5 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/normal_map.cpp</code> <br>
+                <code>src/mesh.cpp</code> <br>
+                <code>src/sphere.cpp</code> <br>
+                <code>include/nori/texture.h</code> <br>
+                <code>include/nori/bsdf.h</code>
+              </dd>
+
+              <dt>External libraries</dt>
+              <dd><a href="https://github.com/nothings/stb">stb_image</a></dd>
+
+              <dt>Theory</dt>
+              <dd><a href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/">
+                  OpenGL Tutorial 13: Normal Mapping</a>
+              </dd>
+            </dl>
+
+            <p>Normal mapping can be used to fake the lighting of bumps and dents of meshes without adding more
+              polygons.
+            </p>
+
+            <h3>Implementation</h3>
+            <p>The normal map is an RGB image where each texel encodes the normal at that point: $normal = \left( 2
+              \cdot
+              color_{RGB} \right) - 1$. <br>
+              Loading the image and mapping the $uv$ coordinate to image coordinates is done the same way as for the
+              Image Textures. The only difference is that now the <code>eval()</code> method returns the normal vector
+              instead of the color. <br>
+              To apply the normal mapping, we do the following for each detected intersection:
+            <ul>
+              <li>Compute tangent and bitangent at intersection point. We want the tangent vector to be in the same
+                direction as the texture coordinates. For this, I followed the steps explained in the <a
+                  href="https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/">
+                  OpenGL Normal Mapping</a> tutorial:
+                $$
+                \begin{align}
+                deltaPos1 &= vertex_1 - vertex_0 \\
+                deltaPos2 &= vertex_2 - vertex_0 \\
+                deltaUV1 &= uv_1 - uv_0 \\
+                deltaUV2 &= uv_2 - uv_0 \\
+                r &= \frac{1}{deltaUV1_x \cdot deltaUV2_y - detlaUV1_y \cdot deltaUV2_x} \\
+                tangent &= r \cdot (deltaPos1 \cdot deltaUV2_y - deltaPos2 \cdot deltaUV1_y) \\
+                bitangent &= r \cdot (deltaPos2 \cdot deltaUV1_x - deltaPos1 \cdot deltaUV2_x)
+                \end{align}
+                $$
+                where $detlaPos1, deltaPos2$ are polygon edges, and $deltaUV1, deltaUV2$ the edges in the uv space.
+              </li>
+              <li>Calculate the new normal at the intersection point using the normal map and the $uv$ coordinates:
+                $new\_normal = \left( 2 \cdot color_{RGB} \right) - 1$
+              </li>
+              <li>Use the tangent, bitangent and the mesh normal to compute a tangent space coordinate frame,
+                and then use this frame to convert the new normal to world coordinates.
+              </li>
+              <li>Set the converted normal as the mesh shading frame normal.</li>
+            </ul>
+            </p>
+
+            <h3>Validation</h3>
+            <p>
+              To validate the implementation, we created identical scenes and rendered them in nori and <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
+              sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object.
+              <br>
+              The images are almost identical, only the brightness is again slightly different because nori and mitsuba
+              use somewhat different values for the same light intensity. <br>
+              The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
+              when comparing to only having the texture applied without normal mapping.
+            </p>
+
+            <!--TODO (gimoro): fix lighting-->
+            <div class="twentytwenty-container">
+              <img src="images/features/normal-mapping/mitsuba-normal-mapping-sphere.png" alt="mitsuba3"
+                class="img-responsive">
+              <img src="images/features/normal-mapping/normal-mapping-sphere.png" alt="Mine" class="img-responsive">
+              <img src="images/features/normal-mapping/no-normal-mapping-sphere.png" alt="Texture only"
+                class="img-responsive">
+            </div>
+            <br>
+            <div class="twentytwenty-container">
+              <img src="images/features/normal-mapping/mitsuba-normal-mapping-wall.png" alt="mitsuba3"
+                class="img-responsive">
+              <img src="images/features/normal-mapping/normal-mapping-wall.png" alt="Mine" class="img-responsive">
+              <img src="images/features/normal-mapping/no-normal-mapping-wall.png" alt="Texture only"
+                class="img-responsive">
+            </div>
+
+            <p>The texture and normal maps are from <a
+                href="https://3dtextures.me/2022/05/21/stylized-stone-floor-005/">3dtextures.me</a>
+            </p>
           </div>
 
-          <p>The texture and normal maps are from <a
-              href="https://3dtextures.me/2022/05/21/stylized-stone-floor-005/">3dtextures.me</a>
-          </p>
-        </div>
-
-        <br>
-
-        <div id="texturedAreaEmitters">
-          <h2>3. Textured Area Emitters [5 points]</h2>
-          <dl>
-            <dt>Modified Files</dt>
-            <dd>
-              <code>src/arealight.cpp</code> <br>
-              <code>src/mesh.cpp</code> <br>
-              <code>src/sphere.cpp</code> <br>
-              <code>src/path_mis, path_mats, photonmapper, direct_mis, direct_mats, direct_ems.cpp</code> <br>
-              <code>include/nori/emitter.h</code> <br>
-              <code>include/nori/shape.h</code>
-            </dd>
-          </dl>
-
-          <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of "Mip-Mapping"
-            to stay in the 60 points limit.</i>
-
-          <h3>Implementation</h3>
-          <p>For this feature, I modified the arealight to also accept a texture as the radiance. Now when sampling the
-            emitter, it will use the uv coordinates to look up the color in the texture and return that
-            value as the radiance. The lookup is the same as for Image Textures, described above. <br>
-            To be able to lookup the texture, I added a <code>Point2f uv</code> property to the
-            <code>EmitterQueryRecord</code> and to the <code>ShapeQueryRecord</code>. The <code>uv</code> property of
-            the <code>EmitterQueryRecord</code> is updated in the <code>Integrator::Li</code> methods of the different
-            integrators. This uv value is updated when the ray intersection point is an emitter. <br>
-            The <code>uv</code> property of the <code>ShapeQueryRecord</code> is updated in the
-            <code>Shape::sampleSurface</code> method in <code>mesh.cpp</code> and <code>sphere.cpp</code>.
-            This uv value is updated when we sample a point on the emitter surface.
-          </p>
-
-          <h3>Validation</h3>
-          <p>To validate the implementation, we created identical scenes and redered them in nori and <a
-              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain either an
-            analytical sphere or a mesh, and a ground plane. The sphere resp. mesh is the only emitter in the scene. The
-            <code>path_mis</code> integrator with 64 samples per pixel was used to render the scene. <br>
-            The images look very similar: The mean error between the images is only 0.003 for both scenes, calculated
-            using the <a href="https://github.com/tom94/tev">tev</a> tool.
-          </p>
-          <div class="twentytwenty-container">
-            <img src="images/features/textured-emitters/mitsuba-textured-emitter-sphere.png" alt="mitsuba3"
-              class="img-responsive">
-            <img src="images/features/textured-emitters/textured-emitter-sphere.png" alt="Mine" class="img-responsive">
-          </div>
           <br>
-          <div class="twentytwenty-container">
-            <img src="images/features/textured-emitters/mitsuba-textured-emitter-mesh.png" alt="mitsuba3"
-              class="img-responsive">
-            <img src="images/features/textured-emitters/textured-emitter-mesh.png" alt="Mine" class="img-responsive">
+
+          <div id="texturedAreaEmitters">
+            <h2>3. Textured Area Emitters [5 points]</h2>
+
+            <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
+              "Mip-Mapping" to stay in the 60 points limit.</i> <br> <br>
+
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/arealight.cpp</code> <br>
+                <code>src/mesh.cpp</code> <br>
+                <code>src/sphere.cpp</code> <br>
+                <code>src/path_mis, path_mats, photonmapper, direct_mis, direct_mats, direct_ems.cpp</code> <br>
+                <code>include/nori/emitter.h</code> <br>
+                <code>include/nori/shape.h</code>
+              </dd>
+            </dl>
+
+            <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
+              "Mip-Mapping"
+              to stay in the 60 points limit.</i>
+
+            <h3>Implementation</h3>
+            <p>For this feature, I modified the arealight to also accept a texture as the radiance. Now when sampling
+              the
+              emitter, it will use the uv coordinates to look up the color in the texture and return that
+              value as the radiance. The lookup is the same as for Image Textures, described above. <br>
+              To be able to lookup the texture, I added a <code>Point2f uv</code> property to the
+              <code>EmitterQueryRecord</code> and to the <code>ShapeQueryRecord</code>. The <code>uv</code> property of
+              the <code>EmitterQueryRecord</code> is updated in the <code>Integrator::Li</code> methods of the different
+              integrators. This uv value is updated when the ray intersection point is an emitter. <br>
+              The <code>uv</code> property of the <code>ShapeQueryRecord</code> is updated in the
+              <code>Shape::sampleSurface</code> method in <code>mesh.cpp</code> and <code>sphere.cpp</code>.
+              This uv value is updated when we sample a point on the emitter surface.
+            </p>
+
+            <h3>Validation</h3>
+            <p>To validate the implementation, we created identical scenes and redered them in nori and <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain either an
+              analytical sphere or a mesh, and a ground plane. The sphere resp. mesh is the only emitter in the scene.
+              The <code>path_mis</code> integrator with 64 samples per pixel was used to render the scene. <br>
+              The images look very similar: The mean error between the images is only 0.003 for both scenes, calculated
+              using the <a href="https://github.com/tom94/tev">tev</a> tool.
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/textured-emitters/mitsuba-textured-emitter-sphere.png" alt="mitsuba3"
+                class="img-responsive">
+              <img src="images/features/textured-emitters/textured-emitter-sphere.png" alt="Mine"
+                class="img-responsive">
+            </div>
+            <br>
+            <div class="twentytwenty-container">
+              <img src="images/features/textured-emitters/mitsuba-textured-emitter-mesh.png" alt="mitsuba3"
+                class="img-responsive">
+              <img src="images/features/textured-emitters/textured-emitter-mesh.png" alt="Mine" class="img-responsive">
+            </div>
+          </div>
+
+          <br>
+
+          <div id="denoising">
+            <h2>4. NL-means Denoising using Pixel Variance Estimates [15 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/render.cpp</code> <br>
+                <code>src/denoise/denoise.py</code>
+              </dd>
+
+              <dt>External Libraries</dt>
+              <dd>
+                <a href="https://github.com/opencv/opencv-python">opencv-python</a> <br>
+                <a href="https://numpy.org/">numpy</a>
+              </dd>
+
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">
+                  CG Lecture Slides 25.11.2022, Image-Based Denoising & Denoising with Deep Learning
+                </a>
+              </dd>
+            </dl>
+
+            <h3>Implementation</h3>
+            <p>
+              To perform NL means denoising, we need the pixel variance. To estimate the non-uniform pixel variance,
+              I used the following formula:
+              $$
+              \begin{align}
+              var[p] &= (\text{sample variance}) \cdot \frac{1}{n} \\
+              &= \left( \left( \frac{\sum_{i=1}^n x_i^2}{n} - \left( \frac{\sum_{i=1}^n x_i}{n} \right)^2 \right)
+              \cdot \frac{n}{n-1} \right) \cdot \frac{1}{n}
+              \end{align}
+              $$
+              To estimate the variance, I updated the <code>RenderThread::renderScene</code> in <code>render.cpp</code>.
+              Now when rendering a scene, it will also output a <code>image_variance.exr</code> file, containing the
+              estimated variances. <br>
+              I implemented the fast NL-means denoising algorithm given in the
+              <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">lecture slides</a> in python,
+              using opencv and numpy. The algorithm is well explained in the lecture slides. For the $d^2$ function,
+              I used the non-uniform variance variant. <br>
+              OpenCV is used to read and write the image files, and to apply the boxfilter convolution.
+              Numpy is used to perform efficient array operations.
+            </p>
+
+            <h3>Validation</h3>
+            <p>
+              To validate the denoising, I rendered the cbox scene using the <code>path_mis</code> integrator,
+              with 256 samples per pixel, which produced quite a noisy image. I also rendered the same scene
+              with 8192 samples per pixel as a baseline to compare the denoised image to. <br>
+              Rendering and denoising the 256 spp image (with $r=10, f=3, k=0.45$) took in total about 2.2 minutes
+              (1.9 minutes for rendering and 0.3 minutes for denosing), while the 8192 spp took about 51 minutes to
+              render. So, we have a speedup of around 23. <br>
+              The denoised image looks very similar to the high spp version. However, there are some faint patterns
+              visible, especially on the walls. With some parameter tweaking, those could probably be reduced even more,
+              but this would also increase the denoising time.
+            </p>
+            <div class="twentytwenty-container" style="width: 70%;">
+              <img src="images/features/denoise/cbox_path_mis-256.png" alt="256 spp render" class="img-responsive">
+              <img src="images/features/denoise/cbox_path_mis-256_denoised.png" alt="256 spp denoised"
+                class="img-responsive">
+              <img src="images/features/denoise/cbox_path_mis-8192.png" alt="8192 spp render" class="img-responsive">
+            </div>
           </div>
         </div>
-      </div>
 
-      <br> <br>
+        <br> <br>
 
-      <div id="denoising">
-        <h2>4. NL-means using Pixel Variance Estimates [15 points]</h2>
-        <dl>
-          <dt>Modified Files</dt>
-          <dd>
-            <code>src/render.cpp</code> <br>
-            <code>src/denoise/denoise.py</code>
-          </dd>
+        <div id="featuresEric">
+          <h1>Features: Eric Enzler</h1>
+          <div id="directional">
+            <h2>1. Directional Light [5 points]</h2>
 
-          <dt>External Libraries</dt>
-          <dd>
-            <a href="https://github.com/opencv/opencv-python">opencv-python</a> <br>
-            <a href="https://numpy.org/">numpy</a>
-          </dd>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/directionallight.cpp</code> <br>
+              </dd>
 
-          <dt>Theory</dt>
-          <dd>
-            <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">
-              CG Lecture Slides 25.11.2022, Image-Based Denoising & Denoising with Deep Learning
-            </a>
-          </dd>
-        </dl>
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Distant_Lights">PBR Book, 12.4 Distant
+                  Lights</a> <br>
+              </dd>
+            </dl>
 
-        <h3>Implementation</h3>
-        <p>
-          To perform NL means denoising, we need the pixel variance. To estimate the non-uniform pixel variance,
-          I used the following formula:
-          $$
-          \begin{align}
-          var[p] &= (\text{sample variance}) \cdot \frac{1}{n} \\
-          &= \left( \left( \frac{\sum_{i=1}^n x_i^2}{n} - \left( \frac{\sum_{i=1}^n x_i}{n} \right)^2 \right)
-          \cdot \frac{n}{n-1} \right) \cdot \frac{1}{n}
-          \end{align}
-          $$
-          To estimate the variance, I updated the <code>RenderThread::renderScene</code> in <code>render.cpp</code>.
-          Now when rendering a scene, it will also output a <code>image_variance.exr</code> file, containing the
-          estimated variances. <br>
-          I implemented the fast NL-means denoising algorithm given in the 
-          <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">lecture slides</a> in python, 
-          using opencv and numpy. The algorithm is well explained in the lecture slides. For the $d^2$ function, 
-          I used the non-uniform variance variant. <br>
-          OpenCV is used to read and write the image files, and to apply the boxfilter convolution. 
-          Numpy is used to perform efficient array operations.
-        </p>
+            <h3>Implementation</h3>
+            <p>For this special light source, I used the implementation of the book. Unfortunately, I could not make use
+              of the bounding box of the scene.
+              In the implementation, I am currently using a hardcoded value for the radius. This overestimates the power
+              of the light a bit but still gives good results.
+            </p>
 
-        <h3>Validation</h3>
-        <p>
-          To validate the denoising, I rendered the cbox scene using the <code>path_mis</code> integrator,
-          with 256 samples per pixel, which produced quite a noisy image. I also rendered the same scene
-          with 8192 samples per pixel as a baseline to compare the denoised image to. <br>
-          Rendering and denoising the 256 spp image (with $r=10, f=3, k=0.45$) took in total about 2.2 minutes,
-          while the 8192 spp took about 51 minutes to render. So, we have a speedup of around 23. <br>
-          The denoised image looks very similar to the high spp version. 
-        </p>
-        <div class="twentytwenty-container">
-          <img src="images/features/denoise/cbox_path_mis-256.png" alt="256 spp render" class="img-responsive">
-          <img src="images/features/denoise/cbox_path_mis-256_denoised.png" alt="256 spp denoised"
-            class="img-responsive">
-          <img src="images/features/denoise/cbox_path_mis-8192.png" alt="8192 spp render" class="img-responsive">
+            <h3>Validation</h3>
+            <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain two meshes
+              and a ground plane. The direction of the light source and the color
+              of the light are the same. The two images show no differences with this direction of the light. In other
+              cases, our implementation resultet in a slightly brighter picture because
+              of the overestimation described above.
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/directionallight/directional1_mine.png" alt="Mine" class="img-responsive">
+              <img src="images/features/directionallight/directional1_ref.png" alt="Mitsuba" class="img-responsive">
+            </div>
+            <br>
+            <p> In the scene below, our implementation results in a brighter image than the one from mitsuba.
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/directionallight/directional2_mine.png" alt="Mine" class="img-responsive">
+              <img src="images/features/directionallight/directional2_ref.png" alt="Mitsuba" class="img-responsive">
+              <img src="images/features/directionallight/directional_colored.png" alt="Colored" class="img-responsive">
+            </div>
+          </div>
         </div>
+
+        <br> <br>
+
+        <div id="finalImage">
+          <h1>Final Image</h1>
+          <i>TODO: Add</i>
+        </div>
+
       </div>
     </div>
-
-    <div id="featuresEric">
-      <h1>Features: Eric Enzler</h1>
-      <!--TODO: Add-->
-    </div>
-
-    <br> <br>
-
-    <div id="finalImage">
-      <h1>Final Image</h1>
-      <i>TODO: Add</i>
-    </div>
-
   </div>
-  </div>
-
 
   <!-- Bootstrap core JavaScript -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
