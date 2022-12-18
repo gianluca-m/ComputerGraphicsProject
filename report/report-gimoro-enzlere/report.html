@@ -59,6 +59,11 @@
     <div class="container contentWrapper">
       <div class="pageContent">
 
+        <em>
+          Note: As discussed with the TAs, since Eric had to do obligatory military service during the project,
+          we were able to submit later until 17. January 2023.
+        </em>
+
         <!--TODO: fix headers-->
 
         <div id="motivation">
@@ -242,7 +247,7 @@
           <div id="texturedAreaEmitters">
             <h2>3. Textured Area Emitters [5 points]</h2>
 
-            <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
+            <i>Note: As discussed with TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
               "Mip-Mapping" to stay in the 60 points limit.</i> <br> <br>
 
             <dl>
@@ -257,14 +262,9 @@
               </dd>
             </dl>
 
-            <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
-              "Mip-Mapping"
-              to stay in the 60 points limit.</i>
-
             <h3>Implementation</h3>
             <p>For this feature, I modified the arealight to also accept a texture as the radiance. Now when sampling
-              the
-              emitter, it will use the uv coordinates to look up the color in the texture and return that
+              the emitter, it will use the uv coordinates to look up the color in the texture and return that
               value as the radiance. The lookup is the same as for Image Textures, described above. <br>
               To be able to lookup the texture, I added a <code>Point2f uv</code> property to the
               <code>EmitterQueryRecord</code> and to the <code>ShapeQueryRecord</code>. The <code>uv</code> property of
