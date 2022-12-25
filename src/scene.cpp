@@ -74,6 +74,10 @@ void Scene::addChild(NoriObject *obj) {
             m_emitters.push_back(static_cast<Emitter *>(obj));
             break;
 
+        case EMedium:
+            m_media.push_back(static_cast<Medium *>(obj));
+            break;
+
         case ESampler:
             if (m_sampler)
                 throw NoriException("There can only be one sampler per scene!");
@@ -115,6 +119,14 @@ std::string Scene::toString() const {
         lights += "\n";
     }
 
+    std::string media;
+    for (size_t i = 0; i < m_media.size(); ++i) {
+        media += std::string("  ") + indent(m_media[i]->toString(), 2);
+        if (i + 1 < m_media.size())
+            media += ",";
+        media += "\n";
+    }
+
     return tfm::format(
         "Scene[\n"
         "  integrator = %s,\n"
@@ -124,12 +136,15 @@ std::string Scene::toString() const {
         "  %s  }\n"
         "  emitters = {\n"
         "  %s  }\n"
+        "  media = {\n"
+        "  %s  }\n"
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
         indent(m_camera->toString()),
         indent(shapes, 2),
-        indent(lights,2)
+        indent(lights,2),
+        indent(media, 2)
     );
 }
 

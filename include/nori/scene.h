@@ -21,6 +21,7 @@
 
 #include <nori/bvh.h>
 #include <nori/emitter.h>
+#include <nori/medium.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -70,6 +71,23 @@ public:
                 static_cast<size_t>(std::floor(n*rnd)),
                 n-1);
         return m_emitters[index];
+    }
+
+    /// Return the closest medium which the ray intersects
+    const Medium* getMedium(const Ray3f &ray) const {
+        float minT = std::numeric_limits<float>::max();
+        Medium *closestMedium = nullptr;
+
+        for (Medium* medium : m_media) {
+            float nearT, farT;
+
+            if (medium->rayIntersect(ray, nearT, farT) && nearT < minT) {
+                minT = nearT;
+                closestMedium = medium;
+            }
+        }
+
+        return closestMedium;
     }
 
     /**
@@ -140,6 +158,7 @@ private:
     BVH *m_bvh = nullptr;
 
     std::vector<Emitter *> m_emitters;
+    std::vector<Medium *> m_media;
 };
 
 NORI_NAMESPACE_END
