@@ -87,6 +87,7 @@ add_executable(nori
   src/image_texture.cpp
   src/normal_map.cpp
   src/directionallight.cpp
+  src/environment.cpp
 )
 
 # The following lines build the warping test application
