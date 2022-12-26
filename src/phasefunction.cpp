@@ -8,13 +8,13 @@ class Isotropic : public PhaseFunction {
 public:
     Isotropic(const PropertyList &props) {}
 
-    float sample(const Vector3f &wo, Vector3f &wi, const Point2f &sample) const override {
-        wi = Warp::squareToUniformSphere(sample);
+    float sample(Vector3f &wo, const Point2f &sample) const override {
+        wo = Warp::squareToUniformSphere(sample);
         return INV_FOURPI;
     }
 
     std::string toString() const override {
-        return tfm::format("[ Isotropic ]");
+        return tfm::format("Isotropic");
     }
 };
 
@@ -25,7 +25,7 @@ public:
         m_g = props.getFloat("g", 0.0f);
     }
 
-    float sample(const Vector3f &wo, Vector3f &wi, const Point2f &sample) const override {
+    float sample(Vector3f &wo, const Point2f &sample) const override {
         float g_sqr = m_g * m_g;
 
         float cos_theta;
@@ -39,7 +39,7 @@ public:
         float sin_theta = sqrt(std::max(0.0f, 1.0f - cos_theta * cos_theta));
         float phi = 2.0f * M_PI * sample.y();
 
-        wi = Vector3f(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
+        wo = Vector3f(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
         return INV_FOURPI * (1.0f - g_sqr) / powf(1.0f + g_sqr - 2.0f * m_g * cos_theta, 1.5f);
     }
 

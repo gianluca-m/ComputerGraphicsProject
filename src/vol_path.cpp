@@ -47,18 +47,16 @@ public:
                     break;
                 }
                 t /= successProbability;
+                t *= albedo;
 
                 Vector3f wo;
-                auto pdfMat = medium->getPhasefunction()->sample(recursiveRay.d, wo, sampler->next2D());
+                auto pdfMat = medium->getPhasefunction()->sample(wo, sampler->next2D());
 
                 auto randomEmitter = scene->getRandomEmitter(sampler->next1D());
                 EmitterQueryRecord emitterRecord{mediumRecord.p};
                 // No need to set emitterRecord.uv here specifically, because it will be set in Emitter::sample()
                 Color3f LeDivPdf = randomEmitter->sample(emitterRecord, sampler->next2D()) * n;
-                
                 if (!scene->rayIntersect(emitterRecord.shadowRay)) {
-                    t *= albedo;
-
                     MediumQueryRecord shadowRayMediumRecord(emitterRecord.shadowRay.maxt);
                     Color3f Tr = medium->Tr(emitterRecord.shadowRay, sampler, shadowRayMediumRecord);
 

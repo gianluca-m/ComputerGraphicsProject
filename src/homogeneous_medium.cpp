@@ -74,10 +74,6 @@ public:
         return Color3f{1.f};
     }
 
-    float getDensity(const Point3f &p) const {
-        return m_bbox.contains(p) ? m_max_density : 0.0f;
-    }
-
     bool rayIntersect(const Ray3f &ray, float &nearT, float &farT) const override {
         return m_bbox.rayIntersect(ray, nearT, farT);
     }
@@ -105,6 +101,11 @@ public:
                 "  bbox = %s\n"
                 "]",
                 m_sigma_a.toString(), m_sigma_s.toString(), m_phasefunction->toString(), m_bbox.toString());
+    }
+
+private:
+    float getDensity(const Point3f &p) const {
+        return m_bbox.contains(p) ? m_max_density : 0.0f;
     }
 };
 

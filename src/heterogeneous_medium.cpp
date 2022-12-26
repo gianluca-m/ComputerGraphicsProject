@@ -14,6 +14,12 @@ public:
 
         // TODO (gimoro): find max_density if not constant
         m_max_density = props.getFloat("max_density", 1.0f);
+        m_inv_max_density = 1.0f / m_max_density;
+
+        // Exponential density
+        m_up_dir = props.getVector3("up_dir", Vector3f{0.0f, 0.0f, 1.0f}).normalized();
+        m_exp_a = std::min(1.0f, props.getFloat("exp_a", m_max_density));
+        m_exp_b = props.getFloat("exp_b", 2.0f);
 
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
         Vector3f center = props.getVector3("center", Vector3f{0.0f});
@@ -78,22 +84,6 @@ public:
         return Color3f{1.f};
     }
 
-    float getDensity(const Point3f &p) const {
-        if (!m_bbox.contains(p)) return 0.0f;
-        
-        switch (m_density_type) {
-            case 0:     // const
-                return m_max_density;
-            case 1:     // exp
-                throw NoriException("Not implemented");
-            case 2:     // volume grid
-                throw NoriException("Not implemented");
-            
-            default:
-                throw NoriException("HeterogeneousMedium: Undefined density type");
-        }
-    }
-
     bool rayIntersect(const Ray3f &ray, float &nearT, float &farT) const override {
         return m_bbox.rayIntersect(ray, nearT, farT);
     }
@@ -118,7 +108,7 @@ public:
                 "  sigma_a = %s,\n"
                 "  sigma_s = %s,\n"
                 "  density_type = %i,\n"
-                "  phasefunction = %s,\n"
+                "  phasefunction = [ %s ],\n"
                 "  bbox = %s\n"
                 "]",
                 m_sigma_a.toString(), m_sigma_s.toString(), m_density_type, 
@@ -127,7 +117,35 @@ public:
 
 private:
     float m_inv_max_density;
-    int m_density_type;     // const, exp, volume_grid
+    int m_density_type;     // const, exp, noise function, volume grid
+
+    // used for exponential density
+    Vector3f m_up_dir;      
+    float m_exp_a;
+    float m_exp_b;
+
+    float getDensity(const Point3f &p) const {
+        if (!m_bbox.contains(p)) return 0.0f;
+        
+        switch (m_density_type) {
+            case 0:     // const
+                return m_max_density;
+            case 1:     // exp
+                return exponentialDensity(p);                
+            case 2:     // noise function
+                throw NoriException("Not implemented");
+            case 3:     // volume grid
+                throw NoriException("Not implemented");
+            
+            default:
+                throw NoriException("HeterogeneousMedium: Undefined density type");
+        }
+    }
+
+    float exponentialDensity(const Point3f &p) const {
+        float h = (p - m_bbox.min).dot(m_up_dir);
+        return m_exp_a * exp(-m_exp_b * h);
+    }
 };
 
 NORI_REGISTER_CLASS(HeterogeneousMedium, "heterogeneous")
