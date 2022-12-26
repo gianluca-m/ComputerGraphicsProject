@@ -99,7 +99,7 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block)
 }
 
 void RenderThread::renderScene(const std::string & filename) {
-    // TODO (gimoro): Make this a CLI argument (?)
+    // TODO (gimoro): Make this a CLI argument or allow option in scene xml file
     bool computeVariance = false;
 
     filesystem::path path(filename);
@@ -206,8 +206,8 @@ void RenderThread::renderScene(const std::string & filename) {
                     auto rows = bitmap.rows();
                     auto columns = bitmap.cols();
                     Color3f currentPixel;
-                    for (int y = 0; y < rows; y++) {
-                        for (int x = 0; x < columns; x++) {
+                    for (int y = 0; y < rows; y++) {    
+                        for (int x = 0; x < columns; x++) {    
                             currentPixel = bitmap(y, x);
                             sumBitmap(y, x) += currentPixel;
                             sumSquaredBitmap(y, x) += pow(currentPixel, 2);
@@ -235,9 +235,7 @@ void RenderThread::renderScene(const std::string & filename) {
                 Bitmap varianceBitmap{camera->getOutputSize()};
                 auto rows = varianceBitmap.rows();
                 auto columns = varianceBitmap.cols();
-                float numSamplesSquared = powf(numSamples, 2);
                 float samplesFactor = numSamples * (numSamples - 1);
-                Color3f currentPixel;
                 for (int y = 0; y < rows; y++) {
                     for (int x = 0; x < columns; x++) {
                         // var[p] = (sample variance) * 1/n = ((ss/n - (s/n)^2) * (n/(n-1))) * 1/n = (ss - s^2/n) / ((n-1) * n)
