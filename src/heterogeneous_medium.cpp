@@ -18,7 +18,6 @@ public:
 
         // Exponential density
         m_up_dir = props.getVector3("up_dir", Vector3f{0.0f, 0.0f, 1.0f}).normalized();
-        m_exp_a = std::min(1.0f, props.getFloat("exp_a", m_max_density));
         m_exp_b = props.getFloat("exp_b", 2.0f);
 
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
@@ -120,8 +119,7 @@ private:
     int m_density_type;     // const, exp, noise function, volume grid
 
     // used for exponential density
-    Vector3f m_up_dir;      
-    float m_exp_a;
+    Vector3f m_up_dir;
     float m_exp_b;
 
     float getDensity(const Point3f &p) const {
@@ -144,7 +142,7 @@ private:
 
     float exponentialDensity(const Point3f &p) const {
         float h = (p - m_bbox.min).dot(m_up_dir);
-        return m_exp_a * exp(-m_exp_b * h);
+        return m_max_density * exp(-m_exp_b * h);
     }
 };
 

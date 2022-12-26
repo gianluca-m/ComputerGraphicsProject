@@ -39,6 +39,7 @@
       <li><a href="#normalMapping">Normal Mapping</a></li>
       <li><a href="#texturedAreaEmitters">Textured Area Emitters</a></li>
       <li><a href="#denoising">NL-means Denoising</a></li>
+      <li><a href="#participating-media">Heterogeneous Participating Media</a></li>
     </ul>
     <hr class="solid">
     <a href="#featuresEric">Features Eric Enzler</a>
@@ -362,6 +363,133 @@
                 class="img-responsive">
               <img src="images/features/denoise/cbox_path_mis-8192.png" alt="8192 spp render" class="img-responsive">
             </div>
+          </div>
+
+          <br>
+
+          <div id="participating-media">
+            <h2>5. Heterogeneous Participating Media [30 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>include/nori/medium.h, src/homogeneous_medium.cpp, src/heterogeneous_medium.cpp</code> <br>
+                <code>include/nori/phasefunction.h, src/phasefunction.cpp</code> <br>
+                <code>src/vol_path.cpp</code> <br>
+                <code>include/nori/scene.h</code>
+              </dd>
+
+              <dt>Theory</dt>
+              <dd>
+                <a
+                  href="https://moodle-app2.let.ethz.ch/pluginfile.php/1449689/mod_resource/content/2/14-participating-media-I.pdf">
+                  CG Lecture Slides 04.11.2022, Participating Media I</a> <br>
+                <a
+                  href="https://moodle-app2.let.ethz.ch/pluginfile.php/1452153/mod_resource/content/1/15-participating-media-II.pdf">
+                  CG Lecture Slides 08.11.2022, Participating Media II</a> <br>
+                <a
+                  href="https://www.pbr-book.org/3ed-2018/Light_Transport_II_Volume_Rendering/Sampling_Volume_Scattering">
+                  PBR Book, 15.2 Sampling Volume Scattering</a> <br>
+                <a
+                  href="https://www.csie.ntu.edu.tw/~cyy/courses/rendering/09fall/lectures/handouts/chap17_volume_4up.pdf">
+                  Volume and Participating Media, Digital Image Synthesis, Yung -Yu Chuang
+                </a>
+              </dd>
+            </dl>
+
+            <h3>Implementation</h3>
+            <p>
+              TODO (gimoro): Add
+              <!--
+                - Medium:
+                  - sample()
+                  - Tr()
+                  - for both (homogeneous and heterogeneous) delta tracking because other approach did produce wrong results
+                  
+                - Volumetric Path tracer
+                  - adapted path_mis
+                  - find closest medium that ray intersects
+                  - check for medium interaction
+
+                - Phase function
+                  - isotropic
+                  - henyey greenstein
+
+                - eval density
+                  - constant
+                  - exponential
+                  - noise function (?)
+                  - volume grid (?)
+              -->
+            </p>
+
+            <div>
+              <h3>Validation</h3>
+
+              <h4>Volumetric Path Tracer</h4>
+              <p>
+                To validate my Volumetric path tracer, I rendered identical scenes without any participating media
+                present, using the volumetric path tracer and the path_mis tracer implemented 
+                as part of the homeworks. <br>
+                As expected, the resulting images look identical.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox.png" alt="vol_path" class="img-responsive">
+                <img src="images/features/medium/cbox_path-mis.png" alt="path_mis" class="img-responsive">
+              </div>
+
+              <h4>Homogeneous</h4>
+              <p>
+                $\sigma_a = 2, \sigma_s = 0.5$ and isotropic phase function.<br>
+                The images look very similar. Note that the position of the medium cube is not 100% identical,
+                because I use a different approach to define the medium position 
+                and thus conversion caused some misalignment.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_homo.png" alt="mine" class="img-responsive">
+                <img src="images/features/medium/mitsuba-cbox_homo.png" alt="mitsuba3" class="img-responsive">
+              </div>
+
+              <br>
+              <p>
+                When scaling the medium cube to fill the full scene, my image is noisier than the mitsuba3 version.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_homo-full.png" alt="mine" class="img-responsive">
+                <img src="images/features/medium/mitsuba-cbox_homo-full.png" alt="mitsuba3" class="img-responsive">
+              </div>
+
+              <br>
+
+              <h4>Heterogeneous: Exponential Density</h4>
+              <p>
+                $\sigma_a = 2, \sigma_t = 1, b = 5$, with different $up\_dir$. <br>
+                No comparision with mitsuba3 renderer because it does not support Exponential density.
+                However, the resulting images look correct to me.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-exp-right.png" alt="up_dir=(1,0,0)" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-exp-up.png" alt="up_dir=(0,1,0)" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-exp-front.png" alt="up_dir=(0,0,1)" class="img-responsive">
+              </div>
+
+              <br>
+
+              <p>
+                In the following scene, the medium cube has been scaled up to fill the entire scene.
+                Together with exponential density, this creates a nice fog effect. <br>
+                $\sigma_a = 1, \sigma_s = 4, b = 5$
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox.png" alt="no medium" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-exp-full.png" alt="heterogenous, exp density" class="img-responsive">
+              </div>
+
+              <br>
+
+              <h4>Heterogeneous: Volume Grid</h4>
+              <p>No comparision with mitsuba3 because blablabla</p>
+            </div>
+
           </div>
         </div>
 
