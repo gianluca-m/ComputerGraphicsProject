@@ -13,7 +13,7 @@ public:
     Environment(const PropertyList &props) {
         m_mapPath = props.getString("filename");
         m_envBitMap = Bitmap(m_mapPath);
-        m_worldRadius = props.getFloat("radius");
+        buildIntensity();
     }  
 
     VectorXf computeCDF(VectorXf PDFVec){
@@ -30,15 +30,19 @@ public:
     } 
 
     void buildIntensity(){
+        
         auto nRow = m_envBitMap.rows();
         auto nCol = m_envBitMap.cols();
+
+        //Init the intensity matrix otherwise core dump
+        intensity = MatrixXf(nRow,nCol);
+
         for(int i = 0; i < nRow; i++){
             for(int j = 0; j < nCol; j++){
-                Color3f val = m_envBitMap(i,j).getLuminance();
-                float r = val.x();
-                float g = val.y();
-                float b = val.z();
-                intensity(i,j) = ((r+r+b+g+g+g) / 6.f) * (sin(i) / m_envBitMap.rows()); //MAL SCHAUEN
+                float val = m_envBitMap(i,j).getLuminance();
+
+                float sinTheta = sin(M_PI * i / (nRow));
+                intensity(i,j) = val * sinTheta; 
             }
         }
 
@@ -69,44 +73,89 @@ public:
 
     }
 
+    static int sampleDiscrete(const VectorXf &cdf,const float &sample) {
+        int n = cdf.size();
+        int a = 0;
+        int b = n - 1;
+        int index = -1;
+        while (a <= b) {
+            int m = (a + b + 1) / 2;
+            if (cdf(m) <= sample) {
+                index = m;
+                a = m + 1;
+            }
+            else {
+                b = m - 1;
+            }
+        }
+        return index;
+    }
+
     virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const {
-       return 0;
-       //From PBRT BOOK --> NEED SampleContinuous Code
+  
+        int row = m_envBitMap.rows();
+        int col = m_envBitMap.cols();
+        auto i = sampleDiscrete(rowCDF, sample.x());
+        auto j = sampleDiscrete(condCDF.row(i).transpose(), sample.y());
+        //From PBRT BOOK --> NEED SampleContinuous Code
+
+        auto theta = M_PI * i / (row - 1);
+        auto phi = 2 * M_PI * j / (col - 1);
+
+        lRec.wi = sphericalDirection(theta, phi);
+        Ray3f ray(lRec.ref, lRec.wi, Epsilon, std::numeric_limits<double>::infinity());
+
+                
+        auto pdfValue = pdf(lRec);
+        if (pdfValue == 0) {
+            return 0;
+        }
+
+        auto J = (col - 1) * (row - 1) / (2 * M_PI * M_PI * Frame::sinTheta(lRec.wi));
+        return eval(lRec) / (J * pdfValue);       
+        
     }
 
     virtual Color3f eval(const EmitterQueryRecord &lRec) const {
-        auto normal = lRec.wi;
-
+        auto normal = sphericalCoordinates(lRec.wi);
+        auto nRow = m_envBitMap.rows()-1;
+        auto nCol = m_envBitMap.cols()-1;
         //From Sphere.cpp 
-        auto u = 0.5f + std::atan2(normal.y(), normal.x()) / (2.0f * M_PI);
-        auto v = 0.5f + std::asin(normal.z()) / M_PI;
-        
+        auto x = normal.x() * nRow * INV_PI;
+        auto y = normal.y() * 0.5f * nCol * INV_PI;
 
-        return intensity(u,v);
+        int u = int(round(x));
+        int v = int(round(y));
+
+        
+        //return Color3f(intensity(u,v));
+        return m_envBitMap(u,v);
     }
 
     virtual float pdf(const EmitterQueryRecord &lRec) const {
-       auto normal = lRec.wi;
-
+        auto normal = sphericalCoordinates(lRec.wi);
+        auto nRow = m_envBitMap.rows();
+        auto nCol = m_envBitMap.cols();
         //From Sphere.cpp 
-        auto u = 0.5f + std::atan2(normal.y(), normal.x()) / (2.0f * M_PI);
-        auto v = 0.5f + std::asin(normal.z()) / M_PI;
+        auto x = normal.x() * nRow * INV_PI;
+        auto y = normal.y() * 0.5f * nCol * INV_PI;
 
-        u = int(round(u));
-        v = int(round(v));
+        int u = int(round(x));
+        int v = int(round(y));
 
-        return condPDF(u,v) * rowPDF(u);
+
+        return condPDF(u,v) * rowPDF(u);  
+        
     }
 
     std::string toString() const {
-        return "";
+        return tfm::format("Environment[]");
     }
 
 private:
     MatrixXf intensity;
     string m_mapPath;
     Bitmap m_envBitMap;
-    float m_worldRadius;
 
     VectorXf rowPDF;
     VectorXf rowCDF;
