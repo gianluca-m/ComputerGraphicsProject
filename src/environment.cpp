@@ -93,49 +93,60 @@ public:
 
     virtual Color3f sample(EmitterQueryRecord &lRec, const Point2f &sample) const {
   
-        int row = m_envBitMap.rows();
-        int col = m_envBitMap.cols();
+        auto nRow = m_envBitMap.rows()-1;
+        auto nCol = m_envBitMap.cols()-1;
+
+        //From PBRT BOOK --> use SampleDiscrete instead of SampleContinuous
+
         auto i = sampleDiscrete(rowCDF, sample.x());
         auto j = sampleDiscrete(condCDF.row(i).transpose(), sample.y());
-        //From PBRT BOOK --> NEED SampleContinuous Code
+        
 
-        auto theta = M_PI * i / (row - 1);
-        auto phi = 2 * M_PI * j / (col - 1);
+        auto theta = M_PI * i / nRow;
+        auto phi = 2 * M_PI * j / nCol;
 
         lRec.wi = sphericalDirection(theta, phi);
-        Ray3f ray(lRec.ref, lRec.wi, Epsilon, std::numeric_limits<double>::infinity());
-
-                
         auto pdfValue = pdf(lRec);
-        if (pdfValue == 0) {
-            return 0;
-        }
 
-        auto J = (col - 1) * (row - 1) / (2 * M_PI * M_PI * Frame::sinTheta(lRec.wi));
-        return eval(lRec) / (J * pdfValue);       
+        //Avoid division by zero
+        if (pdfValue == 0)return 0;
+
+        auto Jacobian = nCol *nRow / (2 * M_PI * M_PI * Frame::sinTheta(lRec.wi));
+        return eval(lRec) / (Jacobian * pdfValue);       
         
     }
 
     virtual Color3f eval(const EmitterQueryRecord &lRec) const {
         auto normal = sphericalCoordinates(lRec.wi);
+
+        //Use row-1 to avoid IndexOutOfBounds
         auto nRow = m_envBitMap.rows()-1;
         auto nCol = m_envBitMap.cols()-1;
-        //From Sphere.cpp 
+        
+        //Not the same conversion as in sphere.cpp
         auto x = normal.x() * nRow * INV_PI;
         auto y = normal.y() * 0.5f * nCol * INV_PI;
 
         int u = int(round(x));
         int v = int(round(y));
 
-        
-        //return Color3f(intensity(u,v));
+        //Edge case avoiding. Use clamp function
+        /*
+        auto u1 = clamp(u+1,0,nRow);
+        auto u2 = clamp(u-1,0,nRow);
+        auto v1 = clamp(v+1,0,nCol);
+        auto v2 = clamp(v-1,0,nCol);
+        */
+        //take average over neighbors = BLUR
+        //auto avgSurrounding = (m_envBitMap(u1,v) +  m_envBitMap(u2,v) +  m_envBitMap(u,v1) +  m_envBitMap(u,v2)) / 4.f;
         return m_envBitMap(u,v);
     }
 
     virtual float pdf(const EmitterQueryRecord &lRec) const {
         auto normal = sphericalCoordinates(lRec.wi);
-        auto nRow = m_envBitMap.rows();
-        auto nCol = m_envBitMap.cols();
+        auto nRow = m_envBitMap.rows()-1;
+        auto nCol = m_envBitMap.cols()-1;
+
         //From Sphere.cpp 
         auto x = normal.x() * nRow * INV_PI;
         auto y = normal.y() * 0.5f * nCol * INV_PI;
@@ -149,7 +160,12 @@ public:
     }
 
     std::string toString() const {
-        return tfm::format("Environment[]");
+        return tfm::format(
+                "Environment[\n"
+                "  filename = %s,\n"
+                "]",
+                m_mapPath
+            );
     }
 
 private:

@@ -339,6 +339,64 @@
               class="img-responsive">
           </div>
         </div>
+
+        <br> 
+
+        <div id="environment">
+          <h2>2. Environment Map [15 points]</h2>
+          <dl>
+            <dt>Modified Files</dt>
+            <dd>
+              <code>src/environment.cpp</code> <br>
+            </dd>
+          <dt>Theory</dt>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#">PBR Book, 14.2 Sampling Light Sources</a> <br>
+              </dd>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights">PBR Book, 12.6 Infinite Area Lights</a> <br>
+              </dd>
+            </dl>
+
+          <h3>Implementation</h3>
+          <p> For the implementation, I followed the approach of the book. 
+            First, as the Environment Map is just an infinite arealight, I cloned the file and began to modify it.
+            In the constructor, I build the Environment Map using the <code> Bitmap("filename")</code> method. With this bitmap,
+            I directly build a matrix of intensities and use this matrix to calculate the row-PDF, row-CDF as well as the 2D conditional PDF and CDF.
+          </p>
+          <p> For the <code>sample()</code> method, I first applied discrete sampling (unlike continuous sampling which is used in the book)
+            to find the {i,j}-coordinates. Then I mapped these coordinates to theta and phi to be able to call <code> sphericalDirection(theta,phi)</code> and set <code>lRec.wi</code> of the EmitterQueryRecord.
+            With this information I was able to calculate the Jacobian matrix and the final return value.
+          </p>
+          <p> For the <code>eval()</code> and <code> pdf()</code> methods, I calculate the u and v coordinates
+            given the EmitterQueryRecord using the approach from the <code>sphere.cpp</code> file. Given the coordinates, we can access values of the bitmap and the conditional PDF/CDF matrices.
+          </p>
+
+          <h3>Validation</h3>
+          <p>To validate the implementation, we created identical scenes and redered them in nori and <a
+              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain a dielectric
+              sphere and an environment map. The images look very similar but the most noticable difference
+              is the blur in my own implementation. There are also some small differences in spots that are very intense in
+              terms of light.
+          </p>
+          <div class="twentytwenty-container">
+            <img src="images/features/environment/sand_mine.png" alt="Mine"
+              class="img-responsive">
+              <img src="images/features/environment/sand_direct_mine.png" alt="Mine, unaveraged"
+              class="img-responsive">
+            <img src="images/features/environment/sand_ref.png" alt="Mitsuba"
+              class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/environment/christmas_mine.png" alt="Mine"
+              class="img-responsive">
+              <img src="images/features/environment/christmas_direct_mine.png" alt="Mine, unaveraged"
+              class="img-responsive">
+            <img src="images/features/environment/christmas_ref.png" alt="Mitsuba" class="img-responsive">
+          </div>
+        </div>
+
         </div>
 
         <br> <br>
