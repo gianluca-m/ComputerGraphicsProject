@@ -38,6 +38,7 @@
       <li><a href="#imageTextures">Image Textures</a></li>
       <li><a href="#normalMapping">Normal Mapping</a></li>
       <li><a href="#texturedAreaEmitters">Textured Area Emitters</a></li>
+      <li><a href="#denoising">NL-means Denoising</a></li>
     </ul>
     <hr class="solid">
     <a href="#featuresEric">Features Eric Enzler</a>
@@ -58,6 +59,11 @@
 
     <div class="container contentWrapper">
       <div class="pageContent">
+
+        <em>
+          Note: As discussed with the TAs, since Eric had to do obligatory military service during the project,
+          we were able to submit later until 17. January 2023.
+        </em>
 
         <!--TODO: fix headers-->
 
@@ -207,7 +213,8 @@
             <p>
               To validate the implementation, we created identical scenes and rendered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
-              sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object. <br>
+              sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object.
+              <br>
               The images are almost identical, only the brightness is again slightly different because nori and mitsuba
               use somewhat different values for the same light intensity. <br>
               The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
@@ -241,7 +248,7 @@
           <div id="texturedAreaEmitters">
             <h2>3. Textured Area Emitters [5 points]</h2>
 
-            <i>Note: As discussed with the TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
+            <i>Note: As discussed with TA, Xianyao Zhang, I am doing "Textured Area Emitters" instead of
               "Mip-Mapping" to stay in the 60 points limit.</i> <br> <br>
 
             <dl>
@@ -263,7 +270,7 @@
               To be able to lookup the texture, I added a <code>Point2f uv</code> property to the
               <code>EmitterQueryRecord</code> and to the <code>ShapeQueryRecord</code>. The <code>uv</code> property of
               the <code>EmitterQueryRecord</code> is updated in the <code>Integrator::Li</code> methods of the different
-              integrators. This uv value is updated when we ray intersection point is an emitter. <br>
+              integrators. This uv value is updated when the ray intersection point is an emitter. <br>
               The <code>uv</code> property of the <code>ShapeQueryRecord</code> is updated in the
               <code>Shape::sampleSurface</code> method in <code>mesh.cpp</code> and <code>sphere.cpp</code>.
               This uv value is updated when we sample a point on the emitter surface.
@@ -290,6 +297,73 @@
               <img src="images/features/textured-emitters/textured-emitter-mesh.png" alt="Mine" class="img-responsive">
             </div>
           </div>
+
+          <br>
+
+          <div id="denoising">
+            <h2>4. NL-means Denoising using Pixel Variance Estimates [15 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/render.cpp</code> <br>
+                <code>src/denoise/denoise.py</code>
+              </dd>
+
+              <dt>External Libraries</dt>
+              <dd>
+                <a href="https://github.com/opencv/opencv-python">opencv-python</a> <br>
+                <a href="https://numpy.org/">numpy</a>
+              </dd>
+
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">
+                  CG Lecture Slides 25.11.2022, Image-Based Denoising & Denoising with Deep Learning
+                </a>
+              </dd>
+            </dl>
+
+            <h3>Implementation</h3>
+            <p>
+              To perform NL means denoising, we need the pixel variance. To estimate the non-uniform pixel variance,
+              I used the following formula:
+              $$
+              \begin{align}
+              var[p] &= (\text{sample variance}) \cdot \frac{1}{n} \\
+              &= \left( \left( \frac{\sum_{i=1}^n x_i^2}{n} - \left( \frac{\sum_{i=1}^n x_i}{n} \right)^2 \right)
+              \cdot \frac{n}{n-1} \right) \cdot \frac{1}{n}
+              \end{align}
+              $$
+              To estimate the variance, I updated the <code>RenderThread::renderScene</code> in <code>render.cpp</code>.
+              Now when rendering a scene, it will also output a <code>image_variance.exr</code> file, containing the
+              estimated variances. <br>
+              I implemented the fast NL-means denoising algorithm given in the
+              <a href="https://moodle-app2.let.ethz.ch/mod/resource/view.php?id=833825">lecture slides</a> in python,
+              using opencv and numpy. The algorithm is well explained in the lecture slides. For the $d^2$ function,
+              I used the non-uniform variance variant. <br>
+              OpenCV is used to read and write the image files, and to apply the boxfilter convolution.
+              Numpy is used to perform efficient array operations.
+            </p>
+
+            <h3>Validation</h3>
+            <p>
+              To validate the denoising, I rendered the cbox scene using the <code>path_mis</code> integrator,
+              with 256 samples per pixel, which produced quite a noisy image. I also rendered the same scene
+              with 8192 samples per pixel as a baseline to compare the denoised image to. <br>
+              Rendering and denoising the 256 spp image (with $r=10, f=3, k=0.45$) took in total about 2.2 minutes
+              (1.9 minutes for rendering and 0.3 minutes for denosing), while the 8192 spp took about 51 minutes to
+              render. So, we have a speedup of around 23. <br>
+              The denoised image looks very similar to the high spp version. However, there are some faint patterns
+              visible, especially on the walls. With some parameter tweaking, those could probably be reduced even more,
+              but this would also increase the denoising time.
+            </p>
+            <div class="twentytwenty-container" style="width: 70%;">
+              <img src="images/features/denoise/cbox_path_mis-256.png" alt="256 spp render" class="img-responsive">
+              <img src="images/features/denoise/cbox_path_mis-256_denoised.png" alt="256 spp denoised"
+                class="img-responsive">
+              <img src="images/features/denoise/cbox_path_mis-8192.png" alt="8192 spp render" class="img-responsive">
+            </div>
+          </div>
         </div>
 
         <br> <br>
@@ -307,37 +381,38 @@
 
               <dt>Theory</dt>
               <dd>
-                <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Distant_Lights">PBR Book, 12.4 Distant Lights</a> <br>
+                <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Distant_Lights">PBR Book, 12.4 Distant
+                  Lights</a> <br>
               </dd>
             </dl>
 
             <h3>Implementation</h3>
-            <p>For this special light source, I used the implementation of the book. Unfortunately, I could not make use of the bounding box of the scene.
-              In the implementation, I am currently using a hardcoded value for the radius. This overestimates the power of the light a bit but still gives good results.
+            <p>For this special light source, I used the implementation of the book. Unfortunately, I could not make use
+              of the bounding box of the scene.
+              In the implementation, I am currently using a hardcoded value for the radius. This overestimates the power
+              of the light a bit but still gives good results.
             </p>
 
             <h3>Validation</h3>
             <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
-                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain two meshes and a ground plane. The direction of the light source and the color
-                  of the light are the same. The two images show no differences with this direction of the light. In other cases, our implementation resultet in a slightly brighter picture because
-                  of the overestimation described above.
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain two meshes
+              and a ground plane. The direction of the light source and the color
+              of the light are the same. The two images show no differences with this direction of the light. In other
+              cases, our implementation resultet in a slightly brighter picture because
+              of the overestimation described above.
             </p>
             <div class="twentytwenty-container">
-              <img src="images/features/directionallight/directional1_mine.png" alt="Mine"
-                class="img-responsive">
-              <img src="images/features/directionallight/directional1_ref.png" alt="Mitsuba"
-                class="img-responsive">
+              <img src="images/features/directionallight/directional1_mine.png" alt="Mine" class="img-responsive">
+              <img src="images/features/directionallight/directional1_ref.png" alt="Mitsuba" class="img-responsive">
             </div>
             <br>
             <p> In the scene below, our implementation results in a brighter image than the one from mitsuba.
-          </p>
-          <div class="twentytwenty-container">
-            <img src="images/features/directionallight/directional2_mine.png" alt="Mine"
-              class="img-responsive">
-              <img src="images/features/directionallight/directional2_ref.png" alt="Mitsuba"
-              class="img-responsive">
-              <img src="images/features/directionallight/directional_colored.png" alt="Colored"
-              class="img-responsive">
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/directionallight/directional2_mine.png" alt="Mine" class="img-responsive">
+              <img src="images/features/directionallight/directional2_ref.png" alt="Mitsuba" class="img-responsive">
+              <img src="images/features/directionallight/directional_colored.png" alt="Colored" class="img-responsive">
+            </div>
           </div>
         </div>
 
@@ -353,9 +428,9 @@
           <dt>Theory</dt>
               <dd>
                 <a href="https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#">PBR Book, 14.2 Sampling Light Sources</a> <br>
-              </dd>
-              <dd>
                 <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights">PBR Book, 12.6 Infinite Area Lights</a> <br>
+                <a href="https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/">Interpolation blog</a> <br>
+                <a href="https://forum.unity.com/threads/bi-lerp.175105/">Lerp for interpolation</a>
               </dd>
             </dl>
 
@@ -366,15 +441,14 @@
             I directly build a matrix of intensities and use this matrix to calculate the row-PDF, row-CDF as well as the 2D conditional PDF and CDF.
           </p>
           <p> For the <code>sample()</code> method, I first applied discrete sampling (unlike continuous sampling which is used in the book)
-            to find the {i,j}-coordinates. Then I mapped these coordinates to theta and phi to be able to call <code> sphericalDirection(theta,phi)</code> and set <code>lRec.wi</code> of the EmitterQueryRecord.
+            to find the {i,j}-coordinates. Then I mapped these coordinates to $\theta$ and $\phi$ to be able to call <code> sphericalDirection(theta,phi)</code> and set <code>lRec.wi</code> of the EmitterQueryRecord.
             With this information I was able to calculate the Jacobian matrix and the final return value.
           </p>
           <p> For the <code>eval()</code> and <code> pdf()</code> methods, I calculate the u and v coordinates
             given the EmitterQueryRecord using the approach from the <code>sphere.cpp</code> file. Given the coordinates, we can access values of the bitmap and the conditional PDF/CDF matrices.
             In the <code> eval() </code> method, I first tried to average the neighboring pixels by myself. Unfortunately, with this approach
             I created a blur filter and the resulting images were not pretty to look at. After doing some more research, I decided to use
-            bilinear interpolation. With the help of this <a
-            href="https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/">blog</a>, I managed to implement the necessary formula with some
+            bilinear interpolation. With the help of two blog posts mentioned above</a>, I managed to implement the necessary formula with some
             minor adjustments for out-of-bounds errors. The resulting image was now less blurry. In an effort to create an unblurred alternative,
             I set a new boolean property which lets the user decide whether he wants to use interpolation or not to find the {u,v}-values.
             If the flag is not set, I will simply do the following: 

@@ -152,22 +152,13 @@ public:
         auto q21 = m_envBitMap(x2,y1);
         auto q22 = m_envBitMap(x2,y2);
 
-        auto x2x1 = x2 - x1;
-        auto y2y1 = y2 - y1;
-        auto x2x = x2 - x;
-        auto y2y = y2 - y;
-        auto yy1 = y - y1;
-        auto xx1 = x - x1;
+        auto xDiff = x-x1;
+        auto yDiff = y-y1;
 
         //Edge Scenario where clamp returns the same value
-        if(x2x1 == 0 || y2y1 == 0)return 0;
+        if(x1 == x2 || y2 == y1)return 0;
 
-        return 1.0f / (x2x1 * y2y1) * (
-                    q11 * x2x * y2y +
-                    q21 * xx1 * y2y +
-                    q12 * x2x * yy1 +
-                    q22 * xx1 * yy1
-        );
+        return lerp(yDiff,lerp(xDiff,q11,q21),lerp(xDiff,q12,q22));
     }
 
     virtual float pdf(const EmitterQueryRecord &lRec) const {
