@@ -21,8 +21,8 @@
 		<integer name="height" value="720"/>
 
 		<boolean name="distortion" value="true"/>
-		<float name="K1" value = "20.0"/>
-		<float name="K2" value = "20.0"/>
+		<float name="K1" value = "5"/>
+		<float name="K2" value = "5"/>
 
 	</camera>
 

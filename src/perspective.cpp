@@ -163,7 +163,7 @@ public:
     float distortionFunction(float xU) const{
         //The further away from the focus point, the larger is xU
         if(xU == 0)return 1.f;
-        auto fin = xU / (xU  / (1.0f + K1 * powf(xU,2) + K2*powf(xU,4)));
+        auto fin = (1.0f + K1 * powf(xU,2) + K2*powf(xU,4));
 
         return fin;
         
