@@ -44,6 +44,7 @@
     <a href="#featuresEric">Features Eric Enzler</a>
     <ul>
       <li><a href="#directional">Directional Light</a></li>
+      <li><a href="#environment">Environment Map</a></li>
     </ul>
     <hr class="solid">
     <a href="#finalImage">Final Image</a>
@@ -415,15 +416,105 @@
           </div>
         </div>
 
-        <br> <br>
+        <br>
 
-        <div id="finalImage">
-          <h1>Final Image</h1>
-          <i>TODO: Add</i>
+        <div id="environment">
+          <h2>2. Environment Map [15 points]</h2>
+          <dl>
+            <dt>Modified Files</dt>
+            <dd>
+              <code>src/environment.cpp</code> <br>
+              <code>nori/common.h</code> <br>
+            </dd>
+            <dt>Theory</dt>
+            <dd>
+              <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights">
+                PBR Book, 12.6 Infinite Area Lights</a> <br>
+              <a href="https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#">
+                PBR Book, 14.2 Sampling Light Sources</a> <br>
+              <a href="https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/">Interpolation blog</a>
+              <br>
+              <a href="https://forum.unity.com/threads/bi-lerp.175105/">Lerp for interpolation</a>
+            </dd>
+          </dl>
+
+          <h3>Implementation</h3>
+          <p> For the implementation, I followed the approach of the book.
+            First, as the Environment Map is just an infinite arealight, I cloned the file and began to modify it.
+            In the constructor, I build the Environment Map using the <code> Bitmap("filename")</code> method. With this
+            bitmap,
+            I directly build a matrix of intensities and use this matrix to calculate the row-PDF, row-CDF as well as
+            the 2D conditional PDF and CDF.
+          </p>
+          <p> For the <code>sample()</code> method, I first applied discrete sampling (unlike continuous sampling which
+            is used in the book) to find the {i,j}-coordinates. 
+            Then I mapped these coordinates to $\theta$ and $\phi$ to be able to call
+            <code> sphericalDirection(theta,phi)</code> and set <code>lRec.wi</code> of the EmitterQueryRecord.
+            With this information I was able to calculate the Jacobian matrix and the final return value.
+          </p>
+          <p> For the <code>eval()</code> and <code> pdf()</code> methods, I calculate the u and v coordinates
+            given the EmitterQueryRecord using the approach from the <code>sphere.cpp</code> file. Given the
+            coordinates, we can access values of the bitmap and the conditional PDF/CDF matrices.
+            In the <code> eval() </code> method, I first tried to average the neighboring pixels by myself.
+            Unfortunately, with this approach
+            I created a blur filter and the resulting images were not pretty to look at. After doing some more research,
+            I decided to use bilinear interpolation. 
+            With the help of two blog posts mentioned above in the Theory listing</a>, I managed to implement the necessary formula with some
+            minor adjustments for out-of-bounds errors. The resulting image was now less blurry than before, but I was not satisfied. In an effort to create
+            an unblurred alternative, I set a new boolean property which lets the user decide 
+            whether he wants to use interpolation or not to find the {u,v}-values.
+            If the flag is not set, I will simply do the following:
+          <pre><code> 
+              if(!m_interpolate){
+                int u = int(round(x));
+                int v = int(round(y));
+                return m_envBitMap(u,v);
+              }</code>
+          </pre>
+          The direct approach is faster in terms of rendering and results in images that are less blurred compared to
+          interpolation.
+          As this might come in handy for the final image, I was eager to leave this option in the final code.
+          </p>
+
+          <h3>Validation</h3>
+          <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain a dielectric
+            sphere in the middle and an environment map. The images look very similar but the most noticable difference
+            is the blur in my own implementation. There are also some small differences in spots that are very intense
+            in terms of light.
+          </p>
+          <p>
+            The first images uses an Environment map with a 2K-Resolution. The rendering is relatively fast: It takes
+            about 20 seconds.
+            The second image uses an Environment map with a 4K-Resolution. The rendering is slow: It takes about 2
+            minutes to complete.
+          </p>
+          <div class="twentytwenty-container">
+            <img src="images/features/environment/sand_mine.png" alt="Mine" class="img-responsive">
+            <img src="images/features/environment/sand_direct_mine.png" alt="Mine, No Interpolation"
+              class="img-responsive">
+            <img src="images/features/environment/sand_ref.png" alt="Mitsuba" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/environment/christmas_mine.png" alt="Mine" class="img-responsive">
+            <img src="images/features/environment/christmas_direct_mine.png" alt="Mine, No Interpolation"
+              class="img-responsive">
+            <img src="images/features/environment/christmas_ref.png" alt="Mitsuba" class="img-responsive">
+          </div>
         </div>
 
       </div>
+
+      <br> <br>
+
+      <div id="finalImage">
+        <h1>Final Image</h1>
+        <i>TODO: Add</i>
+      </div>
+
     </div>
+  </div>
   </div>
 
   <!-- Bootstrap core JavaScript -->
