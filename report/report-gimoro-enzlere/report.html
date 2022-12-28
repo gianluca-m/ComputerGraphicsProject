@@ -393,6 +393,9 @@
                   href="https://www.csie.ntu.edu.tw/~cyy/courses/rendering/09fall/lectures/handouts/chap17_volume_4up.pdf">
                   Volume and Participating Media, Digital Image Synthesis, Yung -Yu Chuang
                 </a>
+                <a href="https://github.com/daniilsjb/perlin-noise">
+                  github.com/daniilsjb/perlin-noise (3D Perlin Noise)
+                </a>
               </dd>
             </dl>
 
@@ -419,6 +422,15 @@
                   - exponential
                   - noise function (?)
                   - volume grid (?)
+              -->
+
+              <!--
+                Explain the different xml options for the medium and which combinations are allowed
+                  - center, size, radius
+                  - density_type
+                  - sigma_s, sigma_a
+                  - exp_b
+                  - max_density, density_scale
               -->
             </p>
 
@@ -497,6 +509,16 @@
                 <img src="images/features/medium/cbox_hetero-grid-scale.png" alt="density_scale=0.5" class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-red.png" alt="red" class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-blue.png" alt="blue" class="img-responsive">
+              </div>
+
+              <br>
+              
+              <p>
+                The following image shows a heterogeneous medium, consisting of a sphere whose density values
+                are sampled from a 3D perlin noise function. 
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-noise.png" alt="perlin noise sphere cloud" class="img-responsive">
               </div>
             </div>
 

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #define NANOVDB_USE_ZIP 1
 #include <nanovdb/util/IO.h>
+#include <nori/perlinnoise.h>
 
 #define KEY(x, y, z) (x + y * 10000 + z * 10000000)
 
@@ -23,7 +24,6 @@ public:
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
         Vector3f center = props.getVector3("center", Vector3f{0.0f});
         m_bbox = BoundingBox3f(center - size, center + size);
-        m_bbox_size = m_bbox.max - m_bbox.min;
 
 
         if (m_density_type == 1) {  // Exponential density
@@ -81,10 +81,19 @@ public:
                 }
             }
         } 
+        else if (m_density_type == 3) {     // perlin noise sphere
+            m_center = Point3f{center};
+            m_radius = props.getFloat("radius", 1.0f);
+            m_frequency = props.getFloat("frequency", 3.5f);
+            m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
+        }
         
+        m_max_density *= m_density_scale;
+
         if (m_max_density == 0.0f) throw NoriException("HeterogeneousMedium: max_density cannot be 0");
 
         m_inv_max_density = 1.0f / m_max_density;
+        m_bbox_size = m_bbox.max - m_bbox.min;
     }
 
     Color3f Tr(const Ray3f &ray, Sampler *sampler, MediumQueryRecord &mRec) const override {
@@ -183,6 +192,7 @@ public:
                 m_phasefunction->toString(), m_bbox.toString());
     }
 
+
 private:
     float m_inv_max_density;
     int m_density_type;     // const, exp, volume grid
@@ -197,6 +207,11 @@ private:
     Vector3f m_density_grid_bbox_size;
     Point3f m_bbox_size;
 
+    // used for perlin noise sphere
+    Point3f m_center;
+    float m_radius;
+    float m_frequency;
+
 
     float getDensity(const Point3f &p) const {
         if (!m_bbox.contains(p)) return 0.0f;
@@ -208,6 +223,8 @@ private:
                 return getExponentialDensity(p) * m_density_scale;
             case 2:     // volume grid
                 return getGridDensity(p) * m_density_scale;
+            case 3:     // perlin noise sphere
+                return getPerlinNoiseDensity(p) * m_density_scale;
             
             default:
                 throw NoriException("HeterogeneousMedium: Undefined density type");
@@ -228,6 +245,19 @@ private:
 
         auto element = m_density_grid_map.find(KEY(x, y, z));
         return element != m_density_grid_map.end() ? element->second : 0.0f;
+    }
+
+    float getPerlinNoiseDensity(const Point3f &p) const {
+        auto dist = (p - m_center).norm();
+
+        if (dist > m_radius) return 0.0f;       // outside of sphere
+
+        if (dist == 0.0f) dist = Epsilon;
+
+        Point3f relative_position = (p - m_bbox.min).cwiseQuotient(m_bbox_size);
+        relative_position *= m_frequency * (m_radius / dist);
+
+        return PerlinNoise::get3DPerlinNoise(relative_position);
     }
 };
 

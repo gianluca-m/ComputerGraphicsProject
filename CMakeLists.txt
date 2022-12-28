@@ -45,6 +45,7 @@ add_executable(nori
   include/nori/warp.h
   include/nori/medium.h
   include/nori/phasefunction.h
+  include/nori/perlinnoise.h
 
   # Source code files
   src/bitmap.cpp
