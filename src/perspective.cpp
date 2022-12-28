@@ -161,9 +161,9 @@ public:
 
     //https://en.wikipedia.org/wiki/Distortion_(optics)
     float distortionFunction(float xU) const{
-        auto r = sqrt(powf(xU,2));
-        
-        auto fin = xU / (xU  / (1.0f + K1 * pow(r,2) + K2*pow(r,4)));
+        //The further away from the focus point, the larger is xU
+        if(xU == 0)return 1.f;
+        auto fin = xU / (xU  / (1.0f + K1 * powf(xU,2) + K2*powf(xU,4)));
 
         return fin;
         
