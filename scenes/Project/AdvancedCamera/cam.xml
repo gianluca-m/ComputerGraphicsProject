@@ -1,0 +1,120 @@
+<scene>
+	<!-- Independent sample generator, user-selected samples per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="32"/>
+	</sampler>
+
+	<!-- Use a direct illumination integrator -->
+	<integrator type="direct" />
+
+	<!-- Render the scene as viewed by a perspective camera -->
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="0,0,0" origin="0,25,0" up="0,0,1"/>
+		</transform>
+
+		<!-- Field of view: 90 degrees -->
+		<float name="fov" value="90"/>
+
+		<!-- 512 x 512 pixels -->
+		<integer name="width" value="720"/>
+		<integer name="height" value="120"/>
+
+		
+		<float name="focalLength" value="12"/>
+		<float name="lensRadius" value="0.5"/>
+		<boolean name="bokeh" value="true"/>
+	
+		<boolean name="distortion" value="false"/>
+		<float name="K1" value = "-1"/>
+		<float name="K2" value = "-1"/>
+
+	</camera>
+
+	<mesh type="sphere">
+        <point name="center" value="-20,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="-15,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="-10,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="-5,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="0,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="5,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="10,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="15,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<mesh type="sphere">
+        <point name="center" value="20,0,0"/>
+        <float name="radius" value="1"/>
+        <bsdf type="diffuse">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+
+	<emitter type="directional">
+		<vector name="direction" value="0,-1.0,0"/>
+		<color name="power" value="1.0,0.1,0.1"/>
+	</emitter>
+
+</scene>

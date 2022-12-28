@@ -21,6 +21,7 @@
 #include <nori/warp.h>
 #include <Eigen/Geometry>
 
+using namespace std;
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -52,6 +53,8 @@ public:
 
         m_motionblur = propList.getString("motionblur", "");
 
+        m_bokeh = propList.getBoolean("bokeh",false);
+
         m_distortion = propList.getBoolean("distortion", false);
         K1 = propList.getFloat("K1", 0.0f);
         K2 = propList.getFloat("K2", 0.0f);
@@ -60,7 +63,6 @@ public:
             m_finalMotion = propList.getTransform("motion", Transform());
         }
 
-            
         m_rfilter = NULL;
     }
 
@@ -129,8 +131,12 @@ public:
 
         /* Depth of Field PBRT 6.2.3*/
         if(m_lensRadius > 0 ) {
-            //Point2f pLens = m_lensRadius * bokehShift(apertureSample, weight)
-            Point2f pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
+            Point2f pLens;
+            if(m_bokeh){
+                pLens = m_lensRadius * bokehShift(apertureSample);
+            } else {
+                pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
+            }
             float ft = m_focalLength / d.z();
             Point3f pFocus = ft * d;
 
@@ -160,26 +166,29 @@ public:
         return Color3f(1.0f);
     }
 
-/*
-    Point2f bokehShift(Point2f sample, float weight){
-        Point2f uOffset = 2.f * sample - Vector2f(1, 1);
-        // Handle degeneracy at the origin
-        if (uOffset.x() == 0 && uOffset.y() == 0) return Point2f(0, 0);
 
-        // Apply concentric mapping to point
+    Point2f bokehShift(Point2f sample) const {
+        //Take an offset step for the sampling method instead of the direct coordinates
+        Point2f offset = 2.f * sample - Vector2f(1, 1);
+      
+        auto x = offset.x();
+        auto y = offset.y();
+        if (x == 0 && y == 0) return Point2f(0, 0);
+
+        // Concentric Disk mapping 
+        // http://l2program.co.uk/900/concentric-disk-sampling
         float theta, r;
-        if (std::abs(uOffset.x()) > std::abs(uOffset.y())) {
-            r = uOffset.x();
-            theta = INV_FOURPI * (uOffset.y() / uOffset.x());
+        if (abs(x) > abs(y)) {
+            r = x;
+            theta = INV_FOURPI * (y / x);
         } else {
-            r = uOffset.y();
-            theta = INV_TWOPI - INV_FOURPI * (uOffset.x() / uOffset.y());
+            r = y;
+            theta = INV_TWOPI - INV_FOURPI * (x / y);
         }
-
-        return r * Point2f(std::cos(theta), std::sin(theta));
-
+        //Polar Coordinates
+        return r * Point2f(cos(theta), sin(theta));
     }
-*/
+
     //https://en.wikipedia.org/wiki/Distortion_(optics)
     float distortionFunction(float xU) const{
         //The further away from the focus point, the larger is xU
@@ -232,6 +241,7 @@ private:
     float m_focalLength;
     float m_lensRadius; //=f-value
     bool m_distortion;
+    bool m_bokeh;
     float K1;
     float K2;
     std::string m_motionblur;
