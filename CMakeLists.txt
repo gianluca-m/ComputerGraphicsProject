@@ -90,6 +90,7 @@ add_executable(nori
   src/image_texture.cpp
   src/normal_map.cpp
   src/directionallight.cpp
+  src/environment.cpp
   src/phasefunction.cpp
   src/homogeneous_medium.cpp
   src/heterogeneous_medium.cpp
