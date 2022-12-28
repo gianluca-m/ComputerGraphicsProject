@@ -129,6 +129,7 @@ public:
 
         /* Depth of Field PBRT 6.2.3*/
         if(m_lensRadius > 0 ) {
+            //Point2f pLens = m_lensRadius * bokehShift(apertureSample, weight)
             Point2f pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
             float ft = m_focalLength / d.z();
             Point3f pFocus = ft * d;
@@ -159,6 +160,26 @@ public:
         return Color3f(1.0f);
     }
 
+/*
+    Point2f bokehShift(Point2f sample, float weight){
+        Point2f uOffset = 2.f * sample - Vector2f(1, 1);
+        // Handle degeneracy at the origin
+        if (uOffset.x() == 0 && uOffset.y() == 0) return Point2f(0, 0);
+
+        // Apply concentric mapping to point
+        float theta, r;
+        if (std::abs(uOffset.x()) > std::abs(uOffset.y())) {
+            r = uOffset.x();
+            theta = INV_FOURPI * (uOffset.y() / uOffset.x());
+        } else {
+            r = uOffset.y();
+            theta = INV_TWOPI - INV_FOURPI * (uOffset.x() / uOffset.y());
+        }
+
+        return r * Point2f(std::cos(theta), std::sin(theta));
+
+    }
+*/
     //https://en.wikipedia.org/wiki/Distortion_(optics)
     float distortionFunction(float xU) const{
         //The further away from the focus point, the larger is xU
