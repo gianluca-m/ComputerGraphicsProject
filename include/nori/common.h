@@ -237,11 +237,6 @@ inline float lerp(float t, float v1, float v2) {
     return ((float) 1 - t) * v1 + t * v2;
 }
 
-/// Linearly interpolate between two values
-inline Color3f lerp(float t, Color3f v1, Color3f v2) {
-    return (1 - t) * v1 + t * v2;
-}
-
 /// Always-positive modulo operation
 inline int mod(int a, int b) {
     int r = a % b;
