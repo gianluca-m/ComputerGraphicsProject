@@ -6,12 +6,12 @@
 NORI_NAMESPACE_BEGIN
 using namespace std;
 using namespace Eigen;
-//https://github.com/yuqinghuang01/nori-report
-//https://github.com/smeno004/CGAS2022-Project-Report
+
 class Environment : public Emitter {
 public:
     Environment(const PropertyList &props) {
         m_mapPath = props.getString("filename");
+        m_interpolate = props.getBoolean("interpolate", true);
         m_envBitMap = Bitmap(m_mapPath);
         buildIntensity();
     }  
@@ -127,19 +127,47 @@ public:
         auto x = normal.x() * nRow * INV_PI;
         auto y = normal.y() * 0.5f * nCol * INV_PI;
 
-        int u = int(round(x));
-        int v = int(round(y));
+        if(!m_interpolate){
+            int u = int(round(x));
+            int v = int(round(y));
 
-        //Edge case avoiding. Use clamp function
-        /*
-        auto u1 = clamp(u+1,0,nRow);
-        auto u2 = clamp(u-1,0,nRow);
-        auto v1 = clamp(v+1,0,nCol);
-        auto v2 = clamp(v-1,0,nCol);
-        */
-        //take average over neighbors = BLUR
-        //auto avgSurrounding = (m_envBitMap(u1,v) +  m_envBitMap(u2,v) +  m_envBitMap(u,v1) +  m_envBitMap(u,v2)) / 4.f;
-        return m_envBitMap(u,v);
+            return m_envBitMap(u,v);
+        }
+
+       //https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/
+       //ADAPTED FROM THIS WEBSITE
+
+        int topX = int(ceil(x));
+        int topY = int(ceil(y));
+        int bottomY = int(floor(y));
+        int bottomX = int(floor(x));
+
+        auto x1 = clamp(bottomX,0,nRow);
+        auto x2 = clamp(topX,0,nRow);
+        auto y1 = clamp(bottomY,0,nCol);
+        auto y2 = clamp(topY,0,nCol);
+
+        auto q11 = m_envBitMap(x1,y1);
+        auto q12 = m_envBitMap(x1,y2);
+        auto q21 = m_envBitMap(x2,y1);
+        auto q22 = m_envBitMap(x2,y2);
+
+        auto x2x1 = x2 - x1;
+        auto y2y1 = y2 - y1;
+        auto x2x = x2 - x;
+        auto y2y = y2 - y;
+        auto yy1 = y - y1;
+        auto xx1 = x - x1;
+
+        //Edge Scenario where clamp returns the same value
+        if(x2x1 == 0 || y2y1 == 0)return 0;
+
+        return 1.0f / (x2x1 * y2y1) * (
+                    q11 * x2x * y2y +
+                    q21 * xx1 * y2y +
+                    q12 * x2x * yy1 +
+                    q22 * xx1 * yy1
+        );
     }
 
     virtual float pdf(const EmitterQueryRecord &lRec) const {
@@ -150,7 +178,7 @@ public:
         //From Sphere.cpp 
         auto x = normal.x() * nRow * INV_PI;
         auto y = normal.y() * 0.5f * nCol * INV_PI;
-
+        
         int u = int(round(x));
         int v = int(round(y));
 
@@ -172,6 +200,7 @@ private:
     MatrixXf intensity;
     string m_mapPath;
     Bitmap m_envBitMap;
+    bool m_interpolate;
 
     VectorXf rowPDF;
     VectorXf rowCDF;
