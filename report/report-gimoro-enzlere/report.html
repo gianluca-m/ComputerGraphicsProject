@@ -459,8 +459,8 @@
             Unfortunately, with this approach
             I created a blur filter and the resulting images were not pretty to look at. After doing some more research,
             I decided to use bilinear interpolation. 
-            With the help of two blog posts mentioned above</a>, I managed to implement the ecessary formula with some
-            minor adjustments for out-of-bounds errors. The resulting image was now less blurry. In an effort to create
+            With the help of two blog posts mentioned above in the Theory listing</a>, I managed to implement the necessary formula with some
+            minor adjustments for out-of-bounds errors. The resulting image was now less blurry than before, but I was not satisfied. In an effort to create
             an unblurred alternative, I set a new boolean property which lets the user decide 
             whether he wants to use interpolation or not to find the {u,v}-values.
             If the flag is not set, I will simply do the following:
