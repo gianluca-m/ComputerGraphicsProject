@@ -52,6 +52,10 @@ public:
 
         m_motionblur = propList.getString("motionblur", "");
 
+        m_distortion = propList.getBoolean("distortion", false);
+        K1 = propList.getFloat("K1", 0.0f);
+        K2 = propList.getFloat("K2", 0.0f);
+
         if(m_motionblur != ""){
             m_finalMotion = propList.getTransform("motion", Transform());
         }
@@ -59,6 +63,8 @@ public:
             
         m_rfilter = NULL;
     }
+
+    
 
     virtual void activate() override {
         float aspect = m_outputSize.x() / (float) m_outputSize.y();
@@ -107,6 +113,12 @@ public:
             samplePosition.x() * m_invOutputSize.x(),
             samplePosition.y() * m_invOutputSize.y(), 0.0f);
 
+        if(m_distortion > 0){
+            //change nearP
+            float distort = distortionFunction(Vector2f(nearP.x() / nearP.z(), nearP.y() / nearP.z()).norm());
+            nearP.x() *= distort;
+            nearP.y() *= distort;
+        }
         /* Turn into a normalized ray direction, and
            adjust the ray interval accordingly */
         Vector3f d = nearP.normalized();
@@ -145,6 +157,16 @@ public:
         ray.update();
 
         return Color3f(1.0f);
+    }
+
+    //https://en.wikipedia.org/wiki/Distortion_(optics)
+    float distortionFunction(float xU) const{
+        auto r = sqrt(powf(xU,2));
+        
+        auto fin = xU / (xU  / (1.0f + K1 * pow(r,2) + K2*pow(r,4)));
+
+        return fin;
+        
     }
 
     virtual void addChild(NoriObject *obj) override {
@@ -188,6 +210,9 @@ private:
     float m_farClip;
     float m_focalLength;
     float m_lensRadius; //=f-value
+    bool m_distortion;
+    float K1;
+    float K2;
     std::string m_motionblur;
     Transform m_finalMotion;
 };
