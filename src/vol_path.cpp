@@ -25,9 +25,10 @@ public:
         auto wEm = 0.0f;
 
         bool sceneIntersection = scene->rayIntersect(recursiveRay, its);
+        auto allMedia = scene->getMedia();
         
         while (true) {
-            auto medium = scene->getMedium(recursiveRay);
+            auto medium = scene->getRandomMedium(recursiveRay, sampler->next1D());
 
             // Sample free path
             float tmax = recursiveRay.maxt;
@@ -58,7 +59,10 @@ public:
                 Color3f LeDivPdf = randomEmitter->sample(emitterRecord, sampler->next2D()) * n;
                 if (!scene->rayIntersect(emitterRecord.shadowRay)) {
                     MediumQueryRecord shadowRayMediumRecord(emitterRecord.shadowRay.maxt);
-                    Color3f Tr = medium->Tr(emitterRecord.shadowRay, sampler, shadowRayMediumRecord);
+                    Color3f Tr{1.0f};
+                    for (auto m : allMedia) {
+                        Tr *= m->Tr(emitterRecord.shadowRay, sampler, shadowRayMediumRecord);
+                    }
 
                     auto pdfEm = randomEmitter->pdf(emitterRecord);
                     auto pdfSum = pdfEm + pdfMat;
@@ -87,9 +91,10 @@ public:
                     EmitterQueryRecord emitterRecord{recursiveRay.o, its.p, its.shFrame.n};
                     emitterRecord.uv = its.uv;
                     Color3f Tr{1.0f};
-                    if (medium != nullptr) {
-                        Tr = medium->Tr(recursiveRay, sampler, mediumRecord);
-                    } 
+                    for (auto m : allMedia) {
+                        Tr *= m->Tr(recursiveRay, sampler, mediumRecord);
+                    }
+
                     Li += t * wMat * its.mesh->getEmitter()->eval(emitterRecord) * Tr;
                 }
 
@@ -119,11 +124,10 @@ public:
                     auto pdfSum = pdfEm + pdfMat;
                     wEm = (pdfSum > 0) ? pdfEm / pdfSum : 0.0f;
 
-                    medium = scene->getMedium(emitterRecord.shadowRay);
                     Color3f Tr{1.0f};
-                    if (medium != nullptr) {
-                        MediumQueryRecord shadowRayMediumRecord(emitterRecord.shadowRay.maxt);
-                        Tr = medium->Tr(emitterRecord.shadowRay, sampler, shadowRayMediumRecord);
+                    MediumQueryRecord shadowRayMediumRecord(emitterRecord.shadowRay.maxt);
+                    for (auto m : allMedia) {
+                        Tr *= m->Tr(emitterRecord.shadowRay, sampler, shadowRayMediumRecord);
                     } 
 
                     Li += wEm * t * its.mesh->getBSDF()->eval(bsdfRecord) * LeDivPdf * cosTheta * Tr;

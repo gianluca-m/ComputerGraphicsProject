@@ -25,7 +25,7 @@
 
 		<integer name="density_type" value="2"/>
 		<string name="volume_grid" value="/volume_grids/wdas_cloud_quarter.nvdb"/>
-		<float name="density_scale" value="0.3"/>
+		<float name="density_scale" value="2"/>
 
         <vector name="center" value="0 0.7 0"/>
         <vector name="size" value="0.7 0.5 0.7"/>

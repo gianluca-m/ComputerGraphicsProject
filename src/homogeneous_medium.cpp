@@ -5,9 +5,11 @@ NORI_NAMESPACE_BEGIN
 class HomogeneousMedium : public Medium {
 public:
     HomogeneousMedium(const PropertyList &props) {
+        m_density_scale = props.getFloat("density_scale", 1.0f);
         m_sigma_a = props.getColor("sigma_a", Color3f{1.0f});
         m_sigma_s = props.getColor("sigma_s", Color3f{1.0f});
         m_sigma_t = m_sigma_a + m_sigma_s;
+        m_sigma_t *= m_density_scale;
         m_albedo = m_sigma_s / m_sigma_t;
         m_max_density = props.getFloat("max_density", 1.0f);
 
@@ -23,11 +25,11 @@ public:
             return Color3f{1.0f};
         }
 
-        float t = 0.0f;
+        float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
         Color3f tr{1.0f};
         float curr_density;
-        float densityDivSigmaT = m_max_density / m_sigma_t.maxCoeff();
+        float densityDivSigmaT = (1.0f / m_max_density) / m_sigma_t.maxCoeff();
 
         while (true) {
             t += -log(1.0f - sampler->next1D()) * densityDivSigmaT;
@@ -37,7 +39,7 @@ public:
             }
                 
             curr_density = getDensity(ray(t));
-            tr *= 1.0f - curr_density * m_max_density;
+            tr *= 1.0f - std::max(0.0f, curr_density / m_max_density);
         }
         
         return tr;
@@ -47,13 +49,14 @@ public:
         // Delta tracking even for homogeneous because other approach produced weird results
         float nearT, farT;
         if (!rayIntersect(ray, nearT, farT)) {
+            mRec.hasInteraction = false;
             return Color3f{1.0f};
         }
 
-        float t = 0.0f;
+        float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
         float curr_density;
-        float densityDivSigmaT = m_max_density / m_sigma_t.maxCoeff();
+        float densityDivSigmaT = (1.0f / m_max_density) / m_sigma_t.maxCoeff();
 
         while (true) {
             t += -log(1.0f - sampler->next1D()) * densityDivSigmaT;
@@ -64,10 +67,10 @@ public:
             }
 
             curr_density = getDensity(ray(t));
-            if (sampler->next1D() < curr_density * m_max_density) {      // density / (1 / max_density) = density * max_density
+            if (sampler->next1D() < curr_density / m_max_density) {
                 mRec.hasInteraction = true;
                 mRec.p = ray(t);
-                return m_albedo * curr_density;
+                return m_albedo;
             }
         }
         

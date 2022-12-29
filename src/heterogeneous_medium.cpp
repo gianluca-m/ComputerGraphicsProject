@@ -12,14 +12,15 @@ NORI_NAMESPACE_BEGIN
 class HeterogeneousMedium : public Medium {
 public:
     HeterogeneousMedium(const PropertyList &props) {
+        m_density_scale = props.getFloat("density_scale", 1.0f);
         m_sigma_a = props.getColor("sigma_a", Color3f{1.0f});
         m_sigma_s = props.getColor("sigma_s", Color3f{1.0f});
         m_sigma_t = m_sigma_a + m_sigma_s;
+        m_sigma_t *= m_density_scale;
         m_albedo = m_sigma_s / m_sigma_t;
 
         m_max_density = props.getFloat("max_density", 1.0f);
         m_density_type = props.getInteger("density_type", 0);
-        m_density_scale = props.getFloat("density_scale", 1.0f);
 
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
         Vector3f center = props.getVector3("center", Vector3f{0.0f});
@@ -87,8 +88,6 @@ public:
             m_frequency = props.getFloat("frequency", 3.5f);
             m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
         }
-        
-        m_max_density *= m_density_scale;
 
         if (m_max_density == 0.0f) throw NoriException("HeterogeneousMedium: max_density cannot be 0");
 
@@ -103,7 +102,7 @@ public:
             return Color3f{1.0f};
         }
 
-        float t = 0.0f;
+        float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
         Color3f tr{1.0f};
         float curr_density;
@@ -127,10 +126,11 @@ public:
         // Delta tracking
         float nearT, farT;
         if (!rayIntersect(ray, nearT, farT)) {
+            mRec.hasInteraction = false;
             return Color3f{1.0f};
         }
 
-        float t = 0.0f;
+        float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
         float curr_density;
         float densityDivSigmaT = m_inv_max_density / m_sigma_t.maxCoeff();
@@ -147,7 +147,7 @@ public:
             if (sampler->next1D() < curr_density * m_inv_max_density) {
                 mRec.hasInteraction = true;
                 mRec.p = ray(t);
-                return m_albedo * curr_density;
+                return m_albedo;
             }
         }
         
@@ -218,13 +218,13 @@ private:
         
         switch (m_density_type) {
             case 0:     // const
-                return m_max_density * m_density_scale;
+                return m_max_density;
             case 1:     // exp
-                return getExponentialDensity(p) * m_density_scale;
+                return getExponentialDensity(p);
             case 2:     // volume grid
-                return getGridDensity(p) * m_density_scale;
+                return getGridDensity(p);
             case 3:     // perlin noise sphere
-                return getPerlinNoiseDensity(p) * m_density_scale;
+                return getPerlinNoiseDensity(p);
             
             default:
                 throw NoriException("HeterogeneousMedium: Undefined density type");

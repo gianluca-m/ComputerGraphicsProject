@@ -20,11 +20,12 @@
 
 	<medium type="heterogeneous">
         <phase type="isotropic"/>
-        <color name="sigma_a" value="2,2,2"/>
-        <color name="sigma_s" value="4,4,4"/>
+        <color name="sigma_a" value="2.5,2.5,2.5"/>
+        <color name="sigma_s" value="0.5,0.5,0.5"/>
 
 		<integer name="density_type" value="3"/>
 		<float name="frequency" value="4"/>
+		<float name="density_scale" value="2"/>
 
         <vector name="center" value="0 0.75 0"/>
         <float name="radius" value="0.7"/>
