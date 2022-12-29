@@ -76,7 +76,7 @@
 	<!-- Illuminate using a point light -->
 	<emitter type="point">
 		<point name="position" value="3,7,10"/>
-		<color name="power" value="5000,5000,5000"/>
+		<color name="power" value="4000,4000,4000"/>
 	</emitter>
 
 	<emitter type="point">
