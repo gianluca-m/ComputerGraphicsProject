@@ -20,12 +20,9 @@
 		<integer name="width" value="720"/>
 		<integer name="height" value="720"/>
 
-		<string name="motionblur" value="linear"/>
-		<float name="angle" value="0"/>
-		<float name="length" value="10"/>
-		<float name="sampleTime" value="0.2"/>
+		<boolean name="motionblur" value="true"/>
 		<transform name="motion">
-			<lookat target="0,0,3" origin="9.5,10,10" up="0,0,1"/>
+			<lookat target="0,0,3" origin="9,9,9" up="0,0,1"/>
 		</transform>
 		
 

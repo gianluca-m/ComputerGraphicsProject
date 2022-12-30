@@ -5,116 +5,191 @@
 	</sampler>
 
 	<!-- Use a direct illumination integrator -->
-	<integrator type="direct" />
+	<integrator type="path_mis" />
 
 	<!-- Render the scene as viewed by a perspective camera -->
 	<camera type="perspective">
 		<transform name="toWorld">
-			<lookat target="0,0,0" origin="0,25,0" up="0,0,1"/>
+			<lookat target="0,-11,6" origin="0,-10,6" up="0,0,1"/>
 		</transform>
 
 		<!-- Field of view: 90 degrees -->
-		<float name="fov" value="90"/>
+		<float name="fov" value="72"/>
 
 		<!-- 512 x 512 pixels -->
-		<integer name="width" value="720"/>
-		<integer name="height" value="120"/>
+		<integer name="width" value="1600"/>
+		<integer name="height" value="900"/>
 
 		
-		<float name="focalLength" value="12"/>
-		<float name="lensRadius" value="0.5"/>
+		<float name="focalLength" value="20"/>
+		<float name="lensRadius" value="0.01"/>
 		<boolean name="bokeh" value="true"/>
 	
-		<boolean name="distortion" value="false"/>
-		<float name="K1" value = "-1"/>
-		<float name="K2" value = "-1"/>
+		<boolean name="distortion" value="true"/>
+		<float name="K1" value = "1.5"/>
+		<float name="K2" value = "1.5"/> 
 
 	</camera>
 
-	<mesh type="sphere">
-        <point name="center" value="-20,0,0"/>
-        <float name="radius" value="1"/>
+<!-- Floor plane -->
+	<mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+
+		<bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+                <string name="filename" value="floor.png"/>
+                <vector name="scale" value="10, 10"/>
+            </texture>
+        </bsdf>
+
+		<transform name="toWorld">
+			<scale value="50 50 50"/>
+			<rotate axis="1,0,0" angle="90"/>
+			<translate value="0,0,-4"/>
+		</transform>
+    </mesh>
+<!-- Back Wall -->
+	 <mesh type="obj">
+		<string name="filename" value="plane.obj"/>
         <bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+				<string name="filename" value="wall.png"/>
+			</texture> 
+        </bsdf> 
+
+		<transform name="toWorld">
+			<scale value="20 20 20"/>
+			<translate value="0,-50,10"/>
+		</transform>
+    </mesh> 
+<!-- Right Wall -->
+    <mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+        <bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+				<string name="filename" value="wall.png"/>
+			</texture> 
+        </bsdf> 
+
+		<transform name="toWorld">
+			<scale value="20 20 20"/>
+            <rotate axis="0,0,1" angle="90"/>
+            <translate value="20,-30,10"/>
+		</transform>
+    </mesh>
+<!-- Left Wall -->
+    <mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+        <bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+				<string name="filename" value="wall.png"/>
+			</texture> 
+        </bsdf> 
+
+		<transform name="toWorld">
+			<scale value="20 20 20"/>
+            <rotate axis="0,0,1" angle="-90"/>
+            <translate value="-20,-30,10"/>
+		</transform>
+    </mesh>
+
+<!-- Ceiling -->
+    <mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+        <bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+				<string name="filename" value="wall.png"/>
+			</texture> 
+        </bsdf> 
+
+		<transform name="toWorld">
+			<scale value="20 20 20"/>
+            <rotate axis="1,0,0" angle="-90"/>
+            <translate value="0,-30,20"/>
+		</transform>
+    </mesh>
+
+<!-- Stand -->
+    <mesh type="obj">
+		<string name="filename" value="cube.obj"/>
+        <bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+				<string name="filename" value="wall.png"/>
+			</texture> 
+        </bsdf> 
+
+		<transform name="toWorld">
+			<scale value="2 2 5"/>
+            <translate value="0,-30,1"/>
+		</transform>
+    </mesh>
+
+    <mesh type="obj">
+		<string name="filename" value="bust.obj"/>
+        <bsdf type="mirror">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+
+		<transform name="toWorld">
+            <scale value="2 2 2"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="180"/>
+            <translate value="0,-30,6"/>
+		</transform>
+    </mesh>
+
+<mesh type="sphere">
+        <point name="center" value="0,-30,7"/>
+        <float name="radius" value="2"/>
+        <bsdf type="dielectric">
+            <float name="extIOR" value="1.0"/>
+            <float name="intIOR" value="1.5046"/>
+        </bsdf>
+    </mesh>
+<!-- Lamp -->
+    <mesh type="obj">
+		<string name="filename" value="lamp.obj"/>
+        <bsdf type="diffuse">
+            <color name="albedo" value="0,0,0"/>
+        </bsdf> 
+
+		<transform name="toWorld">
+            <scale value="3 3 3"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="90"/>
+            <translate value="0,-32,12"/>
+		</transform>
+    </mesh>
+
+<!-- Bokeh Spheres -->
+    <mesh type="sphere">
+        <point name="center" value="-15,-45,15"/>
+        <float name="radius" value="2"/>
+        <bsdf type="dielectric">
             <float name="extIOR" value="1.0"/>
             <float name="intIOR" value="1.5046"/>
         </bsdf>
     </mesh>
 
-	<mesh type="sphere">
-        <point name="center" value="-15,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
 
-	<mesh type="sphere">
-        <point name="center" value="-10,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
-
-	<mesh type="sphere">
-        <point name="center" value="-5,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
-
-	<mesh type="sphere">
+    <mesh type="sphere">
         <point name="center" value="0,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
+        <float name="radius" value="300"/>
 
-	<mesh type="sphere">
-        <point name="center" value="5,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
+        <emitter type="environment">
+            <string name="filename" value="envMap.exr"/>
+            <boolean name="interpolate" value="true"/>
+        </emitter>
     </mesh>
-
-	<mesh type="sphere">
-        <point name="center" value="10,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
-
-	<mesh type="sphere">
-        <point name="center" value="15,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
-
-	<mesh type="sphere">
-        <point name="center" value="20,0,0"/>
-        <float name="radius" value="1"/>
-        <bsdf type="diffuse">
-            <float name="extIOR" value="1.0"/>
-            <float name="intIOR" value="1.5046"/>
-        </bsdf>
-    </mesh>
-
-	<emitter type="directional">
-		<vector name="direction" value="0,-1.0,0"/>
-		<color name="power" value="1.0,0.1,0.1"/>
+   
+	<emitter type="point">
+		<point name="position" value="0,-35,13"/>
+		<color name="power" value="10000,8000,8000"/>
 	</emitter>
 
+    <emitter type="point">
+		<point name="position" value="0,3,19"/>
+		<color name="power" value="10000,8000,8000"/>
+	</emitter>
 </scene>

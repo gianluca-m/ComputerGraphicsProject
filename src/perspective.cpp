@@ -51,7 +51,7 @@ public:
         m_focalLength = propList.getFloat("focalLength", 0.f);
         m_lensRadius = propList.getFloat("lensRadius", 0.f);
 
-        m_motionblur = propList.getString("motionblur", "");
+        
 
         m_bokeh = propList.getBoolean("bokeh",false);
 
@@ -59,9 +59,9 @@ public:
         K1 = propList.getFloat("K1", 0.0f);
         K2 = propList.getFloat("K2", 0.0f);
 
-        if(m_motionblur != ""){
-            m_finalMotion = propList.getTransform("motion", Transform());
-        }
+        m_motionblur = propList.getBoolean("motionblur", false);
+        m_finalMotion = propList.getTransform("motion", Transform());
+        
 
         m_rfilter = NULL;
     }
@@ -148,11 +148,7 @@ public:
             
         }
 
-        if(m_motionblur != ""){
-            Eigen::Matrix4f editable;
-
-            if(m_motionblur == "linear"){
-            }
+        if(m_motionblur){
             Transform trans(m_cameraToWorld.getMatrix() * (1.0f - contribution) + m_finalMotion.getMatrix() * contribution);
             //Keep the origin fixed!
             //Such that the scene stays
@@ -244,7 +240,7 @@ private:
     bool m_bokeh;
     float K1;
     float K2;
-    std::string m_motionblur;
+    bool m_motionblur;
     Transform m_finalMotion;
 };
 
