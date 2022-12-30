@@ -477,7 +477,7 @@
                 For the heterogeneous medium, I added support for different density types, which can be specified with
                 the <code>density_type</code> parameter:
               <ul>
-                <li><b>Expoential:</b> $d(p) = max\_density \cdot exp(-b \cdot h)$, where $h$ is the height in the
+                <li><b>Exponential:</b> $d(p) = max\_density \cdot exp(-b \cdot h)$, where $h$ is the height in the
                   direction
                   of the up-vector
                 </li>
@@ -486,7 +486,7 @@
               </ul>
               </p>
 
-              <h5>Expoential</h5>
+              <h5>Exponential</h5>
               <p>
                 The expoential density function slowly decreases the density in the up direction. The parameter
                 <code>b</code>
@@ -524,10 +524,55 @@
                 while always also including the calculated transmittance along the ray.
               </p>
 
-              <!-- TODO (gimoro): add psuedocode? -->
+              <p>Below is the pseudocode for the volumetric path tracer:</p>
+              <pre><code>Li = 0, t = 1
+while (true) {
+    medium = scene.getRandomMedium()
+    albedo = scene.sampleFreePath()
+
+    if (mediumInteraction) {
+        russianRoulette()
+        t *= albedo
+        Vector3f scatterDirection
+        pdf_mat = medium.phaseFunction().sample(scatterDirection)
+        randomEmitter = scene.getRandomEmitter()
+
+        if (!shadowRayOccluded) {
+            Color3f Tr = 1
+            for (med : scene.getAllMedia()) {
+                Tr *= med.Tr(shadowRay)
+            }
+
+            // update pdf_em and w_em
+
+            Li += t * Tr * randomEmitter.sample() * numEmitters * pdf_mat
+        }
+
+        recursiveRay = Ray3f(mediumInteractionPoint, scatterDirection)
+
+        // update w_mat
+    }
+    else if (!mediumInteraction && !surfaceInteraction) {
+        break
+    }
+    else {
+        // add contribution from material sampling
+        //    including transmittance
+        
+        russianRoulette()
+
+        // add contribution from emitter sampling
+        //    including transmittance
+        //    update w_em
+
+        // update recursiveRay
+        
+        // update w_mat
+    }
+}</code></pre>
             </div>
 
-            <div>
+            <div id="participatingMediaValidation">
               <h3>Validation</h3>
               <h4>Volumetric Path Tracer</h4>
               <p>
@@ -543,10 +588,10 @@
 
               <h4>Homogeneous</h4>
               <p>
-                To validate the homogeneous medium, I rendered identical scenes using my implementation and 
+                To validate the homogeneous medium, I rendered identical scenes using my implementation and
                 <a href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. <br>
                 The images look very similar. Note that the position of the medium cube is not 100% identical,
-                because I use a different approach to define the medium positionm
+                because I use a different approach to define the medium position,
                 and thus conversion caused some misalignment. <br>
                 $\sigma_a = 2, \sigma_s = 0.5$ and isotropic phase function.
               </p>
@@ -584,16 +629,16 @@
 
               <br>
 
-              <h4>Heterogeneous: Volume Grid</h4>
+              <h4>Heterogeneous: Volume Grid Density</h4>
               <p>
-                Unfortunately, no comparision with mitsuba3 because mitsuba3 does not support OpenVDB 
-                or NanoVDB, but requires .vol files. Neither me nor my teammate were able to convert 
-                VDB files to .obj files. <br>
+                Unfortunately, no comparision with mitsuba3 because mitsuba3 does not support OpenVDB
+                or NanoVDB, but requires .vol files, and I was unable to convert our NanoVDB files to
+                .obj files. <br>
                 However, the resulting image looks as expected: The cloud shape is clearly visible.
                 As you can see, we can render colored medium by specifying the $\sigma_a, \sigma_s$
                 accordingly. <br>
-                Default: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 4, 4]$),  
-                Red: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 0.5, 0.5]$),  
+                Gray: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 4, 4]$),
+                Red: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 0.5, 0.5]$),
                 Blue: ($\sigma_a = [1, 1, 1], \sigma_s = [0.5, 0.5, 4]$)
               </p>
               <div class="twentytwenty-container" style="width: 60%;">
@@ -601,8 +646,8 @@
               </div>
 
               <div class="twentytwenty-container" style="width: 60%;">
-                <img src="images/features/medium/cbox_hetero-grid.png" alt="default" class="img-responsive">
-                <img src="images/features/medium/cbox_hetero-grid-scale.png" alt="density_scale=2"
+                <img src="images/features/medium/cbox_hetero-grid.png" alt="gray" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-scale.png" alt="gray + density_scale=2"
                   class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-red.png" alt="red" class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-blue.png" alt="blue" class="img-responsive">
@@ -610,7 +655,7 @@
 
               <br>
 
-              <h4>Heterogeneous: Perlin Noise</h4>
+              <h4>Heterogeneous: 3D Perlin Noise Density</h4>
               <p>
                 The following image shows a heterogeneous medium, consisting of a sphere whose density values
                 are sampled from a 3D perlin noise function. <br>
@@ -765,15 +810,14 @@
           </div>
         </div>
 
+        <br> <br>
+
+        <div id="finalImage">
+          <h1>Final Image</h1>
+          <i>TODO: Add</i>
+        </div>
+
       </div>
-
-      <br> <br>
-
-      <div id="finalImage">
-        <h1>Final Image</h1>
-        <i>TODO: Add</i>
-      </div>
-
     </div>
   </div>
   </div>

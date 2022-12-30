@@ -60,9 +60,7 @@
 		<point name="center" value="-0.421400 0.332100 -0.280000" />
 		<float name="radius" value="0.3263" />
 
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.630 0.065 0.05"/>
-		</bsdf>
+		<bsdf type="mirror"/>
 	</mesh>
 	
 
