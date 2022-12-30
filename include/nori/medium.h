@@ -44,6 +44,7 @@ protected:
     Color3f m_albedo;
 
     float m_max_density;
+    float m_inv_max_density;
     float m_density_scale;
 
     PhaseFunction *m_phasefunction = nullptr;

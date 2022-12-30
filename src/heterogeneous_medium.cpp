@@ -63,7 +63,7 @@ public:
             m_density_grid_bbox = BoundingBox3f{grid_bbox_min, grid_bbox_max};
             m_density_grid_bbox_size = m_density_grid_bbox.max - m_density_grid_bbox.min;
 
-            cout << "Preprocessing volume grid. This might take some time!" << endl;
+            cout << "Preprocessing volume grid information. This might take some time!" << endl;
             m_max_density = 0.0f;
             auto accessor = density_grid->getAccessor();
             float curr_density;
@@ -133,7 +133,13 @@ public:
 
         float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
-        float curr_density;
+
+        // I don't know how this can even happen, but it happens...
+        if (tMax == std::numeric_limits<float>::infinity()) {
+            mRec.hasInteraction = false;
+            return Color3f{1.0f};
+        }
+
         float densityDivSigmaT = m_inv_max_density / m_sigma_t.maxCoeff();
 
         while (true) {
@@ -144,15 +150,14 @@ public:
                 break;
             }
 
-            curr_density = getDensity(ray(t));
-            if (sampler->next1D() < curr_density * m_inv_max_density) {
+            if (sampler->next1D() < getDensity(ray(t)) * m_inv_max_density) {
                 mRec.hasInteraction = true;
                 mRec.p = ray(t);
                 return m_albedo;
             }
         }
         
-        return Color3f{1.f};
+        return Color3f{1.0f};
     }
 
     bool rayIntersect(const Ray3f &ray, float &nearT, float &farT) const override {
@@ -195,7 +200,6 @@ public:
 
 
 private:
-    float m_inv_max_density;
     int m_density_type;     // const, exp, volume grid
 
     // used for exponential density

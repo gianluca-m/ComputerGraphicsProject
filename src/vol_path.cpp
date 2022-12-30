@@ -31,10 +31,7 @@ public:
             auto medium = scene->getRandomMedium(recursiveRay, sampler->next1D());
 
             // Sample free path
-            float tmax = recursiveRay.maxt;
-            if (sceneIntersection && medium != nullptr) {
-                tmax = (its.p - recursiveRay.o).norm();
-            }
+            float tmax = sceneIntersection ? (its.p - recursiveRay.o).norm() : recursiveRay.maxt;
             MediumQueryRecord mediumRecord(tmax);
             Color3f albedo{1.0f};
             if (medium != nullptr) {
