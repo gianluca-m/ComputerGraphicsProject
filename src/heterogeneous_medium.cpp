@@ -46,7 +46,7 @@ public:
 
             if (density_grid == nullptr) throw NoriException("HeterogeneousMedium: No density grid found in '%s'", filename);
 
-            auto grid_bbox = density_grid->worldBBox();
+            auto grid_bbox = density_grid->indexBBox();
             Point3f grid_bbox_min{
                 (float) grid_bbox.min()[0],
                 (float) grid_bbox.min()[1],
@@ -63,6 +63,7 @@ public:
             m_density_grid_bbox = BoundingBox3f{grid_bbox_min, grid_bbox_max};
             m_density_grid_bbox_size = m_density_grid_bbox.max - m_density_grid_bbox.min;
 
+            cout << "Preprocessing volume grid. This might take some time!" << endl;
             m_max_density = 0.0f;
             auto accessor = density_grid->getAccessor();
             float curr_density;
@@ -206,6 +207,7 @@ private:
     BoundingBox3f m_density_grid_bbox;
     Vector3f m_density_grid_bbox_size;
     Point3f m_bbox_size;
+    float m_voxel_size;
 
     // used for perlin noise sphere
     Point3f m_center;

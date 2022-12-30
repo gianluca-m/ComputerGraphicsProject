@@ -442,15 +442,16 @@
               <h4>Medium</h4>
               <p>
                 The medium needs the ability to sample a free path and calculate the transmittance along a ray. <br>
-                For the homogeneous medium, I first tried the simplified variant with $Tr(t) = e^{-\sigma_t \cdot t}$,
+                For the homogeneous medium, I first tried the simplified variant with $Tr(t) = e^{-\sigma_t \cdot t}$
+                (<a href="https://en.wikipedia.org/wiki/Beer%E2%80%93Lambert_law">Beer-Lambert law)</a>,
                 but I couldn't get it to work properly since this always resulted in a completely black medium. <br>
                 Therefore, I am using Delta Tracking for both the homogeneous and heterogeneous medium.
                 The idea is to start at the beginning of the ray and take a random step along the ray, according to
-                $t \texttt{ += } -log(1 - \xi) \cdot inv\_max\_density / \sigma_t$.
+                $t \texttt{ += } -log(1 - \xi) \cdot inv\_max\_density / \sigma_t$. <br>
                 To sample a free path, we continue Delta Tracking until we either exit the medium,
                 or until $current\_density / max\_density \gt \xi$, where $\xi$ is a random number between 0 and 1.
                 The first case means we have no medium interaction, while the second case indicates a medium
-                interaction, and we return $albedo \cdot current\_density$. <br>
+                interaction, and we return the $albedo$ color. <br>
                 To calculate the transmittance, we continue Delta Tracking until we exit the medium, while in every
                 iteration we update $t$ as before and also update the transmittance as:
                 $tr \texttt{ *= } 1 - max(0, current\_density \cdot inv\_max\_density)$, where the initial value is $tr
@@ -481,7 +482,7 @@
                   direction
                   of the up-vector
                 </li>
-                <li><b>Volume Grid:</b> The density at a point is read from a volume grid file</li>
+                <li><b>Volume Grid:</b> The density at a point is read from a volume grid (.nvdb) file</li>
                 <li><b>Perlin Noise:</b> The density at a point is calculated using a 3D perlin noise function</li>
               </ul>
               </p>
@@ -489,19 +490,16 @@
               <h5>Exponential</h5>
               <p>
                 The expoential density function slowly decreases the density in the up direction. The parameter
-                <code>b</code>
-                and the up-direction vector <code>up_dir</code> can be specified in the xml file. This density function
-                allows us to create nice foggy scenes.
+                <code>b</code> and the up-direction vector <code>up_dir</code> can be specified in the xml file. 
+                This density function allows us to create nice foggy scenes.
               </p>
 
               <h5>Volume Grid</h5>
               <p>
-                To read the density values from a volume grid file, I first wanted to use
-                <a href="https://github.com/AcademySoftwareFoundation/openvdb">OpenVDB</a>, but I could not get it
-                installed
-                and running properly on my machine. Therefore, I am instead using
+                To read the density values from a volume grid file, I am using
                 <a href="https://github.com/AcademySoftwareFoundation/openvdb/tree/master/nanovdb/nanovdb">NanoVDB</a>,
-                which is a header-only library to read NanoVDB files. <br>
+                which is a header-only library to read NanoVDB files, which are similar to
+                <a href="https://www.openvdb.org/">OpenVDB</a> files. <br>
                 To get the density of a specific point in our scene, I am first projecting the point inside our medium
                 bounding box to the unit cube. Then I can use this position to determine the corresponding point
                 inside the bouding box of the grid defined in the vdb file.
@@ -510,7 +508,7 @@
               <br>
               <h4>Volumetric Path Tracer</h4>
               <p>
-                To render the participating medium, I implemented a Volumetric Path Tracer (<code>vol_path</code>).
+                To render the participating medium, I implemented a Volumetric Path Tracer <code>vol_path</code>.
                 I based this integrator on the <code>path_mis</code> integrator implemented as part of the homeworks,
                 and added the functionality to handle medium interaction. <br>
                 First, we sample a random medium which the ray intersects. For this medium, we sample the free path,
@@ -576,9 +574,9 @@ while (true) {
               <h3>Validation</h3>
               <h4>Volumetric Path Tracer</h4>
               <p>
-                To validate my Volumetric path tracer, I rendered identical scenes without any participating media
-                present, using the volumetric path tracer and the path_mis tracer implemented as part of the homeworks.
-                <br>
+                To validate my volumetric path tracer, I rendered identical scenes without any participating media
+                present, using my <code>vol_path</code> integrator and the <code>path_mis</code> integrator 
+                implemented as part of the homeworks. <br>
                 As expected, the resulting images look identical.
               </p>
               <div class="twentytwenty-container" style="width: 60%;">
@@ -634,17 +632,25 @@ while (true) {
                 Unfortunately, no comparision with mitsuba3 because mitsuba3 does not support OpenVDB
                 or NanoVDB, but requires .vol files, and I was unable to convert our NanoVDB files to
                 .obj files. <br>
-                However, the resulting image looks as expected: The cloud shape is clearly visible.
-                As you can see, we can render colored medium by specifying the $\sigma_a, \sigma_s$
+                However, the resulting image looks as expected: The expected shapes are clearly visible. <br>
+                The vdb files are from the <a href="https://www.openvdb.org/download/">OpenVDB</a> website,
+                and converted to NanaoVDB files using the converter provided by
+                <a href="https://github.com/AcademySoftwareFoundation/openvdb/tree/master/nanovdb/nanovdb">NanoVDB</a>.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-grid.png" alt="cloud" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-bunny.png" alt="bunny" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-fire.png" alt="fire" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-smoke.png" alt="smoke" class="img-responsive">
+              </div>
+
+              <p>
+                As you can see, we can also render colored medium by specifying the $\sigma_a, \sigma_s$
                 accordingly. <br>
                 Gray: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 4, 4]$),
                 Red: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 0.5, 0.5]$),
                 Blue: ($\sigma_a = [1, 1, 1], \sigma_s = [0.5, 0.5, 4]$)
               </p>
-              <div class="twentytwenty-container" style="width: 60%;">
-                <img src="images/features/medium/cbox_hetero-grid.png" alt="cloud" class="img-responsive">
-              </div>
-
               <div class="twentytwenty-container" style="width: 60%;">
                 <img src="images/features/medium/cbox_hetero-grid.png" alt="gray" class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-scale.png" alt="gray + density_scale=2"
