@@ -169,6 +169,7 @@ public:
       
         auto x = offset.x();
         auto y = offset.y();
+
         if (x == 0 && y == 0) return Point2f(0, 0);
 
         // Concentric Disk mapping 
@@ -186,10 +187,10 @@ public:
     }
 
     //https://en.wikipedia.org/wiki/Distortion_(optics)
-    float distortionFunction(float xU) const{
-        //The further away from the focus point, the larger is xU
-        if(xU == 0)return 1.f;
-        auto fin = (1.0f + K1 * powf(xU,2) + K2*powf(xU,4));
+    float distortionFunction(float r) const{
+        //The further away from the focus point, the larger is r
+        if(r == 0)return 1.f;
+        auto fin = (1.0f + K1 * powf(r,2) + K2*powf(r,4));
 
         return fin;
         

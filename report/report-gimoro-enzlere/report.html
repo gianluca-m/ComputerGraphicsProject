@@ -44,7 +44,9 @@
     <a href="#featuresEric">Features Eric Enzler</a>
     <ul>
       <li><a href="#directional">Directional Light</a></li>
+      <li><a href="#motionblur">Motion Blur</a></li>
       <li><a href="#environment">Environment Map</a></li>
+      <li><a href="#advancedCamera">Advanced Camera</a></li>
     </ul>
     <hr class="solid">
     <a href="#finalImage">Final Image</a>
@@ -430,9 +432,23 @@
           </dl>
 
           <h3>Implementation</h3>
-
+          <p>The implementation of this feature was hard. There is no information about it in the PBRT book and the blog
+            posts online did not help me well either.
+            The basic behind this type of motion blur is obviously that the camera needs to move in some way. At first,
+            I tried to do this by hand, meaning that I setup my own transformation matrices and then multiplied them
+            with the camera's matrix.
+            This did not work at all and I had to use a simpler approach where I defined the transformation matrix
+            directly in the xml file. This means that for motionblur we need to specify the point where the camera will
+            move to.
+            As we already have defined the origin of the camera, I programmed some sort of interpolation between the two
+            matrices. The camera will move a tiny bit towards the final position depending on the contribution of the
+            sample. This contribution factor is based
+            on the value of $m_{progress}$ which is defined in the <code>render.cpp</code>file.
+          </p>
           <h3>Validation</h3>
-          <p> Validation for this type of blur is purely visually</p>
+          <p> Validation for this type of blur is purely visually. For the scene, I let the camera move a small fraction
+            to the side. The blur applies instantly and is very intense. In the renderer one can notice the movement of
+            the camera and its effect on the bluriness.</p>
           <div class="twentytwenty-container">
             <img src="images/features/advanced-camera/motionblur.png" alt="Motionblur" class="img-responsive">
             <img src="images/features/advanced-camera/simple.png" alt="Normal" class="img-responsive">
@@ -539,21 +555,51 @@
             <dd>
               <a href="https://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models">
                 PBR Book, 6.2 Projective Camera Models</a> <br>
+              <a href="http://l2program.co.uk/900/concentric-disk-sampling">
+                Concentric disk sampling - blog</a> <br>
+              <a href="https://en.wikipedia.org/wiki/Distortion_(optics)">
+                Distortion </a> <br>
             </dd>
           </dl>
 
           <h3>Implementation</h3>
           <h4>Depth of Field</h4>
-          <p> TODO </p>
+          <p> For DoF I followed the implementation of the PBRT book which explains the process very clearly. Thanks to
+            the book I managed to implement this feature very quick. </p>
 
           <h4>Lens Distortion</h4>
-          <p> TODO </p>
+          <p> For the distortion, I did not find any good information in the book. After doing some research on the
+            topic and seeing the same formula over and over again, I implemented a simple but effective way to distort
+            the lens.
+            For this, I need two warping parameters $K_1$ and $K_2$ and also the norm of the x and y coordinates on the
+            camera's near plane.
+            Then, I simply calculate the distortion value with the following function:
+          <pre>
+              <code> 
+              float distortionFunction(float r) const{
+                if(r == 0)return 1.f;
+                auto fin = (1.0f + K1 * powf(r,2) + K2*powf(r,4));
+                return fin;
+              }
+            </code>
+          </pre>
+          and multiply the x and y coordinates on the near plane with this value.
+          </p>
 
           <h4>Bokeh</h4>
-          <p> TODO </p>
+          <p> Bokeh was hard to implement as there were simply no resources available in the book. As always I did some
+            research and found that bokeh is a special type of blur occuring usually with depth of field.
+            To implement the feature, I coupled it with DoF: Meaning that bokeh only works in settings where DoF is
+            enabled. For the effect, I modified the warping method that is used in DoF. I calculate an offset for each
+            point <code>Point2f offset = 2.f * sample - Vector2f(1, 1);</code>
+            and then apply concentric disk sampling directly. This allows for bokeh in its circular form - which in my
+            opinion is the most beautiful and relevant one. </p>
 
           <h3>Validation</h3>
-          <p> TODO </p>
+          <p> For DoF, since I followed the implementation of the book, I wanted to confirm my work with the <a
+              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a> renderer. For this I created a
+            simple scene with a plane and a skull. Then I fixed the focal length at 12 and increased the lens radius
+            three times. The images are very similar but the Mitsuba pictures appear to be a bit brighter. </p>
           <div class="twentytwenty-container">
             <img src="images/features/advanced-camera/12_0p1_mine.png" alt="Mine 0.1" class="img-responsive">
             <img src="images/features/advanced-camera/12_0p1_ref.png" alt="Mitsuba 0.1" class="img-responsive">
@@ -571,7 +617,10 @@
         </div>
         <br>
         <br>
-        <p>Bokeh Images were rendered using a distant light source and multiple spheres</p>
+        <p>Bokeh Images were rendered using a distant light source that shines on multiple spheres. I fixed the focal
+          length and increased the lens radius three times. The bokeh effect is only noticable for very blurry images -
+          which is conformant with the real bokeh effect in photography.
+          The validation of this feature is purely visual. </p>
         <div class="twentytwenty-container">
           <img src="images/features/advanced-camera/bokeh_01.png" alt="Bokeh 0.1" class="img-responsive">
           <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
@@ -587,7 +636,9 @@
       </div>
       <br>
       <br>
-      <p>For the camera distortion, I simply rendered an environment map and added the distortion effect.</p>
+      <p>For the camera distortion, I simply rendered an environment map and added the distortion effect. The validation
+        of this feature is purely visual. However, the tiled floor of the environment map makes it easy to verify that
+        the feature does what it should.</p>
       <div class="twentytwenty-container" style="width: 700px;">
         <img src="images/features/advanced-camera/distortion.png" alt="Barrel Distortion" class="img-responsive">
         <img src="images/features/advanced-camera/no_distortion.png" alt="Normal" class="img-responsive">
@@ -598,6 +649,8 @@
       </div>
       <br>
       <br>
+      Thanks to the new camera features, we are now able to create images like the one below. It displays a dielectric
+      rocket on a stand with minor depth of field effect and a barrel distortion.
       <div class="twentytwenty-container" style="width: 75%;">
         <img src="images/features/advanced-camera/final.png" alt="Putting everything together" class="img-responsive">
       </div>
