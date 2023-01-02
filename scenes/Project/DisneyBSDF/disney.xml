@@ -1,0 +1,145 @@
+<scene version="3.0.0">
+  
+    <integrator type="path_mis"/>
+    <camera type="perspective">
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="0,0,0" origin="0,5,3.5" up="0,0,1"/>
+        </transform>
+        <float name="fov" value="90"/>
+
+        <integer name="height" value="400"/> 
+        <integer name="width" value="1000"/>
+    </camera>
+
+
+
+    <!-- Sample generator, number of samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="256"/>
+    </sampler>
+
+<!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="disneyBSDF">
+            <color name="albedo" value="0,0.2,0.4"/>
+            <float name="specular" value="0.5"/>
+            <float name="metallic" value="0.1"/>
+            <float name="clearcoat" value="0.0"/>
+            <float name="roughness" value="0.5"/>
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="3.6,0,0"/> 
+		</transform>
+	</mesh>
+
+<!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="disneyBSDF">
+            <color name="albedo" value="0,0.2,0.4"/>
+            <float name="specular" value="0.5"/>
+            <float name="metallic" value="0.1"/>
+            <float name="clearcoat" value="0.3"/>
+            <float name="roughness" value="0.5"/>
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="1.8,0,0"/> 
+		</transform>
+	</mesh>
+
+<!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="disneyBSDF">
+            <color name="albedo" value="0,0.2,0.4"/>
+            <float name="specular" value="0.5"/>
+            <float name="metallic" value="0.1"/>
+            <float name="clearcoat" value="0.5"/>
+            <float name="roughness" value="0.5"/>
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+		</transform>
+	</mesh>
+
+    <!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="disneyBSDF">
+            <color name="albedo" value="0,0.2,0.4"/>
+            <float name="specular" value="0.5"/>
+            <float name="metallic" value="0.1"/>
+            <float name="clearcoat" value="0.7"/>
+            <float name="roughness" value="0.5"/>
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="-1.8,0,0"/> 
+		</transform>
+	</mesh>
+
+    <!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="disneyBSDF">
+            <color name="albedo" value="0,0.2,0.4"/>
+            <float name="specular" value="0.5"/>
+            <float name="metallic" value="0.1"/>
+            <float name="clearcoat" value="1.0"/>
+            <float name="roughness" value="0.5"/>
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="-3.6,0,0"/> 
+		</transform>
+	</mesh>
+
+
+<!-- Ground Plane -->
+
+    <mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+     
+		<bsdf type="diffuse">
+				<texture type="checkerboard_color" name="albedo">
+						<point name="delta" value="0.5,0.5"/>
+						<vector name="scale" value="0.02,0.02"/>
+						<color name="value1" value="0.8,0.8,0.8"/>
+						<color name="value2" value="0.2,0.2,0.2"/>
+				</texture>
+		</bsdf>
+
+		<transform name="toWorld">
+			<scale value="50 50 50"/>
+			<rotate axis="1,0,0" angle="90"/>
+		</transform>
+	</mesh>
+
+
+
+
+    <mesh type="sphere">
+        <point name="center" value="0,0,0"/>
+        <float name="radius" value="30"/>
+
+        <emitter type="environment">
+            <string name="filename" value="envMap.exr"/>
+            <boolean name="interpolate" value="true"/>
+        </emitter>
+    </mesh>
+
+</scene>

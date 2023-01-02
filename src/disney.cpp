@@ -18,75 +18,73 @@
 
 #include <nori/bsdf.h>
 #include <nori/frame.h>
+#include <nori/warp.h>
 
 NORI_NAMESPACE_BEGIN
 using namespace std;
 class DisneyBSDF : public BSDF {
 public:
     DisneyBSDF(const PropertyList &propList) {
-       PropertyList l;
+        PropertyList l,s;
         l.setColor("value", propList.getColor("albedo"));
         m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
-
+        
         m_specular = propList.getFloat("specular", 0.f);
         m_metallic = propList.getFloat("metallic", 0.f);
-        m_roughness = propList.getFloat("roughness", 0.f);
+        m_roughness = propList.getFloat("roughness", 0.0f);
         m_sheen = propList.getFloat("sheen", 0.f);
         m_clearcoat = propList.getFloat("clearcoat", 0.f);
-        m_specularTint = propList.getFloat("specularTint", 0.f);
+        m_specularTint = propList.getFloat("specularTint", 0.0f);
     }
 
     static float SchlickWeight(float cosTheta) {
         float m = clamp(1 - cosTheta, 0.f, 1.f);
-        return pow(m,5);
+        return powf(m,5);
     }
 
     static float FrSchlick(float R0, float cosTheta) {
         return lerp(SchlickWeight(cosTheta), R0, 1);
     }
 
-    static float GTR1(float cosTheta, float alpha){
-        float a = alpha * alpha;
-        return (a - 1) / (M_PI * log(a) * (1 + (a-1) * cosTheta * cosTheta));
-    }
     static float smithGGGX(float cosTheta, float alpha) {
         float a = alpha * alpha;
         float c = cosTheta * cosTheta;
-        return 1 / (cosTheta + sqrt(a + c - a * c));
+        return 1.f / (cosTheta + sqrt(a + c - a * c));
     } 
-/*
+
+    static Color3f lerpColor(float t, const Color3f v1, const Color3f v2) {
+        return (1 - t) * v1 + t * v2;
+    }
+
     Color3f Diffuse(const float wo, const float wi, const float cosThetaD, Color3f baseColor) const{
         float Fo = SchlickWeight(wo);
         float Fi = SchlickWeight(wi);
-        float FD90 = (.5f + 2 * m_roughness * pow(cosThetaD,2)) - 1.0f;
-        return baseColor * INV_PI * (1.f + Fo * FD90) * (1 + Fi * FD90);
+        float FD90 = (0.5f + 2 * m_roughness * powf(cosThetaD,2));
+        return baseColor * INV_PI * (1.f + (FD90-1.f)*Fo)*(1.f + (FD90 -1.f) * Fi);
     }
 
-    Color3f Sheen(const float cosThetaD, const Vector3f &h, Color3f baseColor) const{
-        if(h.x() == 0 && h.y() == 0 && h.z() == 0) return 0;
-        return baseColor * SchlickWeight(cosThetaD);
+    Color3f Sheen(const float cosThetaD, Color3f baseColor) const{
+        return m_sheen * SchlickWeight(cosThetaD);
     }
 
-   Color3f Specular(const float cosThetaD,const float cosThetaL,const float cosThetaV,Color3f specularColor) const {
-        float a = std::max(0.001f, m_roughness, m_roughness);
-        float Ds = 0;
+   Color3f Specular(const float cosThetaD,const float cosThetaL,const float cosThetaV,Color3f specularColor, const Vector3f h) const {
+        float a = std::max(0.001f, m_roughness* m_roughness);
+        float Ds = Warp::squareToGTR2Pdf(h,a);
         float Fh = SchlickWeight(cosThetaD);
         float Gs = smithGGGX(cosThetaL, a) * smithGGGX(cosThetaV, a);
-        return lerpColor(specularColor, 1, Fh)* Gs * Ds;
+        return lerpColor(Fh, specularColor,Color3f(1))* Gs * Ds;
     }
  
 
     Color3f Clearcoat(const Vector3f h, float cosThetaL , float cosThetaV, float cosThetaD)const{
-        if(h.x() == 0 && h.y() == 0 && h.z() == 0) return 0;
 
-        float alpha = std::max(0.001f, m_roughness * m_roughness);
-        float Dr = GTR1(Frame::cosTheta(h), alpha);
-        float Fr = FrSchlick(.04f, cosThetaD);
+        float Dr = Warp::squareToGTR1Pdf(Frame::cosTheta(h), lerp(0.0, 0.1f, 0.001f)); //Fixing Clearcoat gloss at 
+        float Fr = lerp(SchlickWeight(cosThetaD),0.04f,1.f);
         float Gr = smithGGGX(cosThetaL, 0.25f) * smithGGGX(cosThetaV,0.25f);
 
-        return m_clearcoat * Gr * Fr * Dr / 4.f;
+        return (m_clearcoat * Gr * Fr * Dr);
     }
-*/
+
     virtual Color3f eval(const BSDFQueryRecord &bRec) const override {
         auto v = bRec.wi;
         auto l = bRec.wo;
@@ -97,9 +95,7 @@ public:
         auto cosThetaH = Frame::cosTheta(h);
         auto cosThetaD = l.dot(h);
 
-        if (cosThetaV <= 0 || cosThetaL <= 0 || bRec.measure != ESolidAngle) {
-            return 0;
-        }
+        if (cosThetaV < 0.f || cosThetaL < 0.f)return 0;
 
         auto baseColor = m_albedo -> eval(bRec.uv);
         auto L = baseColor.getLuminance();
@@ -111,43 +107,76 @@ public:
             tint = Color3f(baseColor / L);
         }
 
-        //auto specC = lerpColor(m_specular*0.08f * lerpColor(1, tint, m_specularTint), baseColor, m_metallic);
-        /*
+        auto specC = lerpColor(m_metallic,m_specular *0.08f * lerpColor(1, tint, m_specularTint), baseColor);
+        
         auto diffuseColor = Diffuse(cosThetaL,cosThetaV,cosThetaD,baseColor);
-        auto sheenColor = Sheen(cosThetaD, h, baseColor);
-        auto specularColor = Specular(cosThetaD, cosThetaL, cosThetaV, specC);
+        auto sheenColor = Sheen(cosThetaD,baseColor);
+        auto specularColor = Specular(cosThetaD, cosThetaL, cosThetaV, specC, h);
         auto clearcoatColor = Clearcoat(h,cosThetaL,cosThetaV,cosThetaD);
 
         return (1.f - m_metallic) * diffuseColor + specularColor + clearcoatColor + sheenColor;
-        */
-       return 0;
     }
 
+//PDF IS BUGGY :-(
     virtual float pdf(const BSDFQueryRecord &bRec) const override {
         auto v = bRec.wi;
         auto l = bRec.wo;
         auto h = (v + l).normalized();
 
-        auto cosTheta_v = Frame::cosTheta(v);
-        auto cosTheta_l = Frame::cosTheta(l);
-        auto cosTheta_h = Frame::cosTheta(h);
+        auto cosThetaL = Frame::cosTheta(l);
+        auto cosThetaH = Frame::cosTheta(h);
+        auto cosThetaD = l.dot(h);
 
-        if (cosTheta_l <= 0 || cosTheta_v <= 0 || bRec.measure != ESolidAngle) {
-            return 0;
-        }
+        if (cosThetaL <= 0)return 0;
 
-        auto alpha =pow(m_roughness,2);
-        auto Jh = 1 / (4 * h.dot(l));
-        auto Ds = 0; //Warp::squareToGTR2Pdf(h, alpha);
+        auto diffuseWeight = (1.f - m_metallic) * 0.5f;
 
-        return (1 - m_metallic) * cosTheta_l * INV_PI
-                + m_metallic * Ds * cosTheta_h * Jh;
+        auto GTR2Weight = 1.f / (1.f + m_clearcoat);
+        auto GTR1Weight = (1.f - GTR2Weight);
+
+        auto alpha = max(0.001f, powf(m_roughness,2));
+
+        // Use abs value to prevent NaN and invalid radiance!!!
+        auto Jh = 1.f / (4 * abs(cosThetaD));
+
+        auto GTR2PDF = Warp::squareToGTR2Pdf(h, alpha);
+        auto GTR1PDF = Warp::squareToGTR1Pdf(h, lerp(0.0,0.1f,0.001f)); //fixed tint at 0
+
+        return diffuseWeight * cosThetaL * INV_PI + (1.f - diffuseWeight)* (GTR2Weight * GTR2PDF * Jh * cosThetaH + (GTR1Weight * GTR1PDF * Jh * cosThetaH));
     }
 
     virtual Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override {
         bRec.measure = EDiscrete;
 
-        return Color3f{1.0f};
+        auto v = bRec.wi;
+        auto cosThetaV = Frame::cosTheta(v);
+        Vector3f h;
+
+        if(cosThetaV <= 0.f)return 0;
+
+        auto diffuseWeight = (1.f - m_metallic) * 0.5f;
+
+        if(sample.x() < diffuseWeight){
+            bRec.wo = Warp::squareToCosineHemisphere(Point2f(sample.x() / diffuseWeight, sample.y()));
+        } else {
+            auto newX = (sample.x() - diffuseWeight) / (1 - diffuseWeight);
+            auto newSP = Point2f(newX,sample.y());
+            auto GTR2Weight = 1.f / (1.f + m_clearcoat);
+
+            if(newX < GTR2Weight){
+                auto alpha = max(0.001f, m_roughness*m_roughness);
+                newX /= GTR2Weight;
+                h = Warp::squareToGTR2(Point2f(newX, sample.y()), alpha);
+            } else {
+                newX = (newX - GTR2Weight) / (1.f - GTR2Weight);
+                h = Warp::squareToGTR1(Point2f(newX,sample.y()), lerp(0.0,0.1f,0.001f));
+            }
+            bRec.wo = (2 * v.dot(h) * h - v).normalized();
+        }
+        auto cosTheta = Frame::cosTheta(bRec.wo);
+        if(cosTheta <= 0.f)return 0;
+
+        return eval(bRec) * cosTheta / pdf(bRec);
     }
 
     virtual std::string toString() const override {
@@ -165,8 +194,10 @@ public:
     }
 private:
     float m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat;
+
     Texture<Color3f> * m_albedo;
 };
+
 
 NORI_REGISTER_CLASS(DisneyBSDF, "disneyBSDF");
 NORI_NAMESPACE_END
