@@ -53,7 +53,7 @@
 	<!-- Illuminate using a point light -->
 	<emitter type="point">
 		<point name="position" value="5,5,12"/>
-		<rgb name="intensity" value="400"/>
+		<rgb name="intensity" value="320"/>
 	</emitter>
 
 </scene>
