@@ -21,6 +21,7 @@
 
 #include <nori/bvh.h>
 #include <nori/emitter.h>
+#include <nori/medium.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -70,6 +71,30 @@ public:
                 static_cast<size_t>(std::floor(n*rnd)),
                 n-1);
         return m_emitters[index];
+    }
+
+    /// Return all media present in the scene
+    const std::vector<Medium *> getMedia() const { return m_media; }
+
+    /// Return a random medium which the ray intersects
+    const Medium* getRandomMedium(const Ray3f &ray, float rnd) const {
+        std::vector<Medium* > intersectingMedia;
+        for (Medium* medium : m_media) {
+            float nearT, farT;
+
+            if (medium->rayIntersect(ray, nearT, farT)) {
+                intersectingMedia.push_back(medium);
+            }
+        }
+
+        auto const & n = intersectingMedia.size();
+
+        if (n == 0) return nullptr;
+
+        size_t index = std::min(
+                static_cast<size_t>(std::floor(n*rnd)),
+                n-1);
+        return intersectingMedia[index];
     }
 
     /**
@@ -140,6 +165,7 @@ private:
     BVH *m_bvh = nullptr;
 
     std::vector<Emitter *> m_emitters;
+    std::vector<Medium *> m_media;
 };
 
 NORI_NAMESPACE_END
