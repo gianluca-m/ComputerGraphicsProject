@@ -53,11 +53,7 @@ public:
         float a = alpha * alpha;
         float c = cosTheta * cosTheta;
         return 1 / (cosTheta + sqrt(a + c - a * c));
-    }
-
-    static Color3f lerpColor(const Color3f& v1, const Color3f& v2, const float t) {
-        return (1 - t) * v1 + t * v2;
-    }   
+    } 
 /*
     Color3f Diffuse(const float wo, const float wi, const float cosThetaD, Color3f baseColor) const{
         float Fo = SchlickWeight(wo);
@@ -115,7 +111,7 @@ public:
             tint = Color3f(baseColor / L);
         }
 
-        auto specC = lerpColor(m_specular*0.08f * lerpColor(1, tint, m_specularTint), baseColor, m_metallic);
+        //auto specC = lerpColor(m_specular*0.08f * lerpColor(1, tint, m_specularTint), baseColor, m_metallic);
         /*
         auto diffuseColor = Diffuse(cosThetaL,cosThetaV,cosThetaD,baseColor);
         auto sheenColor = Sheen(cosThetaD, h, baseColor);
