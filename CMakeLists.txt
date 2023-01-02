@@ -43,6 +43,9 @@ add_executable(nori
   include/nori/transform.h
   include/nori/vector.h
   include/nori/warp.h
+  include/nori/medium.h
+  include/nori/phasefunction.h
+  include/nori/perlinnoise.h
 
   # Source code files
   src/bitmap.cpp
@@ -88,6 +91,10 @@ add_executable(nori
   src/normal_map.cpp
   src/directionallight.cpp
   src/environment.cpp
+  src/phasefunction.cpp
+  src/homogeneous_medium.cpp
+  src/heterogeneous_medium.cpp
+  src/vol_path.cpp
 )
 
 # The following lines build the warping test application

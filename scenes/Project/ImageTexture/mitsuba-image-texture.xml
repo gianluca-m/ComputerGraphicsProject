@@ -76,11 +76,11 @@
     <!-- Illuminate using a point light -->
     <emitter type="point">
 		<point name="position" value="3,7,10"/>
-		<rgb name="intensity" value="500"/>
+		<rgb name="intensity" value="325"/>
 	</emitter>
 
 	<emitter type="point">
 		<point name="position" value="-10,-10,20"/>
-		<rgb name="intensity" value="400"/>
+		<rgb name="intensity" value="325"/>
 	</emitter>
 </scene>

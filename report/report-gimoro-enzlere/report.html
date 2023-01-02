@@ -39,6 +39,7 @@
       <li><a href="#normalMapping">Normal Mapping</a></li>
       <li><a href="#texturedAreaEmitters">Textured Area Emitters</a></li>
       <li><a href="#denoising">NL-means Denoising</a></li>
+      <li><a href="#participating-media">Heterogeneous Participating Media</a></li>
     </ul>
     <hr class="solid">
     <a href="#featuresEric">Features Eric Enzler</a>
@@ -366,6 +367,315 @@
               <img src="images/features/denoise/cbox_path_mis-8192.png" alt="8192 spp render" class="img-responsive">
             </div>
           </div>
+
+          <br>
+
+          <div id="participating-media">
+            <h2>5. Heterogeneous Participating Media [30 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>include/nori/medium.h, src/homogeneous_medium.cpp, src/heterogeneous_medium.cpp</code> <br>
+                <code>include/nori/phasefunction.h, src/phasefunction.cpp</code> <br>
+                <code>src/vol_path.cpp</code> <br>
+                <code>include/nori/perlinnoise.h</code> <br>
+                <code>include/nori/scene.h</code>
+              </dd>
+
+              <dt>External Libraries</dt>
+              <dd>
+                <a href="https://github.com/AcademySoftwareFoundation/openvdb/tree/master/nanovdb/nanovdb">
+                  NanoVDB (A lightweight version of OpenVDB)
+                </a> <br>
+                <a href="https://github.com/daniilsjb/perlin-noise">
+                  github.com/daniilsjb/perlin-noise (3D Perlin Noise)
+                </a>
+              </dd>
+
+              <dt>Theory</dt>
+              <dd>
+                <a
+                  href="https://moodle-app2.let.ethz.ch/pluginfile.php/1449689/mod_resource/content/2/14-participating-media-I.pdf">
+                  CG Lecture Slides 04.11.2022, Participating Media I</a> <br>
+                <a
+                  href="https://moodle-app2.let.ethz.ch/pluginfile.php/1452153/mod_resource/content/1/15-participating-media-II.pdf">
+                  CG Lecture Slides 08.11.2022, Participating Media II</a> <br>
+                <a
+                  href="https://www.pbr-book.org/3ed-2018/Light_Transport_II_Volume_Rendering/Sampling_Volume_Scattering">
+                  PBR Book, 15.2 Sampling Volume Scattering</a> <br>
+                <a
+                  href="https://www.pbr-book.org/3ed-2018/Light_Transport_II_Volume_Rendering/Volumetric_Light_Transport">
+                  PBR Book, 15.3 Volumetric Light Transport
+                </a> <br>
+                <a
+                  href="https://www.csie.ntu.edu.tw/~cyy/courses/rendering/09fall/lectures/handouts/chap17_volume_4up.pdf">
+                  Volume and Participating Media, Digital Image Synthesis, Yung -Yu Chuang
+                </a>
+              </dd>
+            </dl>
+
+            <p>
+              Participating media allows us to render clouds and fog. I implemented both homogeneous and
+              heterogeneous participating media using a volumetric path tracer.
+            </p>
+
+            <div id="participatingMediaImplementation">
+              <h3>Implementation</h3>
+              <p>
+                This feature was the most complicated to implement for me, and took the most amount of time to finish.
+                For the implementation, I mainly followed the theory covered in the lecture slides and the PBR book.
+              </p>
+
+              <h4>Phase Function</h4>
+              <p>
+                To sample a new scattering direction, I implemented both the isotropic and Henyey Greenstein
+                phase functions, as defined in the lecture slides. The pdf functions are as follows:
+                $$
+                \begin{align}
+                f_{p\text{ISO}} (\vec{w}', \vec{w}) &= \frac{1}{4\pi} \\
+                f_{p\text{HG}} (\theta) &= \frac{1}{4\pi} \frac{1 - g^2}{\left( 1 + g^2 - 2g \text{cos}(\theta)
+                \right)^{3/2}} \\
+                \text{where: } \; \; \text{cos}(\theta) &= \frac{1}{2g} \left( 1 + g^2 -
+                \left( \frac{1 - g^2}{1 - g + 2g\xi} \right)^2 \right)
+                \end{align}
+                $$
+              </p>
+
+              <h4>Medium</h4>
+              <p>
+                The medium needs the ability to sample a free path and calculate the transmittance along a ray. <br>
+                For the homogeneous medium, I first tried the simplified variant with $Tr(t) = e^{-\sigma_t \cdot t}$
+                (<a href="https://en.wikipedia.org/wiki/Beer%E2%80%93Lambert_law">Beer-Lambert law)</a>,
+                but I couldn't get it to work properly since this always resulted in a completely black medium. <br>
+                Therefore, I am using Delta Tracking for both the homogeneous and heterogeneous medium.
+                The idea is to start at the beginning of the ray and take a random step along the ray, according to
+                $t \texttt{ += } -log(1 - \xi) \cdot inv\_max\_density / \sigma_t$. <br>
+                To sample a free path, we continue Delta Tracking until we either exit the medium,
+                or until $current\_density / max\_density \gt \xi$, where $\xi$ is a random number between 0 and 1.
+                The first case means we have no medium interaction, while the second case indicates a medium
+                interaction, and we return the $albedo$ color. <br>
+                To calculate the transmittance, we continue Delta Tracking until we exit the medium, while in every
+                iteration we update $t$ as before and also update the transmittance as:
+                $tr \texttt{ *= } 1 - max(0, current\_density \cdot inv\_max\_density)$, where the initial value is $tr
+                = 1$.
+              </p>
+              <p>
+                Each medium is described by:
+                $$
+                \begin{align}
+                \text{Absorption coefficient } & \sigma_a \\
+                \text{Scattering coefficient } & \sigma_s \\
+                \text{Extinction coefficient } & \sigma_t = \sigma_a + \sigma_s \\
+                \text{Albedo } & \alpha = \sigma_s / \sigma_t
+                \end{align}
+                $$
+              </p>
+
+              <p>
+                All media types use a bounding box, defined by the <code>center</code> and <code>size</code> xml scene
+                parameters, to define where the medium should be placed. <br>
+                While the density function for the homogeneous medium is always constant, for the heterogeneous medium
+                it is spatially varying. For the homogeneous medium, we can specify the density with the
+                <code>max_density</code> value in the xml scene file.
+                For the heterogeneous medium, I added support for different density types, which can be specified with
+                the <code>density_type</code> parameter:
+              <ul>
+                <li><b>Exponential:</b> $d(p) = max\_density \cdot exp(-b \cdot h)$, where $h$ is the height in the
+                  direction
+                  of the up-vector
+                </li>
+                <li><b>Volume Grid:</b> The density at a point is read from a volume grid (.nvdb) file</li>
+                <li><b>Perlin Noise:</b> The density at a point is calculated using a 3D perlin noise function</li>
+              </ul>
+              </p>
+
+              <h5>Exponential</h5>
+              <p>
+                The expoential density function slowly decreases the density in the up direction. The parameter
+                <code>b</code> and the up-direction vector <code>up_dir</code> can be specified in the xml file.
+                This density function allows us to create nice foggy scenes.
+              </p>
+
+              <h5>Volume Grid</h5>
+              <p>
+                To read the density values from a volume grid file, I am using
+                <a href="https://github.com/AcademySoftwareFoundation/openvdb/tree/master/nanovdb/nanovdb">NanoVDB</a>,
+                which is a header-only library to read NanoVDB files, which are similar to
+                <a href="https://www.openvdb.org/">OpenVDB</a> files. <br>
+                To get the density of a specific point in our scene, I am first projecting the point inside our medium
+                bounding box to the unit cube. Then I can use this position to determine the corresponding point
+                inside the bouding box of the grid defined in the vdb file.
+              </p>
+
+              <br>
+              <h4>Volumetric Path Tracer</h4>
+              <p>
+                To render the participating medium, I implemented a Volumetric Path Tracer <code>vol_path</code>.
+                I based this integrator on the <code>path_mis</code> integrator implemented as part of the homeworks,
+                and added the functionality to handle medium interaction. <br>
+                First, we sample a random medium which the ray intersects. For this medium, we sample the free path,
+                and if we detect a medium interaction, we sample a random emitter. If the emitter is visible from the
+                sampled medium point, we calculate the transmittance along the shadowray through all media in the scene
+                by multiplying each transmittance value together. <br>
+                We then use the phase function to sample a new direction for the recursive ray. If the new intersection
+                point is an emitter, we update the $w_{mat}$ value similar to how it's done in the
+                <code>path_mis</code> integrator. <br>
+                If we have no medium interaction, we basically do the same as in the <code>path_mis</code> integrator,
+                while always also including the calculated transmittance along the ray.
+              </p>
+
+              <p>Below is the pseudocode for the volumetric path tracer:</p>
+              <pre><code>Li = 0, t = 1
+while (true) {
+    medium = scene.getRandomMedium()
+    albedo = scene.sampleFreePath()
+
+    if (mediumInteraction) {
+        russianRoulette()
+        t *= albedo
+        Vector3f scatterDirection
+        pdf_mat = medium.phaseFunction().sample(scatterDirection)
+        randomEmitter = scene.getRandomEmitter()
+
+        if (!shadowRayOccluded) {
+            Color3f Tr = 1
+            for (med : scene.getAllMedia()) {
+                Tr *= med.Tr(shadowRay)
+            }
+
+            // update pdf_em and w_em
+
+            Li += t * Tr * randomEmitter.sample() * numEmitters * pdf_mat
+        }
+
+        recursiveRay = Ray3f(mediumInteractionPoint, scatterDirection)
+
+        // update w_mat
+    }
+    else if (!mediumInteraction && !surfaceInteraction) {
+        break
+    }
+    else {
+        // add contribution from material sampling
+        //    including transmittance
+        
+        russianRoulette()
+
+        // add contribution from emitter sampling
+        //    including transmittance
+        //    update w_em
+
+        // update recursiveRay
+        
+        // update w_mat
+    }
+}</code></pre>
+            </div>
+
+            <div id="participatingMediaValidation">
+              <h3>Validation</h3>
+              <h4>Volumetric Path Tracer</h4>
+              <p>
+                To validate my volumetric path tracer, I rendered identical scenes without any participating media
+                present, using my <code>vol_path</code> integrator and the <code>path_mis</code> integrator
+                implemented as part of the homeworks. <br>
+                As expected, the resulting images look identical.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox.png" alt="vol_path" class="img-responsive">
+                <img src="images/features/medium/cbox_path-mis.png" alt="path_mis" class="img-responsive">
+              </div>
+
+              <h4>Homogeneous</h4>
+              <p>
+                To validate the homogeneous medium, I rendered identical scenes using my implementation and
+                <a href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. <br>
+                The images look very similar. Note that the position of the medium cube is not 100% identical,
+                because I use a different approach to define the medium position,
+                and thus conversion caused some misalignment. <br>
+                $\sigma_a = 2, \sigma_s = 0.5$ and isotropic phase function.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_homo.png" alt="mine" class="img-responsive">
+                <img src="images/features/medium/mitsuba-cbox_homo.png" alt="mitsuba3" class="img-responsive">
+              </div>
+
+              <br>
+
+              <h4>Heterogeneous: Exponential Density</h4>
+              <p>
+                No comparision with mitsuba3 renderer because it does not support Exponential density.
+                However, the resulting images look correct to me. <br>
+                $\sigma_a = 2, \sigma_s = 1, b = 5$, with different $up\_dir$.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-exp-right.png" alt="up_dir=(1,0,0)" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-exp-up.png" alt="up_dir=(0,1,0)" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-exp-front.png" alt="up_dir=(0,0,1)" class="img-responsive">
+              </div>
+
+              <br>
+
+              <p>
+                In the following scene, the medium cube has been scaled up to fill the entire scene.
+                Together with exponential density, this creates a nice fog effect. <br>
+                $\sigma_a = 1, \sigma_s = 4, b = 5$
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox.png" alt="no medium" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-exp-full.png" alt="heterogenous, exp density"
+                  class="img-responsive">
+              </div>
+
+              <br>
+
+              <h4>Heterogeneous: Volume Grid Density</h4>
+              <p>
+                Unfortunately, no comparision with mitsuba3 because mitsuba3 does not support OpenVDB
+                or NanoVDB, but requires .vol files, and I was unable to convert our NanoVDB files to
+                .obj files. <br>
+                However, the resulting image looks as expected: The expected shapes are clearly visible. <br>
+                The vdb files are from the <a href="https://www.openvdb.org/download/">OpenVDB</a> website,
+                and converted to NanaoVDB files using the converter provided by
+                <a href="https://github.com/AcademySoftwareFoundation/openvdb/tree/master/nanovdb/nanovdb">NanoVDB</a>.
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-grid.png" alt="cloud" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-bunny.png" alt="bunny" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-fire.png" alt="fire" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-smoke.png" alt="smoke" class="img-responsive">
+              </div>
+
+              <p>
+                As you can see, we can also render colored medium by specifying the $\sigma_a, \sigma_s$
+                accordingly. <br>
+                Gray: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 4, 4]$),
+                Red: ($\sigma_a = [1, 1, 1], \sigma_s = [4, 0.5, 0.5]$),
+                Blue: ($\sigma_a = [1, 1, 1], \sigma_s = [0.5, 0.5, 4]$)
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-grid.png" alt="gray" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-scale.png" alt="gray + density_scale=2"
+                  class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-red.png" alt="red" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-blue.png" alt="blue" class="img-responsive">
+              </div>
+
+              <br>
+
+              <h4>Heterogeneous: 3D Perlin Noise Density</h4>
+              <p>
+                The following image shows a heterogeneous medium, consisting of a sphere whose density values
+                are sampled from a 3D perlin noise function. <br>
+                $\sigma_a = 2.5, \sigma_s = 0.5, density\_scale = 2$
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-noise.png" alt="perlin noise sphere cloud"
+                  class="img-responsive">
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <br> <br>
@@ -655,7 +965,15 @@
         <img src="images/features/advanced-camera/final.png" alt="Putting everything together" class="img-responsive">
       </div>
 
+      <br> <br>
+
+      <div id="finalImage">
+        <h1>Final Image</h1>
+        <i>TODO: Add</i>
+      </div>
+
     </div>
+  </div>
   </div>
 
   <br> <br>
