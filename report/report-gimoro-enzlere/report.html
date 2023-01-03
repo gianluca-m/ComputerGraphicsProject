@@ -46,6 +46,7 @@
     <ul>
       <li><a href="#directional">Directional Light</a></li>
       <li><a href="#environment">Environment Map</a></li>
+      <li><a href="#disney">Disney BSDF</a></li>
     </ul>
     <hr class="solid">
     <a href="#finalImage">Final Image</a>
@@ -490,7 +491,7 @@
               <h5>Exponential</h5>
               <p>
                 The expoential density function slowly decreases the density in the up direction. The parameter
-                <code>b</code> and the up-direction vector <code>up_dir</code> can be specified in the xml file. 
+                <code>b</code> and the up-direction vector <code>up_dir</code> can be specified in the xml file.
                 This density function allows us to create nice foggy scenes.
               </p>
 
@@ -575,7 +576,7 @@ while (true) {
               <h4>Volumetric Path Tracer</h4>
               <p>
                 To validate my volumetric path tracer, I rendered identical scenes without any participating media
-                present, using my <code>vol_path</code> integrator and the <code>path_mis</code> integrator 
+                present, using my <code>vol_path</code> integrator and the <code>path_mis</code> integrator
                 implemented as part of the homeworks. <br>
                 As expected, the resulting images look identical.
               </p>
@@ -818,14 +819,77 @@ while (true) {
 
         <br> <br>
 
-        <div id="finalImage">
-          <h1>Final Image</h1>
-          <i>TODO: Add</i>
-        </div>
+        <div id="disney">
+          <h2>5. Disney BSDF [15 points]</h2>
+          <dl>
+            <dt>Modified Files</dt>
+            <dd>
+              <code>src/disney.cpp</code> <br>
+              <code>src/warp.cpp</code> <br>
+              <code>src/warptest.cpp</code> <br>
+            </dd>
+            <dt>Theory</dt>
+            <dd>
+              <a
+                href="https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf">
+                Disney Paper</a> <br>
+              <a href="https://schuttejoe.github.io/post/disneybsdf/">Blog post on Disney BSDF</a>
+            </dd>
+          </dl>
 
+          <h3>Implementation</h3>
+          <p> I hated every Second of this shit
+          </p>
+
+          <h3>Validation</h3>
+          <p> Visual Validation
+          </p>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/gtr1.PNG" alt="GTR1" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/gtr1PDF.PNG" alt="GTR1 PDF" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/gtr2.PNG" alt="GTR2" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/gtr2PDF.PNG" alt="GTR2 PDF" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/specular.png" alt="Specular" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/metallic.png" alt="Metallic" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/roughness.png" alt="Roughness" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/clearCoat.png" alt="Clearcoat" class="img-responsive">
+          </div>
+          <br>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/sheen.png" alt="Sheen" class="img-responsive">
+          </div>
+
+          <br> <br>
+
+          <div id="finalImage">
+            <h1>Final Image</h1>
+            <i>TODO: Add</i>
+          </div>
+
+        </div>
       </div>
     </div>
-  </div>
   </div>
 
   <!-- Bootstrap core JavaScript -->

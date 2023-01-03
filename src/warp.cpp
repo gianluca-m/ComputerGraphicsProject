@@ -147,12 +147,12 @@ float Warp::squareToGTR1Pdf(const Vector3f &m, float alpha) {
     //Similar to Beckmann, Disney GTR (1)
     if (abs(1.f - m.norm()) > Epsilon || m.z() < 0.f)return 0.f;
 
-    if (alpha >= 1)return INV_PI;
+    if (alpha >= 1.f)return INV_PI;
 
     auto cosTheta = m.z();
     auto a2 = alpha * alpha;
-    auto t = 1.f + (a2 - 1.f) * cosTheta * cosTheta;
-    return (a2 - 1)* cosTheta / (M_PI * log(a2) * t);
+    auto term = 1.f + (a2 - 1.f) * cosTheta * cosTheta;
+    return (a2 - 1)* cosTheta / (M_PI * log(a2) * term);
 }
 
 Vector3f Warp::squareToGTR2(const Point2f &sample, float alpha) {
@@ -169,8 +169,8 @@ float Warp::squareToGTR2Pdf(const Vector3f &m, float alpha) {
 
     auto cosTheta = m.z();
     float a2 = alpha * alpha;
-    float t = 1.f + (a2 - 1.f) * cosTheta * cosTheta;
-    return a2*cosTheta / (M_PI * t * t);
+    float term = 1.f + (a2 - 1.f) * cosTheta * cosTheta;
+    return a2*cosTheta / (M_PI * powf(term,2));
 }
 
 NORI_NAMESPACE_END

@@ -23,11 +23,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0,0.2,0.4"/>
-            <float name="specular" value="0.5"/>
-            <float name="metallic" value="0.1"/>
-            <float name="clearcoat" value="0.0"/>
-            <float name="roughness" value="0.5"/>
+            <color name="albedo" value="0.7,0.0,0.0"/>
+            <float name="specular" value="0.0"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -41,11 +38,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0,0.2,0.4"/>
-            <float name="specular" value="0.5"/>
-            <float name="metallic" value="0.1"/>
-            <float name="clearcoat" value="0.3"/>
-            <float name="roughness" value="0.5"/>
+            <color name="albedo" value="0.7,0.0,0.0"/>
+            <float name="specular" value="0.3"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -59,11 +53,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0,0.2,0.4"/>
+            <color name="albedo" value="0.7,0.0,0.0"/>
             <float name="specular" value="0.5"/>
-            <float name="metallic" value="0.1"/>
-            <float name="clearcoat" value="0.5"/>
-            <float name="roughness" value="0.5"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -76,11 +67,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0,0.2,0.4"/>
-            <float name="specular" value="0.5"/>
-            <float name="metallic" value="0.1"/>
-            <float name="clearcoat" value="0.7"/>
-            <float name="roughness" value="0.5"/>
+            <color name="albedo" value="0.7,0.0,0.0"/>
+            <float name="specular" value="0.7"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -94,11 +82,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0,0.2,0.4"/>
-            <float name="specular" value="0.5"/>
-            <float name="metallic" value="0.1"/>
-            <float name="clearcoat" value="1.0"/>
-            <float name="roughness" value="0.5"/>
+            <color name="albedo" value="0.7,0.0,0.0"/>
+            <float name="specular" value="0.9"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -141,5 +126,10 @@
             <boolean name="interpolate" value="true"/>
         </emitter>
     </mesh>
+
+    <emitter type="point">
+		<point name="position" value="0,10,1"/>
+		<color name="power" value="7000,2000,2000"/>
+	</emitter>
 
 </scene>

@@ -35,6 +35,13 @@ public:
         m_sheen = propList.getFloat("sheen", 0.f);
         m_clearcoat = propList.getFloat("clearcoat", 0.f);
         m_specularTint = propList.getFloat("specularTint", 0.0f);
+        m_clearcoatGloss = propList.getFloat("clearcoatGloss", 0.1f);
+
+        // The original value for this is 0.25 (original Disney)
+        // But the higher the value to more visible is the clearcoat effect!
+        m_clearcoatIntensity = 1.5; 
+
+        m_sheenIntensity = 1.0;
     }
 
     static float SchlickWeight(float cosTheta) {
@@ -47,9 +54,9 @@ public:
     }
 
     static float smithGGGX(float cosTheta, float alpha) {
-        float a = alpha * alpha;
+        float a2 = alpha * alpha;
         float c = cosTheta * cosTheta;
-        return 1.f / (cosTheta + sqrt(a + c - a * c));
+        return 1.f / (cosTheta + sqrt(a2 + c - a2 * c));
     } 
 
     static Color3f lerpColor(float t, const Color3f v1, const Color3f v2) {
@@ -64,7 +71,8 @@ public:
     }
 
     Color3f Sheen(const float cosThetaD, Color3f baseColor) const{
-        return m_sheen * SchlickWeight(cosThetaD);
+        //Full SheenTint (1.0f)
+        return m_sheen * lerpColor(1.f,Color3f(1),baseColor) * SchlickWeight(cosThetaD) * 4;
     }
 
    Color3f Specular(const float cosThetaD,const float cosThetaL,const float cosThetaV,Color3f specularColor, const Vector3f h) const {
@@ -77,12 +85,11 @@ public:
  
 
     Color3f Clearcoat(const Vector3f h, float cosThetaL , float cosThetaV, float cosThetaD)const{
-
-        float Dr = Warp::squareToGTR1Pdf(Frame::cosTheta(h), lerp(0.0, 0.1f, 0.001f)); //Fixing Clearcoat gloss at 
-        float Fr = lerp(SchlickWeight(cosThetaD),0.04f,1.f);
+        float Dr = Warp::squareToGTR1Pdf(h, lerp(m_clearcoatGloss, 0.1f, 0.001f)); 
+        float Fr = FrSchlick(0.04f, cosThetaD);
         float Gr = smithGGGX(cosThetaL, 0.25f) * smithGGGX(cosThetaV,0.25f);
 
-        return (m_clearcoat * Gr * Fr * Dr);
+        return (m_clearcoat * Gr * Fr * Dr) * m_clearcoatIntensity;
     }
 
     virtual Color3f eval(const BSDFQueryRecord &bRec) const override {
@@ -107,10 +114,10 @@ public:
             tint = Color3f(baseColor / L);
         }
 
-        auto specC = lerpColor(m_metallic,m_specular *0.08f * lerpColor(1, tint, m_specularTint), baseColor);
+        auto specC = lerpColor(m_metallic,m_specular *0.08f * lerpColor(m_specularTint, Color3f(1), tint), baseColor);
         
         auto diffuseColor = Diffuse(cosThetaL,cosThetaV,cosThetaD,baseColor);
-        auto sheenColor = Sheen(cosThetaD,baseColor);
+        auto sheenColor = Sheen(cosThetaD,tint);
         auto specularColor = Specular(cosThetaD, cosThetaL, cosThetaV, specC, h);
         auto clearcoatColor = Clearcoat(h,cosThetaL,cosThetaV,cosThetaD);
 
@@ -140,13 +147,12 @@ public:
         auto Jh = 1.f / (4 * abs(cosThetaD));
 
         auto GTR2PDF = Warp::squareToGTR2Pdf(h, alpha);
-        auto GTR1PDF = Warp::squareToGTR1Pdf(h, lerp(0.0,0.1f,0.001f)); //fixed tint at 0
+        auto GTR1PDF = Warp::squareToGTR1Pdf(h, lerp(m_clearcoatGloss,0.1f,0.001f)); 
 
         return diffuseWeight * cosThetaL * INV_PI + (1.f - diffuseWeight)* (GTR2Weight * GTR2PDF * Jh * cosThetaH + (GTR1Weight * GTR1PDF * Jh * cosThetaH));
     }
 
     virtual Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const override {
-        bRec.measure = EDiscrete;
 
         auto v = bRec.wi;
         auto cosThetaV = Frame::cosTheta(v);
@@ -160,7 +166,6 @@ public:
             bRec.wo = Warp::squareToCosineHemisphere(Point2f(sample.x() / diffuseWeight, sample.y()));
         } else {
             auto newX = (sample.x() - diffuseWeight) / (1 - diffuseWeight);
-            auto newSP = Point2f(newX,sample.y());
             auto GTR2Weight = 1.f / (1.f + m_clearcoat);
 
             if(newX < GTR2Weight){
@@ -169,7 +174,7 @@ public:
                 h = Warp::squareToGTR2(Point2f(newX, sample.y()), alpha);
             } else {
                 newX = (newX - GTR2Weight) / (1.f - GTR2Weight);
-                h = Warp::squareToGTR1(Point2f(newX,sample.y()), lerp(0.0,0.1f,0.001f));
+                h = Warp::squareToGTR1(Point2f(newX,sample.y()), lerp(m_clearcoatGloss,0.1f,0.001f));
             }
             bRec.wo = (2 * v.dot(h) * h - v).normalized();
         }
@@ -189,11 +194,12 @@ public:
             "  roughness = %f\n"
             "  sheen = %f,\n"
             "  clearcoat = %f\n"
+            "  clearcoatGloss = %f\n"
             "]",
-            m_albedo, m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat);
+            m_albedo, m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat,m_clearcoatGloss);
     }
 private:
-    float m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat;
+    float m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat,m_clearcoatGloss,m_clearcoatIntensity, m_sheenIntensity;
 
     Texture<Color3f> * m_albedo;
 };
