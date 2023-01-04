@@ -838,11 +838,33 @@ while (true) {
           </dl>
 
           <h3>Implementation</h3>
-          <p> I hated every Second of this shit
+          <p> Out of the 10 possible parameters, I implemented specular, metallic, roughness, sheen and clearcoat. For
+            most of them, I used the original disney paper as reference. Since sheen is only mentioned briefly in the
+            disney paper,
+            I additionaly took inspiration from a blog post on the Disney BSDF. For specular and clearcoat, I
+            implemented new warping functions called GTR1 and GTR2 (Generalized-Trowbridge-Reit distributions). I also
+            added more than the 5 required parameters to my model because I wanted to see the effects of them in action.
           </p>
-
+          <p>
+            For clearcoat, I was not happy with the implementation that the Disney paper proposed. Officially, the term
+            looks like this: <code>(m_clearcoat * Gr * Fr * Dr) * 0.25</code> where the intensity is
+            only $0.25$ and the effect of clearcoat is not visible without sliding the exposure up to 100%. To counter
+            this, I simply
+            added a new variable <code> (m_clearcoat * Gr * Fr * Dr) * m_clearcoatIntensity </code>. This variable is
+            currently hardcoded at $1.5$ and gives (in my opinion) a much better and clearer clearcoat effect.
+          </p>
+          <p>
+            For sheen, as mentioned above, I did not find a lot of useful information in the disney paper. The original
+            idea for it is given only in the appendix of the paper and after using said idea, I was not happy with the
+            result. I then did some research online and found a blog post that proposed a slightly different formula for
+            sheen.
+            I implemented it but sadly was not able to reconstruct the effect so clearly as it is depicted on the disney
+            reference
+            image.
+          </p>
           <h3>Validation</h3>
-          <p> Visual Validation
+          <p> For the Validation of the new warping functions, I changed the warptest file accordingly and ran the
+            tests. Both warping functions succeeded.
           </p>
           <div class="twentytwenty-container">
             <img src="images/features/disney/gtr1.PNG" alt="GTR1" class="img-responsive">
@@ -860,6 +882,11 @@ while (true) {
             <img src="images/features/disney/gtr2PDF.PNG" alt="GTR2 PDF" class="img-responsive">
           </div>
           <br>
+          <p>
+            For the actual disney parameters, I setup a scene with five teapots and increased the parameter strength
+            from left to right. The other parameters were held constant. For clearcoat, as mentioned above, I changed
+            the factor such that the effect is better visible.
+          </p>
           <div class="twentytwenty-container">
             <img src="images/features/disney/specular.png" alt="Specular" class="img-responsive">
           </div>
@@ -879,6 +906,10 @@ while (true) {
           <div class="twentytwenty-container">
             <img src="images/features/disney/sheen.png" alt="Sheen" class="img-responsive">
           </div>
+          <div class="twentytwenty-container">
+            <img src="images/features/disney/disney_ref.PNG" alt="Disney reference" class="img-responsive">
+          </div>
+
 
           <br> <br>
 

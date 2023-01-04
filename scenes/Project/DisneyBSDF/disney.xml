@@ -23,8 +23,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0.7,0.0,0.0"/>
-            <float name="specular" value="0.0"/>
+            <color name="albedo" value="0.6,0.27,0.24"/>
+            <float name="sheen" value="0.0"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -38,8 +38,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0.7,0.0,0.0"/>
-            <float name="specular" value="0.3"/>
+            <color name="albedo" value="0.6,0.27,0.24"/>
+            <float name="sheen" value="0.3"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -53,8 +53,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0.7,0.0,0.0"/>
-            <float name="specular" value="0.5"/>
+            <color name="albedo" value="0.6,0.27,0.24"/>
+            <float name="sheen" value="0.5"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -67,8 +67,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0.7,0.0,0.0"/>
-            <float name="specular" value="0.7"/>
+            <color name="albedo" value="0.6,0.27,0.24"/>
+            <float name="sheen" value="0.7"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -82,8 +82,8 @@
     <mesh type="obj">
 		<string name="filename" value="pot.obj"/>
         <bsdf type="disneyBSDF">
-            <color name="albedo" value="0.7,0.0,0.0"/>
-            <float name="specular" value="0.9"/>
+            <color name="albedo" value="0.6,0.27,0.24"/>
+            <float name="sheen" value="0.9"/>
         </bsdf>
 		<transform name="toWorld">
 			<scale value="0.25, 0.25, 0.25"/>
@@ -128,8 +128,8 @@
     </mesh>
 
     <emitter type="point">
-		<point name="position" value="0,10,1"/>
-		<color name="power" value="7000,2000,2000"/>
+		<point name="position" value="0,-14,1"/>
+		<color name="power" value="2000,2000,2000"/>
 	</emitter>
 
 </scene>

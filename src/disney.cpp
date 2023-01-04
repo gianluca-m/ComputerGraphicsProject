@@ -72,7 +72,7 @@ public:
 
     Color3f Sheen(const float cosThetaD, Color3f baseColor) const{
         //Full SheenTint (1.0f)
-        return m_sheen * lerpColor(1.f,Color3f(1),baseColor) * SchlickWeight(cosThetaD) * 4;
+        return m_sheen * lerpColor(0.1f,Color3f(1),baseColor) * SchlickWeight(cosThetaD) * m_sheenIntensity;
     }
 
    Color3f Specular(const float cosThetaD,const float cosThetaL,const float cosThetaV,Color3f specularColor, const Vector3f h) const {
@@ -124,7 +124,6 @@ public:
         return (1.f - m_metallic) * diffuseColor + specularColor + clearcoatColor + sheenColor;
     }
 
-//PDF IS BUGGY :-(
     virtual float pdf(const BSDFQueryRecord &bRec) const override {
         auto v = bRec.wi;
         auto l = bRec.wo;
