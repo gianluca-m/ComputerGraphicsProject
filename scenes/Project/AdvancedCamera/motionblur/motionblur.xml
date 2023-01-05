@@ -22,7 +22,7 @@
 
 		<boolean name="motionblur" value="true"/>
 		<transform name="motion">
-			<lookat target="0,0,3" origin="9,9,9" up="0,0,1"/>
+			<lookat target="0,0,3" origin="9.5,10,10" up="0,0,1"/>
 		</transform>
 		
 

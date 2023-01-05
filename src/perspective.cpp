@@ -115,7 +115,7 @@ public:
             samplePosition.x() * m_invOutputSize.x(),
             samplePosition.y() * m_invOutputSize.y(), 0.0f);
 
-        if(m_distortion > 0){
+        if(m_distortion){
             //change nearP
             float distort = distortionFunction(Vector2f(nearP.x() / nearP.z(), nearP.y() / nearP.z()).norm());
             nearP.x() *= distort;
@@ -123,11 +123,9 @@ public:
         }
         /* Turn into a normalized ray direction, and
            adjust the ray interval accordingly */
-        Vector3f d = nearP.normalized();
-        float invZ = 1.0f / d.z();
 
-        ray.o = m_cameraToWorld * Point3f(0, 0, 0);
-        ray.d = m_cameraToWorld * d; 
+        ray.o = Point3f(0, 0, 0);
+        ray.d = nearP.normalized(); 
 
         /* Depth of Field PBRT 6.2.3*/
         if(m_lensRadius > 0 ) {
@@ -137,22 +135,24 @@ public:
             } else {
                 pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
             }
-            float ft = m_focalLength / d.z();
-            Point3f pFocus = ft * d;
+            float ft = m_focalLength / ray.d.z();
+            Point3f pFocus = ray(ft); //Ray cast just like in the book works
 
             ray.o = Point3f(pLens.x(), pLens.y(), 0);
-            ray.d = (pFocus-ray.o).normalized();
-
-            ray.o = m_cameraToWorld * ray.o;
-            ray.d = m_cameraToWorld * d;
+            ray.d = (pFocus - ray.o).normalized();
             
         }
 
+        float invZ = 1.0f / ray.d.z();
+
         if(m_motionblur){
             Transform trans(m_cameraToWorld.getMatrix() * (1.0f - contribution) + m_finalMotion.getMatrix() * contribution);
-            //Keep the origin fixed!
-            //Such that the scene stays
-            ray.d = trans * d;
+            //Use trans instead of m_cameraToWorld
+            ray.o = trans * ray.o;
+            ray.d = trans * ray.d;
+        } else {
+            ray.o = m_cameraToWorld * ray.o;
+            ray.d = m_cameraToWorld * ray.d;
         }
 
         ray.mint = m_nearClip * invZ;

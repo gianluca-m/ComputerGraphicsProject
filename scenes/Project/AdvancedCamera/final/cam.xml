@@ -1,7 +1,7 @@
 <scene>
 	<!-- Independent sample generator, user-selected samples per pixel -->
 	<sampler type="independent">
-		<integer name="sampleCount" value="32"/>
+		<integer name="sampleCount" value="256"/>
 	</sampler>
 
 	<!-- Use a direct illumination integrator -->
@@ -22,7 +22,7 @@
 
 		
 		<float name="focalLength" value="20"/>
-		<float name="lensRadius" value="0.01"/>
+		<float name="lensRadius" value="0.1"/>
 		<boolean name="bokeh" value="true"/>
 	
 		<boolean name="distortion" value="true"/>

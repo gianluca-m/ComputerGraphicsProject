@@ -726,165 +726,177 @@ while (true) {
               <img src="images/features/directionallight/directional_colored.png" alt="Colored" class="img-responsive">
             </div>
           </div>
-        </div>
 
-        <br>
-        <div id="motionblur">
-          <h2>2. Motion Blur for cameras [5 points]</h2>
-          <dl>
-            <dt>Modified Files</dt>
-            <dd>
-              <code>src/perspective.cpp</code> <br>
-              <code>src/render.cpp</code> <br>
-              <code>src/ttest.cpp</code> <br>
-              <code>nori/camera.h</code> <br>
-            </dd>
-          </dl>
+          <br>
+          <div id="motionblur">
+            <h2>2. Motion Blur for cameras [5 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/perspective.cpp</code> <br>
+                <code>src/render.cpp</code> <br>
+                <code>src/ttest.cpp</code> <br>
+                <code>nori/camera.h</code> <br>
+              </dd>
+            </dl>
 
-          <h3>Implementation</h3>
-          <p>The implementation of this feature was hard. There is no information about it in the PBRT book and the blog
-            posts online did not help me well either.
-            The basic behind this type of motion blur is obviously that the camera needs to move in some way. At first,
-            I tried to do this by hand, meaning that I setup my own transformation matrices and then multiplied them
-            with the camera's matrix.
-            This did not work at all and I had to use a simpler approach where I defined the transformation matrix
-            directly in the xml file. This means that for motionblur we need to specify the point where the camera will
-            move to.
-            As we already have defined the origin of the camera, I programmed some sort of interpolation between the two
-            matrices. The camera will move a tiny bit towards the final position depending on the contribution of the
-            sample. This contribution factor is based
-            on the value of $m_{progress}$ which is defined in the <code>render.cpp</code>file.
-          </p>
-          <h3>Validation</h3>
-          <p> Validation for this type of blur is purely visually. For the scene, I let the camera move a small fraction
-            to the side. The blur applies instantly and is very intense. In the renderer one can notice the movement of
-            the camera and its effect on the bluriness.</p>
-          <div class="twentytwenty-container">
-            <img src="images/features/advanced-camera/motionblur.png" alt="Motionblur" class="img-responsive">
-            <img src="images/features/advanced-camera/simple.png" alt="Normal" class="img-responsive">
+            <h3>Implementation</h3>
+            <p>The implementation of this feature was hard. There is no information about it in the PBRT book and the
+              blog
+              posts online did not help me well either.
+              The basic behind this type of motion blur is obviously that the camera needs to move in some way. At
+              first,
+              I tried to do this by hand, meaning that I setup my own transformation matrices and then multiplied them
+              with the camera's matrix.
+              This did not work at all and I had to use a simpler approach where I defined the transformation matrix
+              directly in the xml file. This means that for motionblur we need to specify the point where the camera
+              will
+              move to.
+              As we already have defined the origin of the camera, I programmed some sort of interpolation between the
+              two
+              matrices. The camera will move a tiny bit towards the final position depending on the contribution of the
+              sample. This contribution factor is based
+              on the value of $m_{progress}$ which is defined in the <code>render.cpp</code>file.
+            </p>
+            <h3>Validation</h3>
+            <p> Validation for this type of blur is purely visually. For the scene, I let the camera move a small
+              fraction
+              to the side. The blur applies instantly and is very intense. In the renderer one can notice the movement
+              of
+              the camera and its effect on the bluriness.</p>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/motionblur.png" alt="Motionblur" class="img-responsive">
+              <img src="images/features/advanced-camera/simple.png" alt="Normal" class="img-responsive">
+            </div>
           </div>
-        </div>
 
 
-        <div id="environment">
-          <h2>3. Environment Map [15 points]</h2>
-          <dl>
-            <dt>Modified Files</dt>
-            <dd>
-              <code>src/environment.cpp</code> <br>
-              <code>nori/common.h</code> <br>
-            </dd>
-            <dt>Theory</dt>
-            <dd>
-              <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights">
-                PBR Book, 12.6 Infinite Area Lights</a> <br>
-              <a href="https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#">
-                PBR Book, 14.2 Sampling Light Sources</a> <br>
-              <a href="https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/">Interpolation blog</a>
-              <br>
-              <a href="https://forum.unity.com/threads/bi-lerp.175105/">Lerp for interpolation</a>
-            </dd>
-          </dl>
+          <div id="environment">
+            <h2>3. Environment Map [15 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/environment.cpp</code> <br>
+                <code>nori/common.h</code> <br>
+              </dd>
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights">
+                  PBR Book, 12.6 Infinite Area Lights</a> <br>
+                <a
+                  href="https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#">
+                  PBR Book, 14.2 Sampling Light Sources</a> <br>
+                <a href="https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/">Interpolation blog</a>
+                <br>
+                <a href="https://forum.unity.com/threads/bi-lerp.175105/">Lerp for interpolation</a>
+              </dd>
+            </dl>
 
-          <h3>Implementation</h3>
-          <p> For the implementation, I followed the approach of the book.
-            First, as the Environment Map is just an infinite arealight, I cloned the file and began to modify it.
-            In the constructor, I build the Environment Map using the <code> Bitmap("filename")</code> method. With this
-            bitmap,
-            I directly build a matrix of intensities and use this matrix to calculate the row-PDF, row-CDF as well as
-            the 2D conditional PDF and CDF.
-          </p>
-          <p> For the <code>sample()</code> method, I first applied discrete sampling (unlike continuous sampling which
-            is used in the book) to find the {i,j}-coordinates.
-            Then I mapped these coordinates to $\theta$ and $\phi$ to be able to call
-            <code> sphericalDirection(theta,phi)</code> and set <code>lRec.wi</code> of the EmitterQueryRecord.
-            With this information I was able to calculate the Jacobian matrix and the final return value.
-          </p>
-          <p> For the <code>eval()</code> and <code> pdf()</code> methods, I calculate the u and v coordinates
-            given the EmitterQueryRecord using the approach from the <code>sphere.cpp</code> file. Given the
-            coordinates, we can access values of the bitmap and the conditional PDF/CDF matrices.
-            In the <code> eval() </code> method, I first tried to average the neighboring pixels by myself.
-            Unfortunately, with this approach
-            I created a blur filter and the resulting images were not pretty to look at. After doing some more research,
-            I decided to use bilinear interpolation.
-            With the help of two blog posts mentioned above in the Theory listing</a>, I managed to implement the
-            necessary formula with some
-            minor adjustments for out-of-bounds errors. The resulting image was now less blurry than before, but I was
-            not satisfied. In an effort to create
-            an unblurred alternative, I set a new boolean property which lets the user decide
-            whether he wants to use interpolation or not to find the {u,v}-values.
-            If the flag is not set, I will simply do the following:
-          <pre><code> 
+            <h3>Implementation</h3>
+            <p> For the implementation, I followed the approach of the book.
+              First, as the Environment Map is just an infinite arealight, I cloned the file and began to modify it.
+              In the constructor, I build the Environment Map using the <code> Bitmap("filename")</code> method. With
+              this
+              bitmap,
+              I directly build a matrix of intensities and use this matrix to calculate the row-PDF, row-CDF as well as
+              the 2D conditional PDF and CDF.
+            </p>
+            <p> For the <code>sample()</code> method, I first applied discrete sampling (unlike continuous sampling
+              which
+              is used in the book) to find the {i,j}-coordinates.
+              Then I mapped these coordinates to $\theta$ and $\phi$ to be able to call
+              <code> sphericalDirection(theta,phi)</code> and set <code>lRec.wi</code> of the EmitterQueryRecord.
+              With this information I was able to calculate the Jacobian matrix and the final return value.
+            </p>
+            <p> For the <code>eval()</code> and <code> pdf()</code> methods, I calculate the u and v coordinates
+              given the EmitterQueryRecord using the approach from the <code>sphere.cpp</code> file. Given the
+              coordinates, we can access values of the bitmap and the conditional PDF/CDF matrices.
+              In the <code> eval() </code> method, I first tried to average the neighboring pixels by myself.
+              Unfortunately, with this approach
+              I created a blur filter and the resulting images were not pretty to look at. After doing some more
+              research,
+              I decided to use bilinear interpolation.
+              With the help of two blog posts mentioned above in the Theory listing</a>, I managed to implement the
+              necessary formula with some
+              minor adjustments for out-of-bounds errors. The resulting image was now less blurry than before, but I was
+              not satisfied. In an effort to create
+              an unblurred alternative, I set a new boolean property which lets the user decide
+              whether he wants to use interpolation or not to find the {u,v}-values.
+              If the flag is not set, I will simply do the following:
+            <pre><code> 
               if(!m_interpolate){
                 int u = int(round(x));
                 int v = int(round(y));
                 return m_envBitMap(u,v);
               }</code>
           </pre>
-          The direct approach is faster in terms of rendering and results in images that are less blurred compared to
-          interpolation.
-          As this might come in handy for the final image, I was eager to leave this option in the final code.
-          </p>
+            The direct approach is faster in terms of rendering and results in images that are less blurred compared to
+            interpolation.
+            As this might come in handy for the final image, I was eager to leave this option in the final code.
+            </p>
 
-          <h3>Validation</h3>
-          <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
-              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain a dielectric
-            sphere in the middle and an environment map. The images look very similar but the most noticable difference
-            is the blur in my own implementation. There are also some small differences in spots that are very intense
-            in terms of light.
-          </p>
-          <p>
-            The first images uses an Environment map with a 2K-Resolution. The rendering is relatively fast: It takes
-            about 20 seconds.
-            The second image uses an Environment map with a 4K-Resolution. The rendering is slow: It takes about 2
-            minutes to complete.
-          </p>
-          <div class="twentytwenty-container">
-            <img src="images/features/environment/sand_mine.png" alt="Mine" class="img-responsive">
-            <img src="images/features/environment/sand_direct_mine.png" alt="Mine, No Interpolation"
-              class="img-responsive">
-            <img src="images/features/environment/sand_ref.png" alt="Mitsuba" class="img-responsive">
+            <h3>Validation</h3>
+            <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain a dielectric
+              sphere in the middle and an environment map. The images look very similar but the most noticable
+              difference
+              is the blur in my own implementation. There are also some small differences in spots that are very intense
+              in terms of light.
+            </p>
+            <p>
+              The first images uses an Environment map with a 2K-Resolution. The rendering is relatively fast: It takes
+              about 20 seconds.
+              The second image uses an Environment map with a 4K-Resolution. The rendering is slow: It takes about 2
+              minutes to complete.
+            </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/environment/sand_mine.png" alt="Mine" class="img-responsive">
+              <img src="images/features/environment/sand_direct_mine.png" alt="Mine, No Interpolation"
+                class="img-responsive">
+              <img src="images/features/environment/sand_ref.png" alt="Mitsuba" class="img-responsive">
+            </div>
+            <br>
+            <div class="twentytwenty-container">
+              <img src="images/features/environment/christmas_mine.png" alt="Mine" class="img-responsive">
+              <img src="images/features/environment/christmas_direct_mine.png" alt="Mine, No Interpolation"
+                class="img-responsive">
+              <img src="images/features/environment/christmas_ref.png" alt="Mitsuba" class="img-responsive">
+            </div>
           </div>
-          <br>
-          <div class="twentytwenty-container">
-            <img src="images/features/environment/christmas_mine.png" alt="Mine" class="img-responsive">
-            <img src="images/features/environment/christmas_direct_mine.png" alt="Mine, No Interpolation"
-              class="img-responsive">
-            <img src="images/features/environment/christmas_ref.png" alt="Mitsuba" class="img-responsive">
-          </div>
-        </div>
 
-        <div id="advancedCamera">
-          <h2>4. Advanced Camera [15 points]</h2>
-          <dl>
-            <dt>Modified Files</dt>
-            <dd>
-              <code>src/perspective.cpp</code> <br>
-            </dd>
-            <dt>Theory</dt>
-            <dd>
-              <a href="https://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models">
-                PBR Book, 6.2 Projective Camera Models</a> <br>
-              <a href="http://l2program.co.uk/900/concentric-disk-sampling">
-                Concentric disk sampling - blog</a> <br>
-              <a href="https://en.wikipedia.org/wiki/Distortion_(optics)">
-                Distortion </a> <br>
-            </dd>
-          </dl>
+          <div id="advancedCamera">
+            <h2>4. Advanced Camera [15 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/perspective.cpp</code> <br>
+              </dd>
+              <dt>Theory</dt>
+              <dd>
+                <a href="https://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models">
+                  PBR Book, 6.2 Projective Camera Models</a> <br>
+                <a href="http://l2program.co.uk/900/concentric-disk-sampling">
+                  Concentric disk sampling - blog</a> <br>
+                <a href="https://en.wikipedia.org/wiki/Distortion_(optics)">
+                  Distortion </a> <br>
+              </dd>
+            </dl>
 
-          <h3>Implementation</h3>
-          <h4>Depth of Field</h4>
-          <p> For DoF I followed the implementation of the PBRT book which explains the process very clearly. Thanks to
-            the book I managed to implement this feature very quick. </p>
+            <h3>Implementation</h3>
+            <h4>Depth of Field</h4>
+            <p> For DoF I followed the implementation of the PBRT book which explains the process very clearly. Thanks
+              to
+              the book I managed to implement this feature very quick. </p>
 
-          <h4>Lens Distortion</h4>
-          <p> For the distortion, I did not find any good information in the book. After doing some research on the
-            topic and seeing the same formula over and over again, I implemented a simple but effective way to distort
-            the lens.
-            For this, I need two warping parameters $K_1$ and $K_2$ and also the norm of the x and y coordinates on the
-            camera's near plane.
-            Then, I simply calculate the distortion value with the following function:
-          <pre>
+            <h4>Lens Distortion</h4>
+            <p> For the distortion, I did not find any good information in the book. After doing some research on the
+              topic and seeing the same formula over and over again, I implemented a simple but effective way to distort
+              the lens.
+              For this, I need two warping parameters $K_1$ and $K_2$ and also the norm of the x and y coordinates on
+              the
+              camera's near plane.
+              Then, I simply calculate the distortion value with the following function:
+            <pre>
               <code> 
               float distortionFunction(float r) const{
                 if(r == 0)return 1.f;
@@ -893,98 +905,109 @@ while (true) {
               }
             </code>
           </pre>
-          and multiply the x and y coordinates on the near plane with this value.
-          </p>
+            and multiply the x and y coordinates on the near plane with this value.
+            </p>
 
-          <h4>Bokeh</h4>
-          <p> Bokeh was hard to implement as there were simply no resources available in the book. As always I did some
-            research and found that bokeh is a special type of blur occuring usually with depth of field.
-            To implement the feature, I coupled it with DoF: Meaning that bokeh only works in settings where DoF is
-            enabled. For the effect, I modified the warping method that is used in DoF. I calculate an offset for each
-            point <code>Point2f offset = 2.f * sample - Vector2f(1, 1);</code>
-            and then apply concentric disk sampling directly. This allows for bokeh in its circular form - which in my
-            opinion is the most beautiful and relevant one. </p>
+            <h4>Bokeh</h4>
+            <p> Bokeh was hard to implement as there were simply no resources available in the book. As always I did
+              some
+              research and found that bokeh is a special type of blur occuring usually with depth of field.
+              To implement the feature, I coupled it with DoF: Meaning that bokeh only works in settings where DoF is
+              enabled. For the effect, I modified the warping method that is used in DoF. I calculate an offset for each
+              point <code>Point2f offset = 2.f * sample - Vector2f(1, 1);</code>
+              and then apply concentric disk sampling directly. This allows for bokeh in its circular form - which in my
+              opinion is the most beautiful and relevant one. </p>
 
-          <h3>Validation</h3>
-          <p> For DoF, since I followed the implementation of the book, I wanted to confirm my work with the <a
-              href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a> renderer. For this I created a
-            simple scene with a plane and a skull. Then I fixed the focal length at 12 and increased the lens radius
-            three times. The images are very similar but the Mitsuba pictures appear to be a bit brighter. </p>
-          <div class="twentytwenty-container">
-            <img src="images/features/advanced-camera/12_0p1_mine.png" alt="Mine 0.1" class="img-responsive">
-            <img src="images/features/advanced-camera/12_0p1_ref.png" alt="Mitsuba 0.1" class="img-responsive">
+            <h3>Validation</h3>
+            <p> For DoF, since I followed the implementation of the book, I wanted to confirm my work with the <a
+                href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a> renderer. For this I created a
+              simple scene with a plane and a skull. I switched between a short and a long focal distance to get an
+              image
+              where the skull is in focus and one where it is not. The effect seems to work but my pictures are less
+              bright, which is due to the light source intensity. </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/12_0p1_mine.png" alt="Mine at 12" class="img-responsive">
+              <img src="images/features/advanced-camera/12_0p1_ref.png" alt="Mitsuba at 12" class="img-responsive">
+            </div>
+            <br>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/27_0p1_mine.png" alt="Mine at 27" class="img-responsive">
+              <img src="images/features/advanced-camera/27_0p1_ref.png" alt="Mitsuba at 27" class="img-responsive">
+            </div>
+            <br>
+            <p>The following scenes were created without a sibling in Mitsuba. The scene consists of multiple teapots.
+              In
+              the first image, the focal distance is kept short: The focus point is more towards the left side of the
+              picture, where the teapots are close. The first image is crossed with an image of the same focal distance
+              but a different lens radius. The second image has a larger focal length: Its focus point shifts more to
+              the
+              right of the picture.</p>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/mine_01.png" alt="Mine, short/0.1" class="img-responsive">
+              <img src="images/features/advanced-camera/mine_02.png" alt="Mine, short/0.2" class="img-responsive">
+            </div>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/mine_far_01.png" alt="Mine, long/0.1" class="img-responsive">
+            </div>
+
+            <br>
+            <br>
+            <p>Bokeh Images were rendered using a distant light source that shines on multiple spheres. I fixed the
+              focal
+              length and increased the lens radius three times. The bokeh effect is only noticable for very blurry
+              images
+              -
+              which is conformant with the real bokeh effect in photography.
+              The validation of this feature is purely visual. </p>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/bokeh_01.png" alt="Bokeh 0.1" class="img-responsive">
+              <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
+            </div>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/bokeh_03.png" alt="Bokeh 0.3" class="img-responsive">
+              <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
+            </div>
+            <div class="twentytwenty-container">
+              <img src="images/features/advanced-camera/bokeh_05.png" alt="Bokeh 0.5" class="img-responsive">
+              <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
+            </div>
+
+            <br>
+            <br>
+            <p>For the camera distortion, I simply rendered an environment map and added the distortion effect. The
+              validation
+              of this feature is purely visual. However, the tiled floor of the environment map makes it easy to verify
+              that
+              the feature does what it should.</p>
+            <div class="twentytwenty-container" style="width: 700px;">
+              <img src="images/features/advanced-camera/distortion.png" alt="Barrel Distortion" class="img-responsive">
+              <img src="images/features/advanced-camera/no_distortion.png" alt="Normal" class="img-responsive">
+            </div>
+            <div class="twentytwenty-container" style="width: 700px;">
+              <img src=" images/features/advanced-camera/distortion2.png" alt="Pincushion Distortion"
+                class="img-responsive">
+              <img src="images/features/advanced-camera/no_distortion.png" alt="Normal" class="img-responsive">
+            </div>
+            <br>
+            <br>
+            Thanks to the new camera features, we are now able to create images like the one below. It displays a
+            dielectric
+            rocket on a stand with minor depth of field effect and a barrel distortion.
+            <div class="twentytwenty-container" style="width: 75%;">
+              <img src="images/features/advanced-camera/final.png" alt="Putting everything together"
+                class="img-responsive">
+            </div>
+
           </div>
-          <br>
-          <div class="twentytwenty-container">
-            <img src="images/features/advanced-camera/12_0p2_mine.png" alt="Mine 0.2" class="img-responsive">
-            <img src="images/features/advanced-camera/12_0p2_ref.png" alt="Mitsuba 0.2" class="img-responsive">
-          </div>
-          <br>
-          <div class="twentytwenty-container">
-            <img src="images/features/advanced-camera/12_0p3_mine.png" alt="Mine 0.3" class="img-responsive">
-            <img src="images/features/advanced-camera/12_0p3_ref.png" alt="Mitsuba 0.3" class="img-responsive">
-          </div>
         </div>
-        <br>
-        <br>
-        <p>Bokeh Images were rendered using a distant light source that shines on multiple spheres. I fixed the focal
-          length and increased the lens radius three times. The bokeh effect is only noticable for very blurry images -
-          which is conformant with the real bokeh effect in photography.
-          The validation of this feature is purely visual. </p>
-        <div class="twentytwenty-container">
-          <img src="images/features/advanced-camera/bokeh_01.png" alt="Bokeh 0.1" class="img-responsive">
-          <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
-        </div>
-        <div class="twentytwenty-container">
-          <img src="images/features/advanced-camera/bokeh_03.png" alt="Bokeh 0.3" class="img-responsive">
-          <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
-        </div>
-        <div class="twentytwenty-container">
-          <img src="images/features/advanced-camera/bokeh_05.png" alt="Bokeh 0.5" class="img-responsive">
-          <img src="images/features/advanced-camera/bokeh_00.png" alt="Normal" class="img-responsive">
-        </div>
-      </div>
-      <br>
-      <br>
-      <p>For the camera distortion, I simply rendered an environment map and added the distortion effect. The validation
-        of this feature is purely visual. However, the tiled floor of the environment map makes it easy to verify that
-        the feature does what it should.</p>
-      <div class="twentytwenty-container" style="width: 700px;">
-        <img src="images/features/advanced-camera/distortion.png" alt="Barrel Distortion" class="img-responsive">
-        <img src="images/features/advanced-camera/no_distortion.png" alt="Normal" class="img-responsive">
-      </div>
-      <div class="twentytwenty-container" style="width: 700px;">
-        <img src=" images/features/advanced-camera/distortion2.png" alt="Pincushion Distortion" class="img-responsive">
-        <img src="images/features/advanced-camera/no_distortion.png" alt="Normal" class="img-responsive">
-      </div>
-      <br>
-      <br>
-      Thanks to the new camera features, we are now able to create images like the one below. It displays a dielectric
-      rocket on a stand with minor depth of field effect and a barrel distortion.
-      <div class="twentytwenty-container" style="width: 75%;">
-        <img src="images/features/advanced-camera/final.png" alt="Putting everything together" class="img-responsive">
-      </div>
 
-      <br> <br>
-
-      <div id="finalImage">
-        <h1>Final Image</h1>
-        <i>TODO: Add</i>
+        <div id="finalImage">
+          <h1>Final Image</h1>
+          <i>TODO: Add</i>
+        </div>
       </div>
-
     </div>
-  </div>
-  </div>
 
-  <br> <br>
-
-  <div id="finalImage">
-    <h1>Final Image</h1>
-    <i>TODO: Add</i>
-  </div>
-
-  </div>
-  </div>
   </div>
 
   <!-- Bootstrap core JavaScript -->

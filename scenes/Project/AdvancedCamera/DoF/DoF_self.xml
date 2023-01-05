@@ -1,0 +1,116 @@
+<scene version="3.0.0">
+  
+    <integrator type="direct"/>
+    <camera type="perspective">
+        <transform name="toWorld">
+            <scale value="-1,1,1"/>
+            <lookat target="0,0,0" origin="2,5,2.5" up="0,0,1"/>
+        </transform>
+        <float name="fov" value="90"/>
+
+        <integer name="height" value="700"/> 
+        <integer name="width" value="1000"/>
+
+        <float name="focalLength" value="7"/>
+    	<float name="lensRadius" value="0.1"/>
+    </camera>
+
+
+
+    <!-- Sample generator, number of samples per pixel -->
+    <sampler type="independent">
+        <integer name="sampleCount" value="256"/>
+    </sampler>
+
+<!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="diffuse">
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="3.6,0,0"/> 
+		</transform>
+	</mesh>
+
+<!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="diffuse">
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="1.8,0,0"/> 
+		</transform>
+	</mesh>
+
+<!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="diffuse">
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+		</transform>
+	</mesh>
+
+    <!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="diffuse">
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="-1.8,0,0"/> 
+		</transform>
+	</mesh>
+
+    <!-- Pot -->
+    <mesh type="obj">
+		<string name="filename" value="pot.obj"/>
+        <bsdf type="diffuse">
+        </bsdf>
+		<transform name="toWorld">
+			<scale value="0.25, 0.25, 0.25"/>
+            <rotate axis="1,0,0" angle="90"/>
+            <rotate axis="0,0,1" angle="130"/>
+            <translate value="-3.6,0,0"/> 
+		</transform>
+	</mesh>
+
+
+<!-- Ground Plane -->
+
+    <mesh type="obj">
+		<string name="filename" value="plane.obj"/>
+     
+		<bsdf type="diffuse">
+				<texture type="checkerboard_color" name="albedo">
+						<point name="delta" value="0.5,0.5"/>
+						<vector name="scale" value="0.02,0.02"/>
+						<color name="value1" value="0.8,0.8,0.8"/>
+						<color name="value2" value="0.2,0.2,0.2"/>
+				</texture>
+		</bsdf>
+
+		<transform name="toWorld">
+			<scale value="50 50 50"/>
+			<rotate axis="1,0,0" angle="90"/>
+		</transform>
+	</mesh>
+
+
+    <emitter type="directional">
+		<vector name="direction" value="0,-1,-0.1"/>
+		<color name="power" value="1,1,1.25"/>
+	</emitter>
+
+</scene>
