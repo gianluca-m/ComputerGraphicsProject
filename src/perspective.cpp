@@ -21,6 +21,7 @@
 #include <nori/warp.h>
 #include <Eigen/Geometry>
 
+using namespace std;
 NORI_NAMESPACE_BEGIN
 
 /**
@@ -47,8 +48,25 @@ public:
         m_nearClip = propList.getFloat("nearClip", 1e-4f);
         m_farClip = propList.getFloat("farClip", 1e4f);
 
+        m_focalLength = propList.getFloat("focalLength", 0.f);
+        m_lensRadius = propList.getFloat("lensRadius", 0.f);
+
+        
+
+        m_bokeh = propList.getBoolean("bokeh",false);
+
+        m_distortion = propList.getBoolean("distortion", false);
+        K1 = propList.getFloat("K1", 0.0f);
+        K2 = propList.getFloat("K2", 0.0f);
+
+        m_motionblur = propList.getBoolean("motionblur", false);
+        m_finalMotion = propList.getTransform("motion", Transform());
+        
+
         m_rfilter = NULL;
     }
+
+    
 
     virtual void activate() override {
         float aspect = m_outputSize.x() / (float) m_outputSize.y();
@@ -89,25 +107,93 @@ public:
 
     Color3f sampleRay(Ray3f &ray,
             const Point2f &samplePosition,
-            const Point2f &apertureSample) const {
+            const Point2f &apertureSample,
+            float contribution) const {
         /* Compute the corresponding position on the 
            near plane (in local camera space) */
         Point3f nearP = m_sampleToCamera * Point3f(
             samplePosition.x() * m_invOutputSize.x(),
             samplePosition.y() * m_invOutputSize.y(), 0.0f);
 
+        if(m_distortion){
+            //change nearP
+            float distort = distortionFunction(Vector2f(nearP.x() / nearP.z(), nearP.y() / nearP.z()).norm());
+            nearP.x() *= distort;
+            nearP.y() *= distort;
+        }
         /* Turn into a normalized ray direction, and
            adjust the ray interval accordingly */
-        Vector3f d = nearP.normalized();
-        float invZ = 1.0f / d.z();
 
-        ray.o = m_cameraToWorld * Point3f(0, 0, 0);
-        ray.d = m_cameraToWorld * d;
+        ray.o = Point3f(0, 0, 0);
+        ray.d = nearP.normalized(); 
+
+        /* Depth of Field PBRT 6.2.3*/
+        if(m_lensRadius > 0 ) {
+            Point2f pLens;
+            if(m_bokeh){
+                pLens = m_lensRadius * bokehShift(apertureSample);
+            } else {
+                pLens = m_lensRadius* Warp::squareToUniformDisk(apertureSample);
+            }
+            float ft = m_focalLength / ray.d.z();
+            Point3f pFocus = ray(ft); //Ray cast just like in the book works
+
+            ray.o = Point3f(pLens.x(), pLens.y(), 0);
+            ray.d = (pFocus - ray.o).normalized();
+            
+        }
+
+        float invZ = 1.0f / ray.d.z();
+
+        if(m_motionblur){
+            Transform trans(m_cameraToWorld.getMatrix() * (1.0f - contribution) + m_finalMotion.getMatrix() * contribution);
+            //Use trans instead of m_cameraToWorld
+            ray.o = trans * ray.o;
+            ray.d = trans * ray.d;
+        } else {
+            ray.o = m_cameraToWorld * ray.o;
+            ray.d = m_cameraToWorld * ray.d;
+        }
+
         ray.mint = m_nearClip * invZ;
         ray.maxt = m_farClip * invZ;
         ray.update();
 
         return Color3f(1.0f);
+    }
+
+
+    Point2f bokehShift(Point2f sample) const {
+        //Take an offset step for the sampling method instead of the direct coordinates
+        Point2f offset = 2.f * sample - Vector2f(1, 1);
+      
+        auto x = offset.x();
+        auto y = offset.y();
+
+        if (x == 0 && y == 0) return Point2f(0, 0);
+
+        // Concentric Disk mapping 
+        // http://l2program.co.uk/900/concentric-disk-sampling
+        float theta, r;
+        if (abs(x) > abs(y)) {
+            r = x;
+            theta = INV_FOURPI * (y / x);
+        } else {
+            r = y;
+            theta = INV_TWOPI - INV_FOURPI * (x / y);
+        }
+        //Polar Coordinates
+        return r * Point2f(cos(theta), sin(theta));
+    }
+
+    //https://en.wikipedia.org/wiki/Distortion_(optics)
+    float distortionFunction(float r) const{
+        //The further away from the focus point, the larger is r
+        if(r == 0)return 1.f;
+        auto fin = (1.0f + K1 * powf(r,2) + K2*powf(r,4));
+
+        return fin;
+        
     }
 
     virtual void addChild(NoriObject *obj) override {
@@ -149,6 +235,14 @@ private:
     float m_fov;
     float m_nearClip;
     float m_farClip;
+    float m_focalLength;
+    float m_lensRadius; //=f-value
+    bool m_distortion;
+    bool m_bokeh;
+    float K1;
+    float K2;
+    bool m_motionblur;
+    Transform m_finalMotion;
 };
 
 NORI_REGISTER_CLASS(PerspectiveCamera, "perspective");
