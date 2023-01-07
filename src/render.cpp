@@ -69,7 +69,7 @@ float RenderThread::getProgress() {
     else return 1.f;
 }
 
-static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block) {
+static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block, float contribution) {
     const Camera *camera = scene->getCamera();
     const Integrator *integrator = scene->getIntegrator();
 
@@ -87,7 +87,7 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block)
 
             /* Sample a ray from the camera */
             Ray3f ray;
-            Color3f value = camera->sampleRay(ray, pixelSample, apertureSample);
+            Color3f value = camera->sampleRay(ray, pixelSample, apertureSample, contribution);
 
             /* Compute the incident radiance */
             value *= integrator->Li(scene, sampler, ray);
@@ -182,8 +182,7 @@ void RenderThread::renderScene(const std::string & filename) {
                         }
 
                         // Render all contained pixels
-                        renderBlock(m_scene, samplers.at(blockId).get(), block);
-
+                        renderBlock(m_scene, samplers.at(blockId).get(), block,m_progress);
                         // The image block has been processed. Now add it to the "big" block that represents the entire image
                         m_block.put(block);        
 

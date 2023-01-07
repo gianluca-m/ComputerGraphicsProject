@@ -22,10 +22,11 @@
 
 NORI_NAMESPACE_BEGIN
 using namespace std;
+
 class DisneyBSDF : public BSDF {
 public:
     DisneyBSDF(const PropertyList &propList) {
-        PropertyList l,s;
+        PropertyList l;
         l.setColor("value", propList.getColor("albedo"));
         m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
         
@@ -71,7 +72,6 @@ public:
     }
 
     Color3f Sheen(const float cosThetaD, Color3f baseColor) const{
-        //Full SheenTint (1.0f)
         return m_sheen * lerpColor(0.1f,Color3f(1),baseColor) * SchlickWeight(cosThetaD) * m_sheenIntensity;
     }
 

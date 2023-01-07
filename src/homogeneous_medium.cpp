@@ -30,18 +30,16 @@ public:
         float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
         Color3f tr{1.0f};
-        float curr_density;
         float densityDivSigmaT = m_inv_max_density / m_sigma_t.maxCoeff();
 
         while (true) {
-            t += -log(1.0f - sampler->next1D()) * densityDivSigmaT;
+            t -= log(1.0f - sampler->next1D()) * densityDivSigmaT;
 
             if (t >= tMax) {
                 break;
             }
                 
-            curr_density = getDensity(ray(t));
-            tr *= 1.0f - std::max(0.0f, curr_density * m_inv_max_density);
+            tr *= 1.0f - std::max(0.0f, getDensity(ray(t)) * m_inv_max_density);
         }
         
         return tr;
@@ -67,7 +65,7 @@ public:
         float densityDivSigmaT = m_inv_max_density / m_sigma_t.maxCoeff();
 
         while (true) {
-            t += -log(1.0f - sampler->next1D()) * densityDivSigmaT;
+            t -= log(1.0f - sampler->next1D()) * densityDivSigmaT;
 
             if (t >= tMax) {
                 mRec.hasInteraction = false;
