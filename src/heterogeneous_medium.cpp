@@ -5,8 +5,6 @@
 #include <nanovdb/util/IO.h>
 #include <nori/perlinnoise.h>
 
-#define KEY(x, y, z) (x + y * 10000 + z * 10000000)
-
 NORI_NAMESPACE_BEGIN
 
 class HeterogeneousMedium : public Medium {
@@ -24,7 +22,25 @@ public:
 
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
         Vector3f center = props.getVector3("center", Vector3f{0.0f});
-        m_bbox = BoundingBox3f(center - size, center + size);
+
+        m_bbox.expandBy(center - size);
+        m_bbox.expandBy(center + size);
+
+        // The transform "toWorld" should only contain rotations!
+        // The center of the volume should be defined using the "center" property!
+        Eigen::Matrix4f translate_center;
+        translate_center << 1, 0, 0, center.x(),
+                            0, 1, 0, center.y(),
+                            0, 0, 1, center.z(),
+                            0, 0, 0, 1;
+        Transform transform = props.getTransform("toWorld", Transform()) * Transform{translate_center};
+        m_inv_transform = transform.getInverseMatrix();
+
+        Point3f origin{0.0f};
+        Point3f bbox_min = transform * Point3f(origin - size);
+        Point3f bbox_max = transform * Point3f(origin + size);
+        m_bbox.expandBy(bbox_min);
+        m_bbox.expandBy(bbox_max);
 
 
         if (m_density_type == 1) {  // Exponential density
@@ -32,21 +48,24 @@ public:
             m_exp_b = props.getFloat("exp_b", 2.0f);
         } 
         else if (m_density_type == 2) {    // Volume grid 
-            auto filename = getFileResolver()->resolve(props.getString("volume_grid")).str();
-            auto handle = nanovdb::io::readGrid(filename);
-            nanovdb::FloatGrid* density_grid = nullptr;
+            m_non_transformed_bbox_min = origin - size;
+            m_non_transformed_bbox_size = 2 * size;
 
-            for (uint32_t i = 0; i < handle.gridCount(); i++) {
-                auto *curr_grid = handle.grid<float>(i);
+            auto filename = getFileResolver()->resolve(props.getString("volume_grid")).str();
+            m_handle = nanovdb::io::readGrid(filename);
+            m_density_grid = nullptr;
+
+            for (uint32_t i = 0; i < m_handle.gridCount(); i++) {
+                auto *curr_grid = m_handle.grid<float>(i);
                 if (strcmp(curr_grid->gridName(), "density") == 0) {
-                    density_grid = curr_grid;
+                    m_density_grid = curr_grid;
                     break;
                 }
             }
 
-            if (density_grid == nullptr) throw NoriException("HeterogeneousMedium: No density grid found in '%s'", filename);
+            if (m_density_grid == nullptr) throw NoriException("HeterogeneousMedium: No density grid found in '%s'", filename);
 
-            auto grid_bbox = density_grid->indexBBox();
+            auto grid_bbox = m_density_grid->indexBBox();
             Point3f grid_bbox_min{
                 (float) grid_bbox.min()[0],
                 (float) grid_bbox.min()[1],
@@ -63,9 +82,8 @@ public:
             m_density_grid_bbox = BoundingBox3f{grid_bbox_min, grid_bbox_max};
             m_density_grid_bbox_size = m_density_grid_bbox.max - m_density_grid_bbox.min;
 
-            cout << "Preprocessing volume grid information. This might take some time!" << endl;
             m_max_density = 0.0f;
-            auto accessor = density_grid->getAccessor();
+            auto accessor = m_density_grid->getAccessor();
             float curr_density;
             for (int x = (int) std::ceil(grid_bbox_min.x()); x < grid_bbox_max.x(); x++) {
                 for (int y = (int) std::ceil(grid_bbox_min.y()); y < grid_bbox_max.y(); y++) {
@@ -75,10 +93,6 @@ public:
                         if (curr_density < 0) throw NoriException("HeterogeneousMedium: Found illegal negative density value in grid!");
 
                         m_max_density = std::max(m_max_density, curr_density);
-
-                        // using hashmap, because using grid does not work in getGridDensity() for some reason...
-                        // This unfortunately introduces some additional preprocessing time.
-                        m_density_grid_map[KEY(x, y, z)] = curr_density;
                     }
                 }
             }
@@ -88,12 +102,11 @@ public:
             m_radius = props.getFloat("radius", 1.0f);
             m_frequency = props.getFloat("frequency", 3.5f);
             m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
+            m_bbox_size = m_bbox.max - m_bbox.min;
         }
 
         if (m_max_density == 0.0f) throw NoriException("HeterogeneousMedium: max_density cannot be 0");
-
         m_inv_max_density = 1.0f / m_max_density;
-        m_bbox_size = m_bbox.max - m_bbox.min;
     }
 
     Color3f Tr(const Ray3f &ray, Sampler *sampler, MediumQueryRecord &mRec) const override {
@@ -106,18 +119,16 @@ public:
         float t = std::max(0.0f, nearT);
         float tMax = std::min(mRec.tMax, farT);
         Color3f tr{1.0f};
-        float curr_density;
         float densityDivSigmaT = m_inv_max_density / m_sigma_t.maxCoeff();
 
         while (true) {
-            t += -log(1.0f - sampler->next1D()) * densityDivSigmaT;
+            t -= log(1.0f - sampler->next1D()) * densityDivSigmaT;
 
             if (t >= tMax) {
                 break;
             }
                 
-            curr_density = getDensity(ray(t));
-            tr *= 1.0f - std::max(0.0f, curr_density * m_inv_max_density);
+            tr *= 1.0f - std::max(0.0f, getDensity(ray(t)) * m_inv_max_density);
         }
         
         return tr;
@@ -143,7 +154,7 @@ public:
         float densityDivSigmaT = m_inv_max_density / m_sigma_t.maxCoeff();
 
         while (true) {
-            t += -log(1.0f - sampler->next1D()) * densityDivSigmaT;
+            t -= log(1.0f - sampler->next1D()) * densityDivSigmaT;
 
             if (t >= tMax) {
                 mRec.hasInteraction = false;
@@ -179,6 +190,22 @@ public:
     }
 
     std::string toString() const override {
+        std::string density_type_str;
+        switch (m_density_type) {
+            case 0:
+                density_type_str = "constant";
+                break;
+            case 1:
+                density_type_str = "exponential";
+                break;
+            case 2:
+                density_type_str = "volume grid";
+                break;
+            case 3:
+                density_type_str = "perlin noise";
+                break;
+        }
+
         return tfm::format(
                 "HeterogeneousMedium[\n"
                 "  sigma_a = %s,\n"
@@ -194,33 +221,39 @@ public:
                 "]",
                 m_sigma_a.toString(), m_sigma_s.toString(),
                 m_sigma_t.toString(), m_albedo.toString(),
-                m_max_density, m_inv_max_density, m_density_type, m_density_scale,
+                density_type_str, m_max_density, m_inv_max_density, m_density_scale,
                 m_phasefunction->toString(), m_bbox.toString());
     }
 
 
 private:
-    int m_density_type;     // const, exp, volume grid
+    int m_density_type;     // const, exp, volume grid, perlin noise
 
     // used for exponential density
     Vector3f m_up_dir;
     float m_exp_b;
 
     // used for volume grid
-    std::unordered_map<uint32_t, float> m_density_grid_map;
     BoundingBox3f m_density_grid_bbox;
     Vector3f m_density_grid_bbox_size;
-    Point3f m_bbox_size;
-    float m_voxel_size;
+    Point3f m_non_transformed_bbox_min;
+    Point3f m_non_transformed_bbox_size;
+    nanovdb::FloatGrid* m_density_grid;
+    // For some reason, NanoVDB getValue in getGridDensity() only works if I leave the handle as a class property...
+    nanovdb::GridHandle<nanovdb::HostBuffer> m_handle;
 
     // used for perlin noise sphere
     Point3f m_center;
+    Point3f m_bbox_size;
     float m_radius;
     float m_frequency;
 
+    // used to transform back positions inside the volume
+    Transform m_inv_transform;
+
 
     float getDensity(const Point3f &p) const {
-        if (!m_bbox.contains(p)) return 0.0f;
+        if (!m_bbox.contains(p)) return 0.0f;       
         
         switch (m_density_type) {
             case 0:     // const
@@ -243,14 +276,16 @@ private:
     }
 
     float getGridDensity(const Point3f &p) const {
-        Point3f relative_position = (p - m_bbox.min).cwiseQuotient(m_bbox_size);
+        // Transform point back so it's aligned with the m_density_grid_bbox
+        // because m_density_grid_bbox is not transformed
+        Point3f back_transformed_p = m_inv_transform * p;
+        Point3f relative_position = (back_transformed_p - m_non_transformed_bbox_min).cwiseQuotient(m_non_transformed_bbox_size);
 
         int x = (int) round(m_density_grid_bbox.min.x() + relative_position.x() * m_density_grid_bbox_size.x());
         int y = (int) round(m_density_grid_bbox.min.y() + relative_position.y() * m_density_grid_bbox_size.y());
         int z = (int) round(m_density_grid_bbox.min.z() + relative_position.z() * m_density_grid_bbox_size.z());
 
-        auto element = m_density_grid_map.find(KEY(x, y, z));
-        return element != m_density_grid_map.end() ? element->second : 0.0f;
+        return m_density_grid->tree().getValue(nanovdb::Coord(x, y, z));
     }
 
     float getPerlinNoiseDensity(const Point3f &p) const {
