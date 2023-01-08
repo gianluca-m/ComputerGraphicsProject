@@ -104,6 +104,13 @@ public:
             m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
             m_bbox_size = m_bbox.max - m_bbox.min;
         }
+        else if (m_density_type == 4) {     // exponential sphere layer
+            m_center = Point3f{center};
+            m_min_radius = props.getFloat("min_radius", 0.5f);
+            m_max_radius = props.getFloat("max_radius", 0.5f);
+            m_exp_b = props.getFloat("exp_b", 2.0f);
+            m_bbox = BoundingBox3f(center - Vector3f{m_max_radius}, center + Vector3f{m_max_radius});
+        }
 
         if (m_max_density == 0.0f) throw NoriException("HeterogeneousMedium: max_density cannot be 0");
         m_inv_max_density = 1.0f / m_max_density;
@@ -204,6 +211,12 @@ public:
             case 3:
                 density_type_str = "perlin noise";
                 break;
+            case 4:
+                density_type_str = "exponential sphere layer";
+                break;
+            default:
+                density_type_str = std::to_string(m_density_type);
+                break;
         }
 
         return tfm::format(
@@ -248,6 +261,10 @@ private:
     float m_radius;
     float m_frequency;
 
+    // used for exponential sphere layer
+    float m_max_radius;
+    float m_min_radius;
+
     // used to transform back positions inside the volume
     Transform m_inv_transform;
 
@@ -264,6 +281,8 @@ private:
                 return getGridDensity(p);
             case 3:     // perlin noise sphere
                 return getPerlinNoiseDensity(p);
+            case 4:
+                return getExponentialDensitySphereLayer(p);
             
             default:
                 throw NoriException("HeterogeneousMedium: Undefined density type");
@@ -272,6 +291,15 @@ private:
 
     float getExponentialDensity(const Point3f &p) const {
         float h = (p - m_bbox.min).dot(m_up_dir);
+        return m_max_density * exp(-m_exp_b * h);
+    }
+
+    float getExponentialDensitySphereLayer(const Point3f &p) const {
+        auto dist = (p - m_center).norm();
+        if (dist > m_max_radius || dist < m_min_radius) return 0.0f;       // not within sphere layer
+
+        Vector3f up_dir = (p - m_center).normalized();
+        float h = (p - m_center).dot(up_dir) - m_min_radius;
         return m_max_density * exp(-m_exp_b * h);
     }
 
