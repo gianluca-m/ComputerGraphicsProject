@@ -22,7 +22,25 @@ public:
 
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
         Vector3f center = props.getVector3("center", Vector3f{0.0f});
-        m_bbox = BoundingBox3f(center - size, center + size);
+
+        m_bbox.expandBy(center - size);
+        m_bbox.expandBy(center + size);
+
+        // The transform "toWorld" should only contain rotations!
+        // The center of the volume should be defined using the "center" property!
+        Eigen::Matrix4f translate_center;
+        translate_center << 1, 0, 0, center.x(),
+                            0, 1, 0, center.y(),
+                            0, 0, 1, center.z(),
+                            0, 0, 0, 1;
+        Transform transform = props.getTransform("toWorld", Transform()) * Transform{translate_center};
+        m_inv_transform = transform.getInverseMatrix();
+
+        Point3f origin{0.0f};
+        Point3f bbox_min = transform * Point3f(origin - size);
+        Point3f bbox_max = transform * Point3f(origin + size);
+        m_bbox.expandBy(bbox_min);
+        m_bbox.expandBy(bbox_max);
 
 
         if (m_density_type == 1) {  // Exponential density
@@ -30,6 +48,9 @@ public:
             m_exp_b = props.getFloat("exp_b", 2.0f);
         } 
         else if (m_density_type == 2) {    // Volume grid 
+            m_non_transformed_bbox_min = origin - size;
+            m_non_transformed_bbox_size = 2 * size;
+
             auto filename = getFileResolver()->resolve(props.getString("volume_grid")).str();
             m_handle = nanovdb::io::readGrid(filename);
             m_density_grid = nullptr;
@@ -61,7 +82,6 @@ public:
             m_density_grid_bbox = BoundingBox3f{grid_bbox_min, grid_bbox_max};
             m_density_grid_bbox_size = m_density_grid_bbox.max - m_density_grid_bbox.min;
 
-            cout << "Preprocessing volume grid information. This might take some time!" << endl;
             m_max_density = 0.0f;
             auto accessor = m_density_grid->getAccessor();
             float curr_density;
@@ -82,12 +102,11 @@ public:
             m_radius = props.getFloat("radius", 1.0f);
             m_frequency = props.getFloat("frequency", 3.5f);
             m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
+            m_bbox_size = m_bbox.max - m_bbox.min;
         }
 
         if (m_max_density == 0.0f) throw NoriException("HeterogeneousMedium: max_density cannot be 0");
-
         m_inv_max_density = 1.0f / m_max_density;
-        m_bbox_size = m_bbox.max - m_bbox.min;
     }
 
     Color3f Tr(const Ray3f &ray, Sampler *sampler, MediumQueryRecord &mRec) const override {
@@ -208,7 +227,7 @@ public:
 
 
 private:
-    int m_density_type;     // const, exp, volume grid
+    int m_density_type;     // const, exp, volume grid, perlin noise
 
     // used for exponential density
     Vector3f m_up_dir;
@@ -217,19 +236,24 @@ private:
     // used for volume grid
     BoundingBox3f m_density_grid_bbox;
     Vector3f m_density_grid_bbox_size;
-    Point3f m_bbox_size;
+    Point3f m_non_transformed_bbox_min;
+    Point3f m_non_transformed_bbox_size;
     nanovdb::FloatGrid* m_density_grid;
     // For some reason, NanoVDB getValue in getGridDensity() only works if I leave the handle as a class property...
-    nanovdb::GridHandle<nanovdb::HostBuffer> m_handle;      
+    nanovdb::GridHandle<nanovdb::HostBuffer> m_handle;
 
     // used for perlin noise sphere
     Point3f m_center;
+    Point3f m_bbox_size;
     float m_radius;
     float m_frequency;
 
+    // used to transform back positions inside the volume
+    Transform m_inv_transform;
+
 
     float getDensity(const Point3f &p) const {
-        if (!m_bbox.contains(p)) return 0.0f;
+        if (!m_bbox.contains(p)) return 0.0f;       
         
         switch (m_density_type) {
             case 0:     // const
@@ -252,7 +276,10 @@ private:
     }
 
     float getGridDensity(const Point3f &p) const {
-        Point3f relative_position = (p - m_bbox.min).cwiseQuotient(m_bbox_size);
+        // Transform point back so it's aligned with the m_density_grid_bbox
+        // because m_density_grid_bbox is not transformed
+        Point3f back_transformed_p = m_inv_transform * p;
+        Point3f relative_position = (back_transformed_p - m_non_transformed_bbox_min).cwiseQuotient(m_non_transformed_bbox_size);
 
         int x = (int) round(m_density_grid_bbox.min.x() + relative_position.x() * m_density_grid_bbox_size.x());
         int y = (int) round(m_density_grid_bbox.min.y() + relative_position.y() * m_density_grid_bbox_size.y());
