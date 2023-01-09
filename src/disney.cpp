@@ -26,9 +26,11 @@ using namespace std;
 class DisneyBSDF : public BSDF {
 public:
     DisneyBSDF(const PropertyList &propList) {
-        PropertyList l;
-        l.setColor("value", propList.getColor("albedo"));
-        m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+        if(propList.has("albedo")) {
+            PropertyList l;
+            l.setColor("value", propList.getColor("albedo"));
+            m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+        }
         
         m_specular = propList.getFloat("specular", 0.f);
         m_metallic = propList.getFloat("metallic", 0.f);
@@ -43,6 +45,11 @@ public:
         m_clearcoatIntensity = 1.5; 
 
         m_sheenIntensity = 1.0;
+    }
+
+    virtual ~DisneyBSDF() {
+        delete m_albedo;
+        delete m_normal_map;
     }
 
     static float SchlickWeight(float cosTheta) {
@@ -186,7 +193,7 @@ public:
     virtual std::string toString() const override {
         return tfm::format(
             "DisneyBSDF[\n"
-            "  albedo = %f,\n"
+            "  albedo = %s,\n"
             "  specular = %f\n"
             "  specularTint = %f\n"
             "  metallic = %f,\n"
@@ -195,11 +202,59 @@ public:
             "  clearcoat = %f\n"
             "  clearcoatGloss = %f\n"
             "]",
-            m_albedo, m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat,m_clearcoatGloss);
+            m_albedo->toString(), m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat,m_clearcoatGloss);
     }
+    // Texture Support copied from diffuse.cpp
+    virtual void addChild(NoriObject *obj) override {
+        switch (obj->getClassType()) {
+            case ETexture:
+                if(obj->getIdName() == "albedo") {
+                    if (m_albedo)
+                        throw NoriException("There is already an albedo defined!");
+                    m_albedo = static_cast<Texture<Color3f> *>(obj);
+                }
+                else if (obj->getIdName() == "normal") {
+                    if (m_normal_map)
+                        throw NoriException("There is already a normal map defined!");
+                    m_normal_map = static_cast<Texture<Vector3f> *>(obj);
+                }
+                else {
+                    throw NoriException("The name of this texture does not match any field!");
+                }
+                break;
+
+            default:
+                throw NoriException("Diffuse::addChild(<%s>) is not supported!",
+                                    classTypeName(obj->getClassType()));
+        }
+    }
+
+    bool isDiffuse() const {
+        return true;
+    }
+
+    bool hasNormalMap() const override {
+        return m_normal_map != nullptr;
+    }
+
+    Texture<Vector3f> *getNormalMap() const override {
+        return m_normal_map;
+    }
+
+    virtual void activate() override {
+        if(!m_albedo) {
+            PropertyList l;
+            l.setColor("value", Color3f(0.5f));
+            m_albedo = static_cast<Texture<Color3f> *>(NoriObjectFactory::createInstance("constant_color", l));
+            m_albedo->activate();
+        }
+    }
+
+    EClassType getClassType() const override { return EBSDF; }
+
 private:
     float m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat,m_clearcoatGloss,m_clearcoatIntensity, m_sheenIntensity;
-
+    Texture<Vector3f> *m_normal_map = nullptr;
     Texture<Color3f> * m_albedo;
 };
 
