@@ -19,6 +19,7 @@
 	</camera>
 
 	<!-- Earth -->
+	<!-- TODO: since we cannot rotate a sphere, we might want to use a sphere mesh-->
 	<mesh type="sphere">
 		<point name="center" value="0  -10 -50" />
         <float name="radius" value="42"/>
@@ -50,18 +51,23 @@
 
 	<!-- Locomotive -->
 	<mesh type="obj">
+		<!-- I had to remove the wagon from the model because the original model requires a separate texture for the wagon -->
+		<!-- TODO (gimoro): add separate wagon model -->
 		<string name="filename" value="/models/locomotive.obj"/>
 
 		<!-- TODO: use DisneyBSDF, with a metallic (or something else) effect -->
 		<bsdf type="diffuse">
+			<!-- For some reason models are mirrored, thus I had to flip the numbers in the texture.
+				Note: flipping the whole model (with scale="1, 1, -1") does correclty flip the model 
+				but causes weird issues with the textures in some parts of the model...
+				nori at its finest once again...-->
+			
 			<texture type="image_texture" name="albedo">
-                <string name="filename" value="/textures/locomotive_diffuse.png"/>
+                <string name="filename" value="/textures/locomotive_diffuse_mirrored.png"/>
             </texture>
 		</bsdf>
 
 		<transform name="toWorld">
-			<!-- For some reason models are mirrored... nori at its finest once again -->
-			<scale value="1 1 -1"/>
 			<rotate axis="1,0,0" angle="90"/>
 			<rotate axis="0,0,1" angle="115"/>
 			<translate value="0,-6,-2.5"/>
