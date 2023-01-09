@@ -25,7 +25,7 @@ using namespace std;
 
 class DisneyBSDF : public BSDF {
 public:
-    DisneyBSDF(const PropertyList &propList) {
+    DisneyBSDF(const PropertyList &propList) : m_albedo(nullptr) {
         if(propList.has("albedo")) {
             PropertyList l;
             l.setColor("value", propList.getColor("albedo"));
@@ -48,7 +48,6 @@ public:
     }
 
     virtual ~DisneyBSDF() {
-        delete m_albedo;
         delete m_normal_map;
     }
 
@@ -106,12 +105,11 @@ public:
 
         auto cosThetaV = Frame::cosTheta(v);
         auto cosThetaL = Frame::cosTheta(l);
-        auto cosThetaH = Frame::cosTheta(h);
         auto cosThetaD = l.dot(h);
 
         if (cosThetaV < 0.f || cosThetaL < 0.f)return 0;
 
-        auto baseColor = m_albedo -> eval(bRec.uv);
+        auto baseColor = m_albedo->eval(bRec.uv);
         auto L = baseColor.getLuminance();
         auto tint = Color3f(0);
 
@@ -204,6 +202,7 @@ public:
             "]",
             m_albedo->toString(), m_specular,m_specularTint, m_metallic,m_roughness,m_sheen,m_clearcoat,m_clearcoatGloss);
     }
+
     // Texture Support copied from diffuse.cpp
     virtual void addChild(NoriObject *obj) override {
         switch (obj->getClassType()) {
@@ -224,13 +223,9 @@ public:
                 break;
 
             default:
-                throw NoriException("Diffuse::addChild(<%s>) is not supported!",
+                throw NoriException("Disney::addChild(<%s>) is not supported!",
                                     classTypeName(obj->getClassType()));
         }
-    }
-
-    bool isDiffuse() const {
-        return true;
     }
 
     bool hasNormalMap() const override {
