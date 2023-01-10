@@ -24,6 +24,12 @@
     });
   </script>
   <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <script type="text/javascript">
+    window.onload = () => {
+      document.getElementById("year").innerHTML = new Date().getFullYear();
+    }
+  </script>
 </head>
 
 <body>
@@ -54,7 +60,7 @@
     <hr class="solid">
     <a href="#finalImage">Final Image</a>
 
-    <p class="copyright"><i>Copyright &copy; 2022, <br> Gianluca Moro & Eric Enzler</i></p>
+    <p class="copyright"><i>Copyright &copy; <span id="year"></span> <br> Gianluca Moro & Eric Enzler</i></p>
   </div>
 
   <div class="main">
@@ -487,8 +493,8 @@
                   of the up-vector
                 </li>
                 <li><b>Volume Grid:</b> The density at a point is read from a volume grid (.nvdb) file</li>
-                <li><b>Perlin Noise:</b> The density at a point is read from the perlin noise header.<a
-                    href="#procedural"> More Information </a></li>
+                <li><b>Perlin Noise:</b> The density at a point is calculated using a 3D perlin noise function.
+                  See <a href="#procedural">Procedural Volumes</a> for more information.</li>
               </ul>
               </p>
 
@@ -511,8 +517,9 @@
               </p>
 
               <h5>Perlin Noise</h5>
-              <p> 
-                For information on Perlin Noise implementation, please have a look at 
+              <p>
+                This was implemented by Eric as part of the Procedural Volumes feature.
+                For implementation details, please have a look at 
                 <a href=#procedural> Eric's section on Procedural Volumes</a>.
               </p>
 
