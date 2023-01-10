@@ -84,6 +84,18 @@ public:
     /// Uniformly sample a vector on the unit cylinder (using Hat-Box theorem)
     static Vector3f squareToUniformCylinder(const Point2f &sample);
 
+    /// Warp to GTR1 (used for disney BSDF)
+    static Vector3f squareToGTR1(const Point2f &sample, float alpha);
+
+    /// Probability density of \ref squareToGTR1()
+    static float squareToGTR1Pdf(const Vector3f &m, float alpha);
+
+    /// Warp GTR2 (used for disney BSDF)
+    static Vector3f squareToGTR2(const Point2f &sample, float alpha);
+
+    /// Probability density of \ref squareToGTR2()
+    static float squareToGTR2Pdf(const Vector3f &m, float alpha);
+
 };
 
 NORI_NAMESPACE_END
