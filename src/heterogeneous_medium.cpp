@@ -97,8 +97,9 @@ public:
                 }
             }
         } 
-        else if (m_density_type == 3) {     // perlin noise sphere
+        else if (m_density_type == 3) {     // perlin noise shape
             m_center = Point3f{center};
+            m_isSphere = props.getBoolean("isSphere", true); //Defines if cube or sphere
             m_radius = props.getFloat("radius", 1.0f);
             m_frequency = props.getFloat("frequency", 3.5f);
             m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
@@ -247,6 +248,7 @@ private:
     Point3f m_bbox_size;
     float m_radius;
     float m_frequency;
+    bool m_isSphere;
 
     // used to transform back positions inside the volume
     Transform m_inv_transform;
@@ -291,7 +293,11 @@ private:
     float getPerlinNoiseDensity(const Point3f &p) const {
         auto dist = (p - m_center).norm();
 
-        if (dist > m_radius) return 0.0f;       // outside of sphere
+        if(m_isSphere){
+            if (dist > m_radius) return 0.0f; //Outside of sphere
+        } else {
+            if(!m_bbox.contains(p))return 0.0f; //outside of bounding box
+        }
 
         if (dist == 0.0f) dist = Epsilon;
 
