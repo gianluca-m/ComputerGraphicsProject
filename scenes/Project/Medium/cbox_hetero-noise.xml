@@ -24,8 +24,9 @@
         <color name="sigma_s" value="0.5,0.5,0.5"/>
 
 		<integer name="density_type" value="3"/>
-		<float name="frequency" value="4"/>
-		<float name="density_scale" value="2"/>
+		<float name="frequency" value="2"/>
+		<float name="density_scale" value="10"/>
+		<boolean name="isSphere" value="false"/>
 
         <vector name="center" value="0 0.75 0"/>
         <float name="radius" value="0.7"/>

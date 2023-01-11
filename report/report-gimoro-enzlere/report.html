@@ -24,6 +24,12 @@
     });
   </script>
   <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <script type="text/javascript">
+    window.onload = () => {
+      document.getElementById("year").innerHTML = new Date().getFullYear();
+    }
+  </script>
 </head>
 
 <body>
@@ -46,6 +52,7 @@
     <ul>
       <li><a href="#directional">Directional Light</a></li>
       <li><a href="#motionblur">Motion Blur</a></li>
+      <li><a href="#procedural">Procedural Volume</a></li>
       <li><a href="#environment">Environment Map</a></li>
       <li><a href="#advancedCamera">Advanced Camera</a></li>
       <li><a href="#disney">Disney BSDF</a></li>
@@ -53,7 +60,7 @@
     <hr class="solid">
     <a href="#finalImage">Final Image</a>
 
-    <p class="copyright"><i>Copyright &copy; 2022, <br> Gianluca Moro & Eric Enzler</i></p>
+    <p class="copyright"><i>Copyright &copy; <span id="year"></span> <br> Gianluca Moro & Eric Enzler</i></p>
   </div>
 
   <div class="main">
@@ -486,7 +493,8 @@
                   of the up-vector
                 </li>
                 <li><b>Volume Grid:</b> The density at a point is read from a volume grid (.nvdb) file</li>
-                <li><b>Perlin Noise:</b> The density at a point is calculated using a 3D perlin noise function</li>
+                <li><b>Perlin Noise:</b> The density at a point is calculated using a 3D perlin noise function.
+                  See <a href="#procedural">Procedural Volumes</a> for more information.</li>
               </ul>
               </p>
 
@@ -506,6 +514,13 @@
                 To get the density of a specific point in our scene, I am first projecting the point inside our medium
                 bounding box to the unit cube. Then I can use this position to determine the corresponding point
                 inside the bouding box of the grid defined in the vdb file.
+              </p>
+
+              <h5>Perlin Noise</h5>
+              <p>
+                This was implemented by Eric as part of the Procedural Volumes feature.
+                For implementation details, please have a look at 
+                <a href=#procedural> Eric's section on Procedural Volumes</a>.
               </p>
 
               <br>
@@ -661,21 +676,7 @@ while (true) {
                 <img src="images/features/medium/cbox_hetero-grid-red.png" alt="red" class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-blue.png" alt="blue" class="img-responsive">
               </div>
-
-              <br>
-
-              <h4>Heterogeneous: 3D Perlin Noise Density</h4>
-              <p>
-                The following image shows a heterogeneous medium, consisting of a sphere whose density values
-                are sampled from a 3D perlin noise function. <br>
-                $\sigma_a = 2.5, \sigma_s = 0.5, density\_scale = 2$
-              </p>
-              <div class="twentytwenty-container" style="width: 60%;">
-                <img src="images/features/medium/cbox_hetero-noise.png" alt="perlin noise sphere cloud"
-                  class="img-responsive">
-              </div>
             </div>
-
           </div>
         </div>
 
@@ -770,8 +771,72 @@ while (true) {
             </div>
           </div>
           <br>
+          <div id="procedural">
+            <h2>3. Procedural Volume [5 points]</h2>
+            <dl>
+              <dt>Modified Files</dt>
+              <dd>
+                <code>src/heterogeneous_medium.cpp</code> <br>
+                <code>include/nori/perlinnoise.h</code> <br>
+              </dd>
+
+              <dt>External Libraries</dt>
+              <dd>
+                <a href="https://github.com/daniilsjb/perlin-noise">
+                  github.com/daniilsjb/perlin-noise (3D Perlin Noise)
+                </a>
+              </dd>
+
+              <dt>Theory</dt>
+              <dd>
+                <a
+                  href="https://moodle-app2.let.ethz.ch/pluginfile.php/1449689/mod_resource/content/2/14-participating-media-I.pdf">
+                  CG Lecture Slides 04.11.2022, Participating Media I</a> <br>
+                <a
+                  href="https://moodle-app2.let.ethz.ch/pluginfile.php/1452153/mod_resource/content/1/15-participating-media-II.pdf">
+                  CG Lecture Slides 08.11.2022, Participating Media II</a> <br>
+                <a
+                  href="https://www.pbr-book.org/3ed-2018/Light_Transport_II_Volume_Rendering/Sampling_Volume_Scattering">
+                  PBR Book, 15.2 Sampling Volume Scattering</a> <br>
+                <a
+                  href="https://www.pbr-book.org/3ed-2018/Light_Transport_II_Volume_Rendering/Volumetric_Light_Transport">
+                  PBR Book, 15.3 Volumetric Light Transport
+                </a> <br>
+                <a
+                  href="https://www.csie.ntu.edu.tw/~cyy/courses/rendering/09fall/lectures/handouts/chap17_volume_4up.pdf">
+                  Volume and Participating Media, Digital Image Synthesis, Yung -Yu Chuang
+                </a>
+              </dd>
+            </dl>
+
+            <h3>Implementation</h3>
+            <p>I implemented this feature together with Gianluca as he is the creator of the Heterogeneous Participating
+              Media. After he explained me the functions and files, it was significantly easier to implement the
+              procedural volume. For the feature, I created a new header file for perlin noise with the help of an
+              existing github repo. To add the noise to the medium, I define a new type of density that is calculated
+              with the 3D perlin noise.
+            </p>
+            <p>To apply the density, I can choose between a cube and a sphere. More complex shapes are not supported.
+            </p>
+            <h3>Validation</h3>
+            <p> I created Perlin spheres and cubes and varied the frequency and density parameters inside the cbox
+              scene.</p>
+            <div class="twentytwenty-container">
+              <img src="images/features/medium/cbox_hetero-noise.png" alt="Perlin Sphere" class="img-responsive">
+            </div>
+            <br>
+            <div class="twentytwenty-container">
+              <img src="images/features/medium/cbox_hetero-noise-dense.png" alt="Cube with high density & high freq"
+                class="img-responsive">
+              <img src="images/features/medium/cbox_hetero-noise-nodense.png" alt="Cube with small density & high freq"
+                class="img-responsive">
+              <img src="images/features/medium/cbox_hetero-noise-nofreq.png" alt="Cube with small density & small freq"
+                class="img-responsive">
+            </div>
+          </div>
+          <br>
           <div id="environment">
-            <h2>3. Environment Map [15 points]</h2>
+            <h2>4. Environment Map [15 points]</h2>
             <dl>
               <dt>Modified Files</dt>
               <dd>
@@ -864,7 +929,7 @@ while (true) {
           </div>
           <br>
           <div id="advancedCamera">
-            <h2>4. Advanced Camera [15 points]</h2>
+            <h2>5. Advanced Camera [15 points]</h2>
             <dl>
               <dt>Modified Files</dt>
               <dd>
@@ -999,7 +1064,7 @@ while (true) {
 
           </div>
           <div id="disney">
-            <h2>5. Disney BSDF [15 points]</h2>
+            <h2>6. Disney BSDF [15 points]</h2>
             <dl>
               <dt>Modified Files</dt>
               <dd>
