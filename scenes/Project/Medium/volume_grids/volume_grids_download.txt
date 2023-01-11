@@ -1,0 +1,6 @@
+To keep the repositor size low, I do not include all volume grids here.
+
+All volume grids used for the project can be downloaded from polybox.
+
+Link: https://polybox.ethz.ch/index.php/s/N5mdjyAH4e6DuTB
+Password: CGVolumeGrids1234

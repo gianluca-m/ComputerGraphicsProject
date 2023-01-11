@@ -132,4 +132,45 @@ Vector3f Warp::squareToUniformTriangle(const Point2f &sample) {
     return Vector3f(u,v,1.f-u-v);
 }
 
+Vector3f Warp::squareToGTR1(const Point2f &sample, float alpha) {
+    //Similar to Beckmann, Disney GTR (3)
+    auto phi = 2.0f * M_PI * sample.x();
+    auto theta = 0.f;
+    if (alpha < 1.f) {
+        auto a2 = alpha * alpha;
+        theta = acosf(sqrt((1 - powf(a2, 1.f - sample.y())) / (1.f - a2)));
+    }
+    return Vector3f(cos(phi)*sin(theta), sin(phi)*sin(theta), cos(theta));
+}
+
+float Warp::squareToGTR1Pdf(const Vector3f &m, float alpha) {
+    //Similar to Beckmann, Disney GTR (1)
+    if (abs(1.f - m.norm()) > Epsilon || m.z() < 0.f)return 0.f;
+
+    if (alpha >= 1.f)return INV_PI;
+
+    auto cosTheta = m.z();
+    auto a2 = alpha * alpha;
+    auto term = 1.f + (a2 - 1.f) * cosTheta * cosTheta;
+    return (a2 - 1)* cosTheta / (M_PI * log(a2) * term);
+}
+
+Vector3f Warp::squareToGTR2(const Point2f &sample, float alpha) {
+    //Similar to Beckmann, Disney GTR (9)
+    float phi = 2 * M_PI * sample.x();
+    float a2 = alpha * alpha;
+    float theta = acosf(sqrtf((1.f - sample.y()) / (1.f + (a2 - 1.f) * sample.y())));
+    return Vector3f(cos(phi)*sin(theta), sin(phi)*sin(theta), cos(theta));
+}
+
+float Warp::squareToGTR2Pdf(const Vector3f &m, float alpha) {
+    //Similar to Beckmann, Disney GTR (8)
+    if(abs(1.f - m.norm()) > Epsilon || m.z() < 0.0f)return 0.f;
+
+    auto cosTheta = m.z();
+    float a2 = alpha * alpha;
+    float term = 1.f + (a2 - 1.f) * cosTheta * cosTheta;
+    return a2*cosTheta / (M_PI * powf(term,2));
+}
+
 NORI_NAMESPACE_END

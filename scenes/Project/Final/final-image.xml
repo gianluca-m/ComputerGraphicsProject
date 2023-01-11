@@ -9,25 +9,43 @@
 	<!-- Render the scene as viewed by a perspective camera -->
 	<camera type="perspective">
 		<transform name="toWorld">
-			<lookat target="0,0,0" origin="0,10,2" up="0,0,1"/>
+			<lookat target="0,0,0" origin="0,10,1" up="0,0,1"/>
 		</transform>
 
 		<float name="fov" value="70"/>
+		<float name="focalLength" value="11"/>
+    	<float name="lensRadius" value="0.01"/>
+
+		<boolean name="distortion" value="true"/>
+		<float name="K1" value = "0.3"/>
+		<float name="K2" value = "0.3"/>
 
 		<integer name="width" value="1920"/>
 		<integer name="height" value="1080"/>
 	</camera>
 
 	<!-- Earth -->
-	<!-- TODO: since we cannot rotate a sphere, we might want to use a sphere mesh-->
 	<mesh type="sphere">
-		<point name="center" value="0  -10 -50" />
-        <float name="radius" value="42"/>
+		<point name="center" value="22  -10 -50" />
+        <float name="radius" value="45"/>
 
         <bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/earth8k.png"/>
-				<vector name="scale" value="1.5, 1.5"/>
+				<vector name="scale" value="1, 1"/>
+				<vector name="shift" value="0.5 0"/>
+            </texture>
+        </bsdf>
+	</mesh>
+	<!-- Moon -->
+	<mesh type="sphere">
+		<point name="center" value="10 -100 -30" />
+        <float name="radius" value="20"/>
+
+        <bsdf type="diffuse">
+            <texture type="image_texture" name="albedo">
+                <string name="filename" value="/textures/moon8k.png"/>
+				<vector name="scale" value="0.5, 0.5"/>
             </texture>
         </bsdf>
 	</mesh>
@@ -44,23 +62,17 @@
 		<transform name="toWorld">
 			<scale value="0.2 0.2 0.2"/>
 			<rotate axis="1,0,0" angle="90"/>
-			<translate value="0,-35,0"/>
+			<translate value="-10,-40,-2"/>
 			
 		</transform>
 	</mesh>
 
 	<!-- Locomotive -->
 	<mesh type="obj">
-		<!-- I had to remove the wagon from the model because the original model requires a separate texture for the wagon -->
-		<!-- TODO (gimoro): add separate wagon model -->
-		<string name="filename" value="/models/locomotive.obj"/>
 
-		<!-- TODO: use DisneyBSDF, with a metallic (or something else) effect -->
+		<string name="filename" value="/models/locomotive.obj"/>
 		<bsdf type="diffuse">
-			<!-- For some reason models are mirrored, thus I had to flip the numbers in the texture.
-				Note: flipping the whole model (with scale="1, 1, -1") does correclty flip the model 
-				but causes weird issues with the textures in some parts of the model...
-				nori at its finest once again...-->
+	
 			
 			<texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/locomotive_diffuse_mirrored.png"/>
@@ -69,7 +81,7 @@
 
 		<transform name="toWorld">
 			<rotate axis="1,0,0" angle="90"/>
-			<rotate axis="0,0,1" angle="115"/>
+			<rotate axis="0,0,1" angle="105"/>
 			<translate value="0,-6,-2.5"/>
 		</transform>
 	</mesh>
@@ -93,24 +105,24 @@
 		</emitter>
 
 		<transform name="toWorld">
-			<scale value="500 500 500"/>
+			<scale value="1000 1000 1000"/>
 			<translate value="0,-1000,0"/>
 		</transform>
 	</mesh>
 
 
 	<!-- Volumes -->
-	<!-- Locomotive Smoke -->
+	<!-- Locomotive Smoke 
 	<medium type="heterogeneous">
         <phase type="isotropic"/>
         <color name="sigma_a" value="0.8,0.8,0.8"/>
         <color name="sigma_s" value="2,2,2"/>
 
-		<!-- TODO (gimoro): maybe find a better smoke volume -->
+		 TODO (gimoro): maybe find a better smoke volume 
 		<integer name="density_type" value="2"/>
 		<string name="volume_grid" value="/volume_grids/locomotive-smoke.nvdb"/>
 
-		<!-- TODO (gimoro): fix position -->
+		 TODO (gimoro): fix position 
         <vector name="center" value="-0.8 0 3.4"/>
         <vector name="size" value="2 2 2"/>
 
@@ -118,28 +130,24 @@
 			<rotate axis="1,0,0" angle="-10"/>
 			<rotate axis="0,0,1" angle="-90"/>
 		</transform>
-    </medium>
+    </medium> -->
 
 	<!-- Earth Clouds/Atomsphere -->
-	<!-- I tried out a new medium type, but idk...
-		 it also results in quite a few "computed invalid radiance value" -->
-	<!--<medium type="heterogeneous">
+	<medium type="heterogeneous">
         <phase type="isotropic"/>
-        <color name="sigma_a" value="0.01, 0.05, 0.1"/>
-        <color name="sigma_s" value="0,0.05,0.05"/>
+        <color name="sigma_a" value="0.01, 0.05, 0.01"/>
+        <color name="sigma_s" value="0.0001,0.009,0.025"/>
 
 		<integer name="density_type" value="4"/>
 		<float name="exp_b" value="5"/>
 
-        <vector name="center" value="0  -10 -50"/>
-        <float name="min_radius" value="42"/>
-        <float name="max_radius" value="43"/>
-    </medium>-->
+        <vector name="center" value="22  -10 -50"/>
+        <float name="min_radius" value="45"/>
+        <float name="max_radius" value="48"/>
+    </medium>
 
 
 	<!-- Lights -->
-	<!-- TODO: fix -->
-
 	<emitter type="point">
 		<point name="position" value="0,-60,-30"/>
 		<color name="power" value="8000,8000,8000"/>
@@ -158,6 +166,12 @@
 	<emitter type="point">
 		<point name="position" value="-10,10,0"/>
 		<color name="power" value="1000,1000,1000"/>
+	</emitter>
+
+<!-- Sunlight from Right to Left-->
+	<emitter type="directional">
+		<vector name="direction" value="-1.0,0.1,0"/>
+		<color name="power" value="2.44,2.33,1.55"/>
 	</emitter>
 
 </scene>
