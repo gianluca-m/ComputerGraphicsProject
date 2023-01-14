@@ -18,17 +18,17 @@
 		<float name="focalLength" value="11"/>
     	<float name="lensRadius" value="0.001"/>
 
-		<boolean name="distortion" value="true"/>
+		<!--<boolean name="distortion" value="true"/>
 		<float name="K1" value = "0.25"/>
-		<float name="K2" value = "0.25"/>
+		<float name="K2" value = "0.25"/>-->
 
 		<integer name="width" value="1920"/>
 		<integer name="height" value="1080"/>
 
-		<boolean name="motionblur" value="true"/>
+		<!--<boolean name="motionblur" value="true"/>
 		<transform name="motion">
 			<lookat target="0,0,0" origin="-0.3,10,1" up="0,0,1"/>
-		</transform>
+		</transform>-->
 
 	</camera>
 
@@ -40,11 +40,11 @@
         <bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/earth8k.png"/>
-				<vector name="scale" value="1, 1"/>
 				<vector name="shift" value="0.5 0"/>
             </texture>
         </bsdf>
 	</mesh>
+
 	<!-- Moon -->
 	<mesh type="sphere">
 		<point name="center" value="25 -100 -30" />
@@ -53,7 +53,7 @@
         <bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/moon8k.png"/>
-				<vector name="scale" value="0.2, 0.2"/>
+				<vector name="shift" value="0.7 0"/>
             </texture>
         </bsdf>
 	</mesh>
@@ -66,11 +66,9 @@
         <bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/mars2k.png"/>
-				<vector name="scale" value="0.5, 0.5"/>
             </texture>
         </bsdf>
 	</mesh>
-
 
 	<!-- Asteroid field -->
 	<mesh type="obj">
@@ -85,18 +83,16 @@
 			<scale value="0.25 0.25 0.25"/>
 			<rotate axis="1,0,0" angle="90"/>
 			<translate value="-10,-25,2"/>
-			
 		</transform>
 	</mesh>
 
+
 	<!-- Road -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/road.obj"/>
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/road.png"/>
-				<vector name="scale" value="5, 5"/>
             </texture>
         </bsdf>
 
@@ -109,7 +105,6 @@
 
 	<!-- Road Lamp Poles -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/streetlight.obj"/>
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
@@ -124,9 +119,8 @@
 		</transform>
 	</mesh>
 
-		<!-- Road Lamp Light -->
+	<!-- Road Lamp Light -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/streetlight_lamp.obj"/>
 
 		<emitter type="area">
@@ -140,9 +134,8 @@
 		</transform>
 	</mesh>
 
-		<!-- Road Rebar -->
+	<!-- Road Rebar -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/rebar.obj"/>
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
@@ -159,7 +152,6 @@
 
 	<!-- Road Cones -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/pole1.obj"/>
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
@@ -174,7 +166,6 @@
 		</transform>
 	</mesh>
 	<mesh type="obj">
-
 		<string name="filename" value="/models/pole2.obj"/>
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
@@ -188,9 +179,7 @@
 			<translate value="-6,-3,-2"/>
 		</transform>
 	</mesh>
-
 	<mesh type="obj">
-
 		<string name="filename" value="/models/pole2.obj"/>
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
@@ -207,7 +196,6 @@
 	
 	<!-- Delo Chassis-->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/chassis.obj"/>
 		<bsdf type="disneyBSDF">
 			<color name="albedo" value="0.8,0.8,0.81"/>
@@ -224,7 +212,6 @@
 
 	<!-- Delo DarkGray -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/darkgray.obj"/>
 		<bsdf type="disneyBSDF">
 			<color name="albedo" value="0.2,0.2,0.2"/>
@@ -238,11 +225,8 @@
 		</transform>
 	</mesh>
 
-	
-
 	<!-- Delo Grill -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/grill.obj"/>
 		<bsdf type="disneyBSDF">
 			<color name="albedo" value="0.2,0.2,0.22"/>
@@ -258,7 +242,6 @@
 
 	<!-- Delo Tires -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/tires.obj"/>
 		<bsdf type="disneyBSDF">
 			<color name="albedo" value="0,0,0"/>
@@ -273,7 +256,6 @@
 	</mesh>
 
 	<mesh type="obj">
-
 		<string name="filename" value="/models/felge.obj"/>
 		<bsdf type="disneyBSDF">
 			<color name="albedo" value="0.8,0.8,0.81"/>
@@ -287,9 +269,8 @@
 		</transform>
 	</mesh> 
 
-<!-- Delo Windows -->
+	<!-- Delo Windows -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/windows.obj"/>
 		<bsdf type="mirror">
             <float name="extIOR" value="1.0"/>
@@ -305,7 +286,6 @@
 
 	<!-- Delo Frontlight -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/frontlight.obj"/>
 
 		<emitter type="area">
@@ -321,7 +301,6 @@
 
 	<!-- Delo Frontlight Orange -->
 	<mesh type="obj">
-
 		<string name="filename" value="/models/orangelight.obj"/>
 
 		<emitter type="area">
@@ -335,7 +314,7 @@
 		</transform>
 	</mesh>
 
-<!-- Delo Red backlight -->
+	<!-- Delo Red backlight -->
 	<mesh type="obj">
 		<string name="filename" value="/models/backlight.obj"/>
 
@@ -349,6 +328,7 @@
 			<translate value="-6,-3,-2"/>
 		</transform>
 	</mesh>
+
 
 	<!-- Background -->
 	<mesh type="obj">
@@ -367,19 +347,21 @@
 		</transform>
 	</mesh>
 
-	<!-- Earth Clouds/Atomsphere -->
+
+	<!-- Earth Clouds/Atmosphere -->
 	<medium type="heterogeneous">
         <phase type="isotropic"/>
         <color name="sigma_a" value="0.01, 0.05, 0.01"/>
         <color name="sigma_s" value="0.0001,0.009,0.025"/>
 
 		<integer name="density_type" value="4"/>
-		<float name="exp_b" value="5"/>
+		<float name="exp_b" value="4"/>
 
         <vector name="center" value="22  -10 -50"/>
         <float name="min_radius" value="45"/>
-        <float name="max_radius" value="48"/>
+        <float name="max_radius" value="50"/>
     </medium>
+
 
 	<!-- Lights -->
 	<emitter type="point">
@@ -387,14 +369,12 @@
 		<color name="power" value="50000,50000,50000"/>
 	</emitter>
 
-
 	<emitter type="point">
 		<point name="position" value="10,8,1"/>
 		<color name="power" value="5000,5000,5000"/>
 	</emitter>
 
-
-<!-- Sunlight from Right to Left -->
+	<!-- Sunlight from Right to Left -->
 	<emitter type="directional">
 		<vector name="direction" value="-1.0,0.1,0"/>
 		<color name="power" value="3.44,3.33,2.55"/>

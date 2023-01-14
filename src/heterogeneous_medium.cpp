@@ -266,12 +266,11 @@ private:
     Point3f m_bbox_size;
     float m_radius;
     float m_frequency;
+    bool m_is_sphere;
 
-    // used for exponential sphere layer
+    // used for exponential sphere layer (--> Earth Atmosphere in final image)
     float m_max_radius;
     float m_min_radius;
-
-    bool m_is_sphere;
 
 
     float getDensity(const Point3f &p) const {
