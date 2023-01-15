@@ -144,7 +144,7 @@
             </p>
 
             <h3>Validation</h3>
-            <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+            <p>To validate the implementation, I created identical scenes and rendered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The images are almost identical,
               only the brightness is slightly different because nori and mitsuba use somewhat different values for the
               same light intensity. However, the textures are applied the identically.
@@ -228,13 +228,13 @@
 
             <h3>Validation</h3>
             <p>
-              To validate the implementation, we created identical scenes and rendered them in nori and <a
+              To validate the implementation, I created identical scenes and rendered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
               sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object.
               <br>
               The images are almost identical, only the brightness is again slightly different because nori and mitsuba
               use somewhat different values for the same light intensity. <br>
-              The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
+              The normal textures are applied identically, and the effect of the normal mapping is clearly visible,
               when comparing to only having the texture applied without normal mapping.
             </p>
 
@@ -294,7 +294,7 @@
             </p>
 
             <h3>Validation</h3>
-            <p>To validate the implementation, we created identical scenes and redered them in nori and <a
+            <p>To validate the implementation, I created identical scenes and redered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain either an
               analytical sphere or a mesh, and a ground plane. The sphere resp. mesh is the only emitter in the scene.
               The <code>path_mis</code> integrator with 64 samples per pixel was used to render the scene. <br>
@@ -506,7 +506,7 @@
 
               <h5>Exponential</h5>
               <p>
-                The expoential density function slowly decreases the density in the up direction. The parameter
+                The exponential density function slowly decreases the density in the up direction. The parameter
                 <code>b</code> and the up-direction vector <code>up_dir</code> can be specified in the xml file.
                 This density function allows us to create nice foggy scenes.
               </p>
@@ -519,7 +519,7 @@
                 <a href="https://www.openvdb.org/">OpenVDB</a> files. <br>
                 To get the density of a specific point in our scene, I am first projecting the point inside our medium
                 bounding box to the unit cube. Then I can use this position to determine the corresponding point
-                inside the bouding box of the grid defined in the vdb file.
+                inside the bounding box of the grid defined in the vdb file.
               </p>
 
               <h5>Perlin Noise</h5>
@@ -543,7 +543,7 @@
                 point is an emitter, we update the $w_{mat}$ value similar to how it's done in the
                 <code>path_mis</code> integrator. <br>
                 If we have no medium interaction, we basically do the same as in the <code>path_mis</code> integrator,
-                while always also including the calculated transmittance along the ray.
+                while also including the calculated transmittance along the ray.
               </p>
 
               <p>Below is the pseudocode for the volumetric path tracer:</p>
