@@ -93,6 +93,7 @@
 		<bsdf type="diffuse">
             <texture type="image_texture" name="albedo">
                 <string name="filename" value="/textures/road.png"/>
+				<vector name="scale" value="8 8"/>
             </texture>
         </bsdf>
 
