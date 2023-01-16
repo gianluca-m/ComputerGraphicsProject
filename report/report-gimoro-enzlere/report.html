@@ -72,15 +72,21 @@
       <div class="pageContent">
 
         <em>
-          Note: As discussed with the TAs, since Eric had to do obligatory military service during the project,
-          we were able to submit later until 17. January 2023.
+          Note: As discussed with Professor Papas and the TAs, since Eric had to do obligatory military service during
+          the project, we were able to submit later until 17. January 2023.
         </em>
-
-        <!--TODO: fix headers-->
 
         <div id="motivation">
           <h1>Motivational Image</h1>
-          <i>TODO: Add</i>
+          <p>
+            For our final image, we wanted to show the beauty of space. To fit the "Out of Place" theme,
+            we wanted to put something random into the scene: For example a car "driving" in space.
+          </p>
+
+          <div>
+            <img style="width: 70%; display: block; margin: auto;" src="images/asteroids.jpg" alt="Asteroids">
+            <p style="text-align: center;">Source: <a href="https://pixabay.com/images/id-1422642/">pixabay.com</a></p>
+          </div>
         </div>
 
         <br> <br>
@@ -138,7 +144,7 @@
             </p>
 
             <h3>Validation</h3>
-            <p>To validate the implementation, we created identical scenes and rendered them in nori and <a
+            <p>To validate the implementation, I created identical scenes and rendered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The images are almost identical,
               only the brightness is slightly different because nori and mitsuba use somewhat different values for the
               same light intensity. However, the textures are applied the identically.
@@ -222,13 +228,13 @@
 
             <h3>Validation</h3>
             <p>
-              To validate the implementation, we created identical scenes and rendered them in nori and <a
+              To validate the implementation, I created identical scenes and rendered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. The first scene is an analytical
               sphere, and the second scene a mesh plane. Both containing a single pointlight source above the object.
               <br>
               The images are almost identical, only the brightness is again slightly different because nori and mitsuba
               use somewhat different values for the same light intensity. <br>
-              The normal textures are applied the identically, and the effect of the normal mapping is clearly visible,
+              The normal textures are applied identically, and the effect of the normal mapping is clearly visible,
               when comparing to only having the texture applied without normal mapping.
             </p>
 
@@ -288,7 +294,7 @@
             </p>
 
             <h3>Validation</h3>
-            <p>To validate the implementation, we created identical scenes and redered them in nori and <a
+            <p>To validate the implementation, I created identical scenes and redered them in nori and <a
                 href="https://mitsuba.readthedocs.io/en/latest/index.html">Mitsuba</a>. Both scenes contain either an
               analytical sphere or a mesh, and a ground plane. The sphere resp. mesh is the only emitter in the scene.
               The <code>path_mis</code> integrator with 64 samples per pixel was used to render the scene. <br>
@@ -500,7 +506,7 @@
 
               <h5>Exponential</h5>
               <p>
-                The expoential density function slowly decreases the density in the up direction. The parameter
+                The exponential density function slowly decreases the density in the up direction. The parameter
                 <code>b</code> and the up-direction vector <code>up_dir</code> can be specified in the xml file.
                 This density function allows us to create nice foggy scenes.
               </p>
@@ -513,13 +519,13 @@
                 <a href="https://www.openvdb.org/">OpenVDB</a> files. <br>
                 To get the density of a specific point in our scene, I am first projecting the point inside our medium
                 bounding box to the unit cube. Then I can use this position to determine the corresponding point
-                inside the bouding box of the grid defined in the vdb file.
+                inside the bounding box of the grid defined in the vdb file.
               </p>
 
               <h5>Perlin Noise</h5>
               <p>
                 This was implemented by Eric as part of the Procedural Volumes feature.
-                For implementation details, please have a look at 
+                For implementation details, please have a look at
                 <a href=#procedural> Eric's section on Procedural Volumes</a>.
               </p>
 
@@ -537,7 +543,7 @@
                 point is an emitter, we update the $w_{mat}$ value similar to how it's done in the
                 <code>path_mis</code> integrator. <br>
                 If we have no medium interaction, we basically do the same as in the <code>path_mis</code> integrator,
-                while always also including the calculated transmittance along the ray.
+                while also including the calculated transmittance along the ray.
               </p>
 
               <p>Below is the pseudocode for the volumetric path tracer:</p>
@@ -662,6 +668,8 @@ while (true) {
                 <img src="images/features/medium/cbox_hetero-grid-smoke.png" alt="smoke" class="img-responsive">
               </div>
 
+              <br>
+
               <p>
                 As you can see, we can also render colored medium by specifying the $\sigma_a, \sigma_s$
                 accordingly. <br>
@@ -675,6 +683,18 @@ while (true) {
                   class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-red.png" alt="red" class="img-responsive">
                 <img src="images/features/medium/cbox_hetero-grid-blue.png" alt="blue" class="img-responsive">
+              </div>
+
+              <br>
+
+              <p>
+                Furthermore, I also implemented the ability to rotate the volume grids. 
+              </p>
+              <div class="twentytwenty-container" style="width: 60%;">
+                <img src="images/features/medium/cbox_hetero-grid-bunny.png" alt="0°" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-rotation_180.png" alt="180°" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-rotation_90.png" alt="90°" class="img-responsive">
+                <img src="images/features/medium/cbox_hetero-grid-rotation_270.png" alt="270°" class="img-responsive">
               </div>
             </div>
           </div>
@@ -1170,7 +1190,16 @@ while (true) {
 
         <div id="finalImage">
           <h1>Final Image</h1>
-          <i>TODO: Add</i>
+          <div class="twentytwenty-container" style="width: 90%;">
+            <img src="images/final-image.png" alt="Final Space Scene">
+          </div>
+
+          <!-- TODO (enzlere): models, textures, etc. sources? -->
+
+          <p>
+            Our final image was rendered using the volumetric path tracer integrator with 256 samples per pixel.
+            We also denoised the image using the method described above.
+          </p>
         </div>
 
       </div>

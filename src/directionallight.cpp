@@ -32,7 +32,7 @@ public:
     }
 
     virtual float pdf(const EmitterQueryRecord &lRec) const {
-        return 0.f;
+        return 1.f;
     }
 
     std::string toString() const {

@@ -100,7 +100,7 @@ static void renderBlock(const Scene *scene, Sampler *sampler, ImageBlock &block,
 
 void RenderThread::renderScene(const std::string & filename) {
     // TODO (gimoro): Make this a CLI argument or allow option in scene xml file
-    bool computeVariance = false;
+    bool computeVariance = true;
 
     filesystem::path path(filename);
 
