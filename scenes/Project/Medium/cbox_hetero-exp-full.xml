@@ -23,7 +23,7 @@
         <color name="sigma_a" value="1,1,1"/>
         <color name="sigma_s" value="4,4,4"/>
 
-		<integer name="density_type" value="1"/>
+		<integer name="density_type" value="0"/>
 		<float name="max_density" value="1"/>
 		<vector name="up_dir" value="0 1 0"/>
 		<float name="exp_b" value="5"/>

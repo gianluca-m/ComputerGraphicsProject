@@ -355,7 +355,7 @@
         <color name="sigma_a" value="0.01, 0.05, 0.01"/>
         <color name="sigma_s" value="0.0001,0.009,0.025"/>
 
-		<integer name="density_type" value="4"/>
+		<integer name="density_type" value="3"/>
 		<float name="exp_b" value="4"/>
 
         <vector name="center" value="22  -10 -50"/>

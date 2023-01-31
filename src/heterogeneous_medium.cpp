@@ -5,6 +5,12 @@
 #include <nanovdb/util/IO.h>
 #include <nori/perlinnoise.h>
 
+// Possible density types
+#define EXPONENTIAL 0
+#define VOLUME_GRID 1
+#define PERLIN_NOISE 2
+#define EXP_SPHERE_LAYER 3
+
 NORI_NAMESPACE_BEGIN
 
 class HeterogeneousMedium : public Medium {
@@ -18,7 +24,7 @@ public:
         m_albedo = m_sigma_s / m_sigma_t;
 
         m_max_density = props.getFloat("max_density", 1.0f);
-        m_density_type = props.getInteger("density_type", 0);
+        m_density_type = props.getInteger("density_type", EXPONENTIAL);
 
         Vector3f size = props.getVector3("size", Vector3f{1.0f}).cwiseAbs();
         Vector3f center = props.getVector3("center", Vector3f{0.0f});
@@ -43,11 +49,11 @@ public:
         m_bbox.expandBy(bbox_max);
 
 
-        if (m_density_type == 1) {  // Exponential density
+        if (m_density_type == EXPONENTIAL) {    // Exponential density
             m_up_dir = props.getVector3("up_dir", Vector3f{0.0f, 0.0f, 1.0f}).normalized();
             m_exp_b = props.getFloat("exp_b", 2.0f);
         } 
-        else if (m_density_type == 2) {    // Volume grid 
+        else if (m_density_type == VOLUME_GRID) {    // Volume grid 
             m_non_transformed_bbox_min = origin - size;
             m_non_transformed_bbox_size = 2 * size;
 
@@ -97,7 +103,7 @@ public:
                 }
             }
         } 
-        else if (m_density_type == 3) {     // perlin noise shape
+        else if (m_density_type == PERLIN_NOISE) {     // perlin noise shape
             // Implemented by Eric
             m_center = Point3f{center};
             m_is_sphere = props.getBoolean("isSphere", true);   // Defines if cube or sphere
@@ -106,7 +112,7 @@ public:
             m_bbox = BoundingBox3f(center - Vector3f{m_radius}, center + Vector3f{m_radius});
             m_bbox_size = m_bbox.max - m_bbox.min;
         }
-        else if (m_density_type == 4) {     // exponential sphere layer
+        else if (m_density_type == EXP_SPHERE_LAYER) {     // exponential sphere layer
             m_center = Point3f{center};
             m_min_radius = props.getFloat("min_radius", 0.5f);
             m_max_radius = props.getFloat("max_radius", 0.5f);
@@ -201,19 +207,16 @@ public:
     std::string toString() const override {
         std::string density_type_str;
         switch (m_density_type) {
-            case 0:
-                density_type_str = "constant";
-                break;
-            case 1:
+            case EXPONENTIAL:
                 density_type_str = "exponential";
                 break;
-            case 2:
+            case VOLUME_GRID:
                 density_type_str = "volume grid";
                 break;
-            case 3:
+            case PERLIN_NOISE:
                 density_type_str = "perlin noise";
                 break;
-            case 4:
+            case EXP_SPHERE_LAYER:
                 density_type_str = "exponential sphere layer";
                 break;
             default:
@@ -242,7 +245,7 @@ public:
 
 
 private:
-    int m_density_type;     // const, exp, volume grid, perlin noise
+    int m_density_type;
 
     // used for exponential density
     Vector3f m_up_dir;
@@ -277,15 +280,13 @@ private:
         if (!m_bbox.contains(p)) return 0.0f;       
         
         switch (m_density_type) {
-            case 0:     // const
-                return m_max_density;
-            case 1:     // exp
+            case EXPONENTIAL:     // exp
                 return getExponentialDensity(p);
-            case 2:     // volume grid
+            case VOLUME_GRID:     // volume grid
                 return getGridDensity(p);
-            case 3:     // perlin noise sphere
+            case PERLIN_NOISE:     // perlin noise shape
                 return getPerlinNoiseDensity(p);
-            case 4:
+            case EXP_SPHERE_LAYER:
                 return getExponentialDensitySphereLayer(p);
             
             default:

@@ -23,7 +23,7 @@
         <color name="sigma_a" value="2.5,2.5,2.5"/>
         <color name="sigma_s" value="0.5,0.5,0.5"/>
 
-		<integer name="density_type" value="3"/>
+		<integer name="density_type" value="2"/>
 		<float name="frequency" value="2"/>
 		<float name="density_scale" value="10"/>
 		<boolean name="isSphere" value="false"/>

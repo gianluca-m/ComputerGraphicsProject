@@ -23,7 +23,7 @@
         <color name="sigma_a" value="1,1,1"/>
         <color name="sigma_s" value="4,4,4"/>
 
-		<integer name="density_type" value="2"/>
+		<integer name="density_type" value="1"/>
 		<string name="volume_grid" value="/volume_grids/wdas_cloud_quarter.nvdb"/>
 
         <vector name="center" value="0 0.7 0"/>
