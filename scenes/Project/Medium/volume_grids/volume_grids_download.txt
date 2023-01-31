@@ -1,4 +1,4 @@
-To keep the repositor size low, I do not include all volume grids here.
+To keep the repository size low, I do not include all volume grids here.
 
 All volume grids used for the project can be downloaded from polybox.
 
