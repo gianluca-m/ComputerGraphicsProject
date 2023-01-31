@@ -15,7 +15,7 @@ dd {
 .sidenav {
     width: 15%;
     min-width: 250px;
-    height: calc(100% - 4em);
+    height: calc(100% - 4.5em);
     position: fixed;
     z-index: 1;
     margin: 2em 0.5em;
@@ -40,7 +40,7 @@ dd {
 }
 
 .copyright {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     font-size: 60%;
 }
