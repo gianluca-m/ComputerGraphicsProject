@@ -2,6 +2,8 @@
 
 Programming course project for the 2022 ETHZ [Computer Graphics course](https://cgl.ethz.ch/teaching/cg22/home.php)
 
+[Final Report](https://gianluca-moro.github.io/ComputerGraphicsProject/)
+
 ---
 
 We extended the Nori v2 ray tracer by adding the following features:
